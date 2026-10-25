@@ -1,0 +1,87 @@
+/* From Uiverse.io by 3bdel3ziz-T - Compact Vertical Dock Navigation Bar */
+
+.uiverse-vbar-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  transition: all 350ms ease-in-out;
+  width: 44px;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.uiverse-vbar-article {
+  border: 1px solid var(--border-hover, rgba(255, 255, 255, 0.16));
+  width: 100%;
+  transition: all 350ms ease-in-out;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  background: var(--bg-surface, #121214);
+  padding: 3px;
+  box-sizing: border-box;
+}
+
+[data-theme="light"] .uiverse-vbar-article {
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.14));
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.9);
+}
+
+.uiverse-vbar-item {
+  position: relative;
+  width: 100%;
+  height: 38px;
+  transition: all 250ms ease-in-out;
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary, #94a3b8);
+  border-radius: 10px;
+  cursor: pointer;
+  box-sizing: border-box;
+  background: transparent;
+  outline: none;
+  padding: 0;
+}
+
+[data-theme="light"] .uiverse-vbar-item {
+  color: #475569;
+}
+
+.uiverse-vbar-item .vbar-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.uiverse-vbar-item svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+  transition: all 250ms ease-in-out;
+}
+
+.uiverse-vbar-item:hover svg,
+.uiverse-vbar-item.is-active svg {
+  transform: scale(1.25);
+  color: #60a5fa;
+  fill: #60a5fa;
+  filter: drop-shadow(0 0 7px rgba(96, 165, 250, 0.8));
+}
+
+.uiverse-vbar-item:hover {
+  background: rgba(96, 165, 250, 0.08);
+}
+
+.uiverse-vbar-item.is-active {
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(96, 165, 250, 0.45);
+  background: rgba(96, 165, 250, 0.15);
+  color: #60a5fa;
+}

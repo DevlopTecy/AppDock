@@ -1,0 +1,1403 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600;700&display=swap');
+
+:root,
+[data-theme="dark"] {
+  --bg-dock: #000000;
+  --bg-header: #050505;
+  --bg-footer: #050505;
+  --bg-surface: #101010;
+  --bg-surface-hover: #181818;
+  --bg-surface-active: #242424;
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --border-hover: rgba(255, 255, 255, 0.16);
+  --btn-border: rgba(255, 255, 255, 0.06);
+  --btn-border-hover: rgba(255, 255, 255, 0.18);
+  --btn-shadow: 0 6px 16px rgba(0, 0, 0, 0.85), 0 2px 4px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.12), inset 0 -1px 0 rgba(0, 0, 0, 0.6);
+  --btn-shadow-hover: 0 10px 24px rgba(0, 0, 0, 0.95), 0 4px 8px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.22), inset 0 -1px 0 rgba(0, 0, 0, 0.7);
+  --btn-shadow-active: 0 2px 4px rgba(0, 0, 0, 0.95), inset 0 2px 5px rgba(0, 0, 0, 0.8);
+  --text-primary: #f8fafc;
+  --text-secondary: #a1a1aa;
+  --text-muted: #737373;
+  --accent: #ffffff;
+  --accent-subtle: rgba(255, 255, 255, 0.12);
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --shadow-dock: 0 18px 48px rgba(0, 0, 0, 0.92), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --toggle-bg: rgba(12, 12, 12, 0.96);
+  --modal-bg: #050505;
+}
+
+[data-theme="light"] {
+  --bg-dock: #ffffff;
+  --bg-header: #f8fafc;
+  --bg-footer: #f8fafc;
+  --bg-surface: #f1f5f9;
+  --bg-surface-hover: #e2e8f0;
+  --bg-surface-active: #cbd5e1;
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-hover: rgba(0, 0, 0, 0.2);
+  --btn-border: rgba(0, 0, 0, 0.12);
+  --btn-border-hover: rgba(0, 0, 0, 0.25);
+  --btn-shadow: 0 2px 6px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --btn-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 1);
+  --btn-shadow-active: 0 1px 3px rgba(0, 0, 0, 0.15), inset 0 2px 4px rgba(0, 0, 0, 0.08);
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --accent: #0f172a;
+  --accent-subtle: rgba(15, 23, 42, 0.08);
+  --shadow-dock: 0 16px 40px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.08);
+  --toggle-bg: #ffffff;
+  --modal-bg: #ffffff;
+}
+
+[data-theme="cyberpunk"] {
+  --bg-dock: #0b031c;
+  --bg-header: #070114;
+  --bg-footer: #070114;
+  --bg-surface: #140733;
+  --bg-surface-hover: #1f0b4d;
+  --bg-surface-active: #2b0f69;
+  --border-subtle: rgba(168, 85, 247, 0.18);
+  --border-hover: rgba(236, 72, 153, 0.45);
+  --btn-border: rgba(168, 85, 247, 0.22);
+  --btn-border-hover: rgba(0, 242, 254, 0.5);
+  --btn-shadow: 0 4px 14px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(236, 72, 153, 0.35);
+  --btn-shadow-hover: 0 8px 24px rgba(168, 85, 247, 0.35), 0 0 12px rgba(0, 242, 254, 0.3);
+  --btn-shadow-active: 0 2px 4px rgba(0, 0, 0, 0.9);
+  --text-primary: #f5f3ff;
+  --text-secondary: #c084fc;
+  --text-muted: #818cf8;
+  --accent: #00f2fe;
+  --accent-subtle: rgba(0, 242, 254, 0.15);
+  --shadow-dock: 0 18px 48px rgba(7, 1, 20, 0.95), 0 0 0 1px rgba(168, 85, 247, 0.28);
+  --toggle-bg: #12072b;
+  --modal-bg: #0b031c;
+}
+
+[data-theme="midnight"] {
+  --bg-dock: #070d1e;
+  --bg-header: #040814;
+  --bg-footer: #040814;
+  --bg-surface: #0c1836;
+  --bg-surface-hover: #12244f;
+  --bg-surface-active: #183069;
+  --border-subtle: rgba(56, 189, 248, 0.14);
+  --border-hover: rgba(56, 189, 248, 0.38);
+  --btn-border: rgba(56, 189, 248, 0.18);
+  --btn-border-hover: rgba(56, 189, 248, 0.45);
+  --btn-shadow: 0 4px 14px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(56, 189, 248, 0.25);
+  --btn-shadow-hover: 0 8px 24px rgba(2, 132, 199, 0.35), 0 0 12px rgba(56, 189, 248, 0.25);
+  --btn-shadow-active: 0 2px 4px rgba(0, 0, 0, 0.9);
+  --text-primary: #f0f9ff;
+  --text-secondary: #7dd3fc;
+  --text-muted: #0284c7;
+  --accent: #38bdf8;
+  --accent-subtle: rgba(56, 189, 248, 0.12);
+  --shadow-dock: 0 18px 48px rgba(4, 8, 20, 0.95), 0 0 0 1px rgba(56, 189, 248, 0.22);
+  --toggle-bg: #0c1836;
+  --modal-bg: #070d1e;
+}
+
+[data-theme="emerald"] {
+  --bg-dock: #04140d;
+  --bg-header: #020d08;
+  --bg-footer: #020d08;
+  --bg-surface: #0a2417;
+  --bg-surface-hover: #103824;
+  --bg-surface-active: #174c31;
+  --border-subtle: rgba(16, 185, 129, 0.16);
+  --border-hover: rgba(52, 211, 153, 0.4);
+  --btn-border: rgba(16, 185, 129, 0.2);
+  --btn-border-hover: rgba(52, 211, 153, 0.45);
+  --btn-shadow: 0 4px 14px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(52, 211, 153, 0.25);
+  --btn-shadow-hover: 0 8px 24px rgba(16, 185, 129, 0.35), 0 0 12px rgba(52, 211, 153, 0.25);
+  --btn-shadow-active: 0 2px 4px rgba(0, 0, 0, 0.9);
+  --text-primary: #ecfdf5;
+  --text-secondary: #6ee7b7;
+  --text-muted: #059669;
+  --accent: #10b981;
+  --accent-subtle: rgba(16, 185, 129, 0.15);
+  --shadow-dock: 0 18px 48px rgba(2, 13, 8, 0.95), 0 0 0 1px rgba(16, 185, 129, 0.24);
+  --toggle-bg: #0a2417;
+  --modal-bg: #04140d;
+}
+
+[data-theme="kawaii"] {
+  --bg-dock: #ede4ff;
+  --bg-header: #ffccd5;
+  --bg-footer: #ede4ff;
+  --bg-surface: #fffdfa;
+  --bg-surface-hover: #fff0f5;
+  --bg-surface-active: #ffd6e0;
+  --border-subtle: rgba(180, 150, 220, 0.35);
+  --border-hover: rgba(255, 140, 175, 0.7);
+  --btn-border: rgba(215, 185, 240, 0.5);
+  --btn-border-hover: rgba(255, 154, 182, 0.7);
+  --btn-shadow: 0 4px 12px rgba(180, 140, 210, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  --btn-shadow-hover: 0 6px 18px rgba(255, 154, 182, 0.35), 0 0 12px rgba(232, 223, 245, 0.5);
+  --btn-shadow-active: 0 2px 4px rgba(180, 140, 210, 0.35);
+  --text-primary: #2d1e4e;
+  --text-secondary: #5c4778;
+  --text-muted: #8b76a6;
+  --accent: #ff85a2;
+  --accent-subtle: rgba(255, 133, 162, 0.2);
+  --shadow-dock: 0 16px 48px rgba(150, 120, 195, 0.3), 0 0 0 2px rgba(255, 204, 213, 0.9);
+  --toggle-bg: #ffccd5;
+  --modal-bg: #f8f4ff;
+}
+
+/* Antigravity & Kawaii Space Zero-G Card Float Keyframes */
+@keyframes floatZeroG1 {
+  0% { transform: translateY(0px) rotate(-1.8deg); }
+  50% { transform: translateY(-7px) rotate(-0.5deg); }
+  100% { transform: translateY(0px) rotate(-1.8deg); }
+}
+
+@keyframes floatZeroG2 {
+  0% { transform: translateY(0px) rotate(2.2deg); }
+  50% { transform: translateY(-8px) rotate(1deg); }
+  100% { transform: translateY(0px) rotate(2.2deg); }
+}
+
+@keyframes floatZeroG3 {
+  0% { transform: translateY(0px) rotate(-2deg); }
+  50% { transform: translateY(-6px) rotate(-3.2deg); }
+  100% { transform: translateY(0px) rotate(-2deg); }
+}
+
+@keyframes floatZeroG4 {
+  0% { transform: translateY(0px) rotate(1.8deg); }
+  50% { transform: translateY(-7px) rotate(2.8deg); }
+  100% { transform: translateY(0px) rotate(1.8deg); }
+}
+
+@keyframes kawaiiStickerDrift {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-6px) rotate(3deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+@keyframes galaxySpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Kawaii Space Theme Custom Styling */
+[data-theme="kawaii"] .glass-surface {
+  background: var(--bg-dock);
+  background-image: 
+    radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.8) 0%, transparent 25%),
+    radial-gradient(circle at 85% 75%, rgba(255, 204, 213, 0.45) 0%, transparent 35%),
+    radial-gradient(circle at 40% 90%, rgba(203, 243, 240, 0.4) 0%, transparent 30%);
+}
+
+[data-theme="kawaii"] .app-card-wrapper:nth-child(4n+1) {
+  animation: floatZeroG1 4.2s ease-in-out infinite;
+}
+[data-theme="kawaii"] .app-card-wrapper:nth-child(4n+2) {
+  animation: floatZeroG2 4.6s ease-in-out infinite;
+}
+[data-theme="kawaii"] .app-card-wrapper:nth-child(4n+3) {
+  animation: floatZeroG3 5.1s ease-in-out infinite;
+}
+[data-theme="kawaii"] .app-card-wrapper:nth-child(4n+4) {
+  animation: floatZeroG4 4.4s ease-in-out infinite;
+}
+
+[data-theme="kawaii"] .glass-card {
+  border-radius: 16px !important;
+  border: 2px solid rgba(255, 182, 193, 0.75) !important;
+  box-shadow: 0 6px 18px rgba(180, 140, 210, 0.22), inset 0 2px 0 #ffffff !important;
+  background: #fffdfa !important;
+}
+
+[data-theme="kawaii"] .glass-card:hover {
+  transform: translateY(-5px) scale(1.03) !important;
+  box-shadow: 0 12px 24px rgba(255, 154, 182, 0.38), inset 0 2px 0 #ffffff !important;
+  border-color: #ff85a2 !important;
+}
+
+[data-theme="kawaii"] .btn-add-card {
+  animation: floatZeroG4 4.5s ease-in-out infinite;
+  border: 2px dashed #f49bb8 !important;
+  background: #fff5f8 !important;
+  border-radius: 16px !important;
+  color: #e06d92 !important;
+  box-shadow: 0 4px 14px rgba(255, 180, 200, 0.25) !important;
+}
+[data-theme="kawaii"] .btn-add-card:hover {
+  background: #ffe8ef !important;
+  border-color: #ff7597 !important;
+  color: #ff527b !important;
+}
+
+[data-theme="kawaii"] aside {
+  background: #d8f3dc !important;
+  border-color: rgba(160, 220, 185, 0.6) !important;
+}
+
+[data-theme="kawaii"] .uiverse-vbar-article {
+  background: #ffe5ec !important;
+  border: 2px solid #ffccd5 !important;
+  box-shadow: 0 8px 24px rgba(255, 180, 200, 0.4), inset 0 1px 1px #fff !important;
+}
+
+[data-theme="kawaii"] .uiverse-vbar-item {
+  color: #8b5cf6 !important;
+}
+[data-theme="kawaii"] .uiverse-vbar-item:hover svg,
+[data-theme="kawaii"] .uiverse-vbar-item.is-active svg {
+  color: #ec4899 !important;
+  fill: #ec4899 !important;
+  filter: drop-shadow(0 0 8px rgba(236, 72, 153, 0.8)) !important;
+}
+
+[data-theme="kawaii"] .kawaii-sidebar-candy {
+  display: block !important;
+}
+
+[data-theme="kawaii"] .kawaii-hub-cherries {
+  display: block !important;
+}
+
+[data-theme="aether"] {
+  --bg-dock: #e8f4fc;
+  --bg-header: #59bcf4;
+  --bg-footer: #e8f4fc;
+  --bg-surface: #5c3e23;
+  --bg-surface-hover: #734e2c;
+  --bg-surface-active: #4a321c;
+  --border-subtle: rgba(140, 96, 56, 0.45);
+  --border-hover: #ffdf59;
+  --btn-border: #2e1c0d;
+  --btn-border-hover: #ffdf59;
+  --btn-shadow: inset -2px -2px 0 #2e1c0d, inset 2px 2px 0 #8c6038;
+  --btn-shadow-hover: inset -2px -2px 0 #2e1c0d, inset 2px 2px 0 #ffdf59, 0 0 10px rgba(255, 223, 89, 0.4);
+  --btn-shadow-active: inset 2px 2px 0 #2e1c0d;
+  --text-primary: #ffdf59;
+  --text-secondary: #dff0fc;
+  --text-muted: #9dd4fd;
+  --accent: #ffdf59;
+  --accent-subtle: rgba(255, 223, 89, 0.2);
+  --shadow-dock: 0 16px 48px rgba(40, 90, 140, 0.35), 0 0 0 2px #388ac4;
+  --toggle-bg: #59bcf4;
+  --modal-bg: #142334;
+}
+
+/* Antigravity & Aether Flight Float Keyframes */
+@keyframes aetherDrift {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-7px) rotate(2deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+@keyframes aetherFloatTilt1 {
+  0% { transform: translateY(0px) rotate(-3.5deg); }
+  50% { transform: translateY(-8px) rotate(-1.5deg); }
+  100% { transform: translateY(0px) rotate(-3.5deg); }
+}
+
+@keyframes aetherFloatTilt2 {
+  0% { transform: translateY(0px) rotate(3deg); }
+  50% { transform: translateY(-9px) rotate(1.2deg); }
+  100% { transform: translateY(0px) rotate(3deg); }
+}
+
+@keyframes aetherFloatTilt3 {
+  0% { transform: translateY(0px) rotate(-2.2deg); }
+  50% { transform: translateY(-6px) rotate(-4deg); }
+  100% { transform: translateY(0px) rotate(-2.2deg); }
+}
+
+@keyframes aetherFloatTilt4 {
+  0% { transform: translateY(0px) rotate(2.5deg); }
+  50% { transform: translateY(-8px) rotate(3.8deg); }
+  100% { transform: translateY(0px) rotate(2.5deg); }
+}
+
+@keyframes aetherUpdraftCurrent {
+  0% { opacity: 0.2; transform: translateX(-50%) translateY(4px); }
+  50% { opacity: 0.9; transform: translateX(-50%) translateY(-6px); }
+  100% { opacity: 0.2; transform: translateX(-50%) translateY(4px); }
+}
+
+@keyframes aetherUpdraft {
+  0% { opacity: 0; transform: translateY(18px) scale(0.7); }
+  40% { opacity: 0.85; }
+  100% { opacity: 0; transform: translateY(-30px) scale(1.15); }
+}
+
+/* Aether Flight Theme Custom Styling */
+[data-theme="aether"] .glass-surface {
+  background: transparent !important;
+  background-image: 
+    radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.45) 0%, transparent 26%),
+    radial-gradient(circle at 86% 28%, rgba(200, 235, 255, 0.35) 0%, transparent 34%),
+    linear-gradient(180deg, rgba(220, 240, 252, 0.22) 0%, rgba(238, 248, 255, 0.12) 50%, rgba(209, 235, 252, 0.25) 100%) !important;
+  position: relative;
+}
+
+[data-theme="aether"] .app-card-wrapper:nth-child(4n+1) {
+  animation: aetherFloatTilt1 4.5s ease-in-out infinite;
+}
+[data-theme="aether"] .app-card-wrapper:nth-child(4n+2) {
+  animation: aetherFloatTilt2 4.8s ease-in-out infinite;
+}
+[data-theme="aether"] .app-card-wrapper:nth-child(4n+3) {
+  animation: aetherFloatTilt3 5.3s ease-in-out infinite;
+}
+[data-theme="aether"] .app-card-wrapper:nth-child(4n+4) {
+  animation: aetherFloatTilt4 4.7s ease-in-out infinite;
+}
+
+[data-theme="aether"] .app-card-wrapper::after {
+  content: "⁝ ⁝ ⁝";
+  position: absolute;
+  bottom: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: #72a4cc;
+  letter-spacing: 3px;
+  font-weight: 900;
+  pointer-events: none;
+  animation: aetherUpdraftCurrent 2.2s ease-in-out infinite;
+  text-shadow: 0 0 4px #ffffff;
+}
+
+[data-theme="aether"] .glass-card {
+  border-radius: 6px !important;
+  border: 3px solid #8c6038 !important;
+  box-shadow: 
+    inset -3px -3px 0 #2e1c0d, 
+    inset 3px 3px 0 #a97545, 
+    0 8px 18px rgba(40, 90, 140, 0.28) !important;
+  background: #5c3e23 !important;
+  image-rendering: pixelated;
+}
+
+[data-theme="aether"] .glass-card:hover {
+  transform: translateY(-5px) scale(1.04) !important;
+  border-color: #ffdf59 !important;
+  box-shadow: 
+    inset -3px -3px 0 #b39722, 
+    inset 3px 3px 0 #fff7cc, 
+    0 12px 24px rgba(255, 223, 89, 0.4) !important;
+}
+
+[data-theme="aether"] .glass-card [style*="color: var(--text-primary)"],
+[data-theme="aether"] .glass-card > div:last-child {
+  color: #ffdf59 !important;
+  text-shadow: 1px 1px 0 #181005, -1px -1px 0 #181005, 1px -1px 0 #181005, -1px 1px 0 #181005 !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.3px;
+}
+
+[data-theme="aether"] .btn-add-card {
+  border: 2px dashed #6b9bc2 !important;
+  background: rgba(255, 255, 255, 0.78) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 6px 18px rgba(89, 188, 244, 0.25), inset 0 2px 0 #ffffff !important;
+  animation: aetherFloatTilt2 4.6s ease-in-out infinite;
+}
+[data-theme="aether"] .btn-add-card:hover {
+  background: #ffffff !important;
+  border-color: #ffdf59 !important;
+  box-shadow: 0 8px 24px rgba(255, 223, 89, 0.45), inset 0 2px 0 #ffffff !important;
+}
+
+[data-theme="aether"] aside {
+  background: #deb26c !important;
+  background-image: linear-gradient(180deg, #deb26c 0%, #caa05b 100%) !important;
+  border-color: #8c6038 !important;
+  box-shadow: inset -2px 0 0 #8c6038 !important;
+}
+
+[data-theme="aether"] aside button {
+  border-radius: 4px !important;
+  border: 2px solid #8c6038 !important;
+  background: #5c3e23 !important;
+  color: #ffdf59 !important;
+  box-shadow: inset -2px -2px 0 #2e1c0d, inset 2px 2px 0 #a97545 !important;
+}
+[data-theme="aether"] aside button:hover {
+  border-color: #ffdf59 !important;
+  box-shadow: inset -2px -2px 0 #b39722, inset 2px 2px 0 #ffffff, 0 0 8px rgba(255, 223, 89, 0.6) !important;
+}
+
+[data-theme="aether"] .uiverse-vbar-article {
+  background: #243854 !important;
+  border: 2px solid #4a688f !important;
+  box-shadow: inset -2px -2px 0 #132030, inset 2px 2px 0 #6d93c4, 0 8px 24px rgba(20, 40, 70, 0.4) !important;
+}
+
+[data-theme="aether"] .uiverse-vbar-item {
+  color: #a8d5fc !important;
+}
+[data-theme="aether"] .uiverse-vbar-item:hover svg,
+[data-theme="aether"] .uiverse-vbar-item.is-active svg {
+  color: #ffdf59 !important;
+  fill: #ffdf59 !important;
+  filter: drop-shadow(0 0 8px rgba(255, 223, 89, 0.85)) !important;
+}
+
+[data-theme="aether"] .aether-sidebar-feather {
+  display: block !important;
+}
+
+[data-theme="aether"] .aether-hub-crystal {
+  display: block !important;
+}
+
+[data-theme="aether"] header {
+  position: relative !important;
+  z-index: 15 !important;
+  background: rgba(56, 138, 196, 0.55) !important;
+  background-image: linear-gradient(180deg, rgba(110, 200, 247, 0.65) 0%, rgba(77, 181, 255, 0.45) 100%) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-bottom: 2px solid #236c9e !important;
+  box-shadow: inset 0 -2px 0 #1b537a, inset 0 2px 0 rgba(179, 227, 255, 0.6) !important;
+}
+[data-theme="aether"] header [style*="color: var(--text-primary)"] {
+  color: #ffdf59 !important;
+  text-shadow: 2px 2px 0 #2e1c0d, -1px -1px 0 #2e1c0d, 1px -1px 0 #2e1c0d, -1px 1px 0 #2e1c0d, 0 0 10px rgba(255, 223, 89, 0.6) !important;
+  font-weight: 800 !important;
+}
+
+/* Aether Modals & Menus High-Contrast Visibility & Styling */
+[data-theme="aether"] .settings-modal-view,
+[data-theme="aether"] .add-modal-view,
+[data-theme="aether"] .new-group-modal-view {
+  background: #142334 !important;
+}
+
+/* Primary Action Buttons in Aether */
+[data-theme="aether"] .btn-primary {
+  background: #ffdf59 !important;
+  color: #2e1c0d !important;
+  border: 1.5px solid #ffe885 !important;
+  box-shadow: inset -2px -2px 0 #b39722, inset 2px 2px 0 #ffffff, 0 2px 8px rgba(255, 223, 89, 0.4) !important;
+  font-weight: 700 !important;
+  text-shadow: none !important;
+}
+[data-theme="aether"] .btn-primary:hover {
+  background: #ffe885 !important;
+  color: #181005 !important;
+  box-shadow: inset -2px -2px 0 #b39722, inset 2px 2px 0 #ffffff, 0 4px 14px rgba(255, 223, 89, 0.6) !important;
+}
+[data-theme="aether"] .btn-primary * {
+  color: #2e1c0d !important;
+  stroke: #2e1c0d !important;
+}
+
+/* Modal Inputs & Forms in Aether */
+[data-theme="aether"] input[type="text"],
+[data-theme="aether"] input[type="search"] {
+  background: #0f1c2b !important;
+  color: #ffdf59 !important;
+  border-color: #388ac4 !important;
+}
+[data-theme="aether"] input[type="text"]::placeholder,
+[data-theme="aether"] input[type="search"]::placeholder {
+  color: #8bbcdb !important;
+}
+
+/* Modal Tab & Density Buttons (Scan, Browse, URL, etc.) */
+[data-theme="aether"] .add-modal-tab-btn,
+[data-theme="aether"] .group-density-btn,
+[data-theme="aether"] .group-icon-btn,
+[data-theme="aether"] .settings-opt-btn {
+  background: #5c3e23 !important;
+  color: #fff9e6 !important;
+  border: 1.5px solid #8c6038 !important;
+  box-shadow: inset -2px -2px 0 #2e1c0d, inset 2px 2px 0 #a97545, 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+  text-shadow: 1px 1px 0 #181005 !important;
+}
+[data-theme="aether"] .add-modal-tab-btn span,
+[data-theme="aether"] .group-density-btn span,
+[data-theme="aether"] .settings-opt-btn span {
+  color: #fff9e6 !important;
+  text-shadow: 1px 1px 0 #181005 !important;
+}
+[data-theme="aether"] .add-modal-tab-btn svg,
+[data-theme="aether"] .group-icon-btn svg {
+  color: #fff9e6 !important;
+  stroke: #fff9e6 !important;
+}
+
+/* Hover States */
+[data-theme="aether"] .add-modal-tab-btn:hover,
+[data-theme="aether"] .group-density-btn:hover,
+[data-theme="aether"] .group-icon-btn:hover,
+[data-theme="aether"] .settings-opt-btn:hover {
+  border-color: #ffdf59 !important;
+  color: #ffdf59 !important;
+  box-shadow: inset -2px -2px 0 #2e1c0d, inset 2px 2px 0 #ffdf59, 0 0 10px rgba(255, 223, 89, 0.45) !important;
+}
+
+/* Active / Selected States in Aether */
+[data-theme="aether"] .add-modal-tab-btn.is-active,
+[data-theme="aether"] .group-density-btn.is-selected,
+[data-theme="aether"] .group-icon-btn.is-selected,
+[data-theme="aether"] .settings-opt-btn.is-selected {
+  background: #ffdf59 !important;
+  color: #2e1c0d !important;
+  border: 1.5px solid #ffe885 !important;
+  box-shadow: inset -2px -2px 0 #b39722, inset 2px 2px 0 #ffffff, 0 0 12px rgba(255, 223, 89, 0.5) !important;
+  text-shadow: none !important;
+  font-weight: 700 !important;
+}
+[data-theme="aether"] .add-modal-tab-btn.is-active span,
+[data-theme="aether"] .group-density-btn.is-selected span,
+[data-theme="aether"] .settings-opt-btn.is-selected span {
+  color: #2e1c0d !important;
+  text-shadow: none !important;
+  font-weight: 700 !important;
+}
+[data-theme="aether"] .add-modal-tab-btn.is-active svg,
+[data-theme="aether"] .group-icon-btn.is-selected svg,
+[data-theme="aether"] .settings-opt-btn.is-selected svg {
+  color: #2e1c0d !important;
+  stroke: #2e1c0d !important;
+}
+
+/* QuickScanner App Items */
+[data-theme="aether"] .quick-scanner-card {
+  background: #5c3e23 !important;
+  border: 1.5px solid #8c6038 !important;
+  box-shadow: inset -2px -2px 0 #2e1c0d, inset 2px 2px 0 #a97545 !important;
+}
+[data-theme="aether"] .quick-scanner-card > div:last-child {
+  color: #ffdf59 !important;
+  text-shadow: 1px 1px 0 #181005 !important;
+  font-weight: 700 !important;
+}
+[data-theme="aether"] .quick-scanner-card.is-added {
+  background: #243854 !important;
+  border-color: #3a567c !important;
+}
+[data-theme="aether"] .quick-scanner-card.is-added > div:last-child {
+  color: #8bbcdb !important;
+  text-shadow: none !important;
+}
+
+/* Settings View Titles & Icons */
+[data-theme="aether"] .settings-modal-view .settings-section-title {
+  color: #a3dbfe !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+  letter-spacing: 0.2px;
+  font-weight: 700 !important;
+}
+[data-theme="aether"] .settings-modal-view .settings-section-icon {
+  color: #ffdf59 !important;
+  stroke: #ffdf59 !important;
+  filter: drop-shadow(0 0 4px rgba(255, 223, 89, 0.45));
+}
+
+/* Connector Modules in Aether (Weather, Calendar, Music) */
+[data-theme="aether"] .dexter-calendar-card {
+  --bg: #142334 !important;
+  --txt: #ffdf59 !important;
+  --txt-sec: #dff0fc !important;
+  --border-col: #ffdf59 !important;
+  --txt-status: #2e1c0d !important;
+  box-shadow: inset 0 3px 10px rgba(0, 0, 0, 0.75), 0 0 0 4px #ffdf59, 0 10px 28px rgba(0, 0, 0, 0.6) !important;
+}
+[data-theme="aether"] .dexter-calendar-card .day-header {
+  color: #a3dbfe !important;
+}
+[data-theme="aether"] .dexter-calendar-card .date-cell {
+  color: #dff0fc !important;
+}
+[data-theme="aether"] .dexter-calendar-card .date-cell.today {
+  background-color: #ffdf59 !important;
+  color: #2e1c0d !important;
+  font-weight: 800 !important;
+}
+
+[data-theme="aether"] .uiverse-weather-wrap .card {
+  background: #142334 !important;
+  color: #ffdf59 !important;
+  border-color: #388ac4 !important;
+}
+[data-theme="aether"] .uiverse-weather-wrap .main-temp {
+  color: #ffdf59 !important;
+}
+[data-theme="aether"] .uiverse-weather-wrap .main-sub,
+[data-theme="aether"] .uiverse-weather-wrap .weather-date-badge {
+  color: #dff0fc !important;
+}
+[data-theme="aether"] .uiverse-weather-wrap .card2 {
+  background: #101c2a !important;
+  border-color: #388ac4 !important;
+}
+[data-theme="aether"] .uiverse-weather-wrap .humiditytext,
+[data-theme="aether"] .uiverse-weather-wrap .airtext,
+[data-theme="aether"] .uiverse-weather-wrap .aqi,
+[data-theme="aether"] .uiverse-weather-wrap .realfeel {
+  color: #dff0fc !important;
+}
+[data-theme="aether"] .uiverse-weather-wrap .forecast-day {
+  color: #ffdf59 !important;
+}
+[data-theme="aether"] .uiverse-weather-wrap .forecast-date {
+  color: #dff0fc !important;
+}
+[data-theme="aether"] .uiverse-weather-wrap .forecast-temp {
+  color: #ffdf59 !important;
+}
+
+[data-theme="aether"] .uiverse-music-container .player-card {
+  background-color: #142334 !important;
+  border: 2px solid #388ac4 !important;
+}
+[data-theme="aether"] .uiverse-music-container .track-title {
+  color: #ffdf59 !important;
+}
+[data-theme="aether"] .uiverse-music-container .track-artist {
+  color: #dff0fc !important;
+}
+[data-theme="aether"] .uiverse-music-container .time-label {
+  color: #c2e5fc !important;
+}
+
+[data-theme="deathnote"] {
+  --bg-dock: #080808;
+  --bg-header: rgba(10, 10, 10, 0.82);
+  --bg-footer: rgba(8, 8, 8, 0.88);
+  --bg-surface: rgba(18, 18, 18, 0.88);
+  --bg-surface-hover: rgba(35, 20, 21, 0.96);
+  --bg-surface-active: #291416;
+  --border-subtle: rgba(52, 48, 47, 0.65);
+  --border-hover: #a3262d;
+  --btn-border: #34302f;
+  --btn-border-hover: #c13239;
+  --btn-shadow: 0 4px 14px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(163, 38, 45, 0.2);
+  --btn-shadow-hover: 0 6px 20px rgba(163, 38, 45, 0.35), 0 0 12px rgba(193, 50, 57, 0.35);
+  --btn-shadow-active: 0 2px 4px rgba(0, 0, 0, 0.95);
+  --text-primary: #eae6df;
+  --text-secondary: #96908a;
+  --text-muted: #6b6661;
+  --accent: #a3262d;
+  --accent-subtle: rgba(163, 38, 45, 0.22);
+  --shadow-dock: 0 20px 50px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(163, 38, 45, 0.35);
+  --toggle-bg: #0d0d0d;
+  --modal-bg: #0c0c0c;
+  --font-gothic: 'Cinzel', 'Times New Roman', serif;
+  --font-script: 'Cormorant Garamond', 'Georgia', serif;
+}
+
+/* Death Note Theme Component Styling */
+[data-theme="deathnote"] .glass-surface {
+  background: var(--bg-dock);
+  background-image: 
+    radial-gradient(circle at 50% 25%, rgba(8, 8, 8, 0.45) 0%, rgba(8, 8, 8, 0.88) 100%),
+    linear-gradient(180deg, rgba(8, 8, 8, 0.65) 0%, rgba(13, 13, 13, 0.25) 45%, rgba(8, 8, 8, 0.9) 100%);
+  position: relative;
+}
+
+[data-theme="deathnote"] .glass-card {
+  border-radius: 10px !important;
+  background: rgba(18, 18, 18, 0.88) !important;
+  border: 1px solid rgba(163, 38, 45, 0.45) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.8), inset 0 0 12px rgba(163, 38, 45, 0.08) !important;
+  backdrop-filter: blur(8px);
+}
+
+[data-theme="deathnote"] .glass-card:hover {
+  transform: translateY(-2px) scale(1.02) !important;
+  border-color: #c13239 !important;
+  background: rgba(35, 20, 21, 0.96) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.9), 0 0 14px rgba(193, 50, 57, 0.4), inset 0 0 14px rgba(163, 38, 45, 0.15) !important;
+}
+
+[data-theme="deathnote"] .glass-card [style*="color: var(--text-primary)"],
+[data-theme="deathnote"] .glass-card > div:last-child {
+  color: #eae6df !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.2px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95);
+}
+
+[data-theme="deathnote"] .btn-add-card {
+  border: 1px dashed rgba(52, 48, 47, 0.7) !important;
+  background: rgba(18, 18, 18, 0.75) !important;
+  border-radius: 10px !important;
+  color: #96908a !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(6px);
+}
+
+[data-theme="deathnote"] .btn-add-card:hover {
+  background: rgba(35, 20, 21, 0.85) !important;
+  border-color: #a3262d !important;
+  color: #eae6df !important;
+  box-shadow: 0 6px 18px rgba(163, 38, 45, 0.3) !important;
+}
+
+[data-theme="deathnote"] aside {
+  background: rgba(10, 10, 10, 0.85) !important;
+  border-color: rgba(52, 48, 47, 0.55) !important;
+  backdrop-filter: blur(8px);
+}
+
+[data-theme="deathnote"] aside button {
+  border-radius: 8px !important;
+  border: 1px solid rgba(52, 48, 47, 0.6) !important;
+  background: rgba(18, 18, 18, 0.85) !important;
+  color: #eae6df !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.7) !important;
+}
+
+[data-theme="deathnote"] aside button:hover {
+  border-color: #a3262d !important;
+  background: rgba(35, 20, 21, 0.95) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 10px rgba(163, 38, 45, 0.5) !important;
+}
+
+[data-theme="deathnote"] .uiverse-vbar-article {
+  background: rgba(12, 12, 12, 0.9) !important;
+  border: 1px solid rgba(52, 48, 47, 0.65) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(163, 38, 45, 0.25) !important;
+  backdrop-filter: blur(8px);
+}
+
+[data-theme="deathnote"] .uiverse-vbar-item {
+  color: #96908a !important;
+}
+
+[data-theme="deathnote"] .uiverse-vbar-item:hover svg,
+[data-theme="deathnote"] .uiverse-vbar-item.is-active svg {
+  color: #e05a61 !important;
+  fill: #e05a61 !important;
+  filter: drop-shadow(0 0 8px rgba(224, 90, 97, 0.85)) !important;
+}
+
+[data-theme="deathnote"] header {
+  background: rgba(10, 10, 10, 0.82) !important;
+  border-bottom: 1px solid rgba(52, 48, 47, 0.65) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(8px);
+}
+
+[data-theme="deathnote"] header [style*="color: var(--text-primary)"] {
+  color: #eae6df !important;
+  font-family: var(--font-gothic);
+  letter-spacing: 0.5px;
+}
+
+[data-theme="deathnote"] footer {
+  background: rgba(8, 8, 8, 0.88) !important;
+  border-top: 1px solid rgba(52, 48, 47, 0.65) !important;
+  backdrop-filter: blur(8px);
+}
+
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  background: transparent;
+  overflow: hidden;
+  user-select: none;
+  height: 100vh;
+  width: 100vw;
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  overflow: hidden;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover);
+}
+
+/* Surfaces */
+.glass-surface {
+  background: var(--bg-dock);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border-subtle);
+}
+
+/* 3D Tactile App Cards with Invisible Borders & Deep Dark Shadow */
+.glass-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--btn-border);
+  box-shadow: var(--btn-shadow);
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease, border-color 0.22s ease, background 0.22s ease;
+}
+
+.glass-card:hover {
+  background: var(--bg-surface-hover);
+  border-color: var(--btn-border-hover);
+  box-shadow: var(--btn-shadow-hover);
+  transform: translateY(-3px) scale(1.02);
+}
+
+.glass-card:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: var(--btn-shadow-active);
+}
+
+/* Icon Zoom & Fluid Hover Transition */
+.app-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), filter 0.22s ease;
+  will-change: transform;
+}
+
+.glass-card:hover .app-icon-wrapper {
+  transform: scale(1.12);
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.65));
+}
+
+/* 3D Tactile Buttons with Specular Highlight and Deep Dark Shadow */
+.btn-dock {
+  border: 1px solid var(--btn-border);
+  box-shadow: var(--btn-shadow);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-dock:hover {
+  color: var(--text-primary);
+  border-color: var(--btn-border-hover);
+  box-shadow: var(--btn-shadow-hover);
+  background: var(--bg-surface-hover);
+  transform: translateY(-2px);
+}
+
+.btn-dock:active {
+  transform: translateY(1px) scale(0.97);
+  box-shadow: var(--btn-shadow-active);
+}
+
+/* Primary Action Button (Adapts to light & dark theme) */
+.btn-primary {
+  background: var(--text-primary);
+  color: var(--bg-dock);
+  border: 1px solid var(--border-hover);
+  box-shadow: var(--btn-shadow);
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-primary:hover {
+  box-shadow: var(--btn-shadow-hover);
+  transform: translateY(-2px);
+  opacity: 0.92;
+}
+
+.btn-primary:active {
+  transform: translateY(1px) scale(0.97);
+  box-shadow: var(--btn-shadow-active);
+}
+
+/* Custom Increase & Decrease Range Bar */
+.custom-range-bar {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  outline: none;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  transition: border-color 0.18s ease;
+}
+
+.custom-range-bar:hover {
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+.custom-range-bar::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 999px;
+}
+
+.custom-range-bar::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.3);
+  cursor: grab;
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s ease;
+  margin-top: -5px;
+}
+
+.custom-range-bar:hover::-webkit-slider-thumb {
+  transform: scale(1.18);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.75), 0 0 0 3px rgba(255, 255, 255, 0.28);
+}
+
+.custom-range-bar:active::-webkit-slider-thumb {
+  cursor: grabbing;
+  transform: scale(1.28);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.85), 0 0 0 4px rgba(255, 255, 255, 0.4);
+}
+
+.custom-range-bar::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.65);
+  cursor: grab;
+}
+
+button {
+  font-family: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: inherit;
+  outline: none;
+}
+
+input {
+  font-family: inherit;
+  outline: none;
+}
+
+/* Butter-Smooth Hub Companion Module Animations */
+@keyframes hubModuleEnterRight {
+  0% {
+    opacity: 0;
+    transform: translateX(24px) scale(0.95);
+  }
+  60% {
+    opacity: 1;
+    transform: translateX(-3px) scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes hubModuleEnterLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-24px) scale(0.95);
+  }
+  60% {
+    opacity: 1;
+    transform: translateX(3px) scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes hubModuleExitRight {
+  0% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(20px) scale(0.94);
+  }
+}
+
+@keyframes hubModuleExitLeft {
+  0% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-20px) scale(0.94);
+  }
+}
+
+.hub-module-enter-right {
+  animation: hubModuleEnterRight 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.hub-module-enter-left {
+  animation: hubModuleEnterLeft 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.hub-module-exit-right {
+  animation: hubModuleExitRight 0.20s cubic-bezier(0.4, 0, 1, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.hub-module-exit-left {
+  animation: hubModuleExitLeft 0.20s cubic-bezier(0.4, 0, 1, 1) forwards;
+  will-change: transform, opacity;
+}
+
+/* =====================================================================
+   DEATH NOTE 3D BOOK OPEN ANIMATION (COMPANION HUB MODULES ONLY)
+   ===================================================================== */
+
+.deathnote-book-wrapper {
+  position: relative;
+  perspective: 1200px;
+  transform-style: preserve-3d;
+  width: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.deathnote-book-cover {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background-color: #0b0b0e;
+  background-image: url('/deathnote/textures/texture_dark_3.jpg');
+  background-size: cover;
+  background-position: center;
+  border: 1.5px solid #3c1e22;
+  box-shadow: 
+    0 16px 40px rgba(0, 0, 0, 0.95), 
+    inset 0 0 24px rgba(0, 0, 0, 0.9),
+    inset 0 0 0 1px rgba(163, 38, 45, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 30;
+  backface-visibility: hidden;
+  overflow: hidden;
+}
+
+.deathnote-book-cover .deathnote-cover-spine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 14px;
+  background: linear-gradient(to right, #050505 0%, #2b1315 50%, #050505 100%);
+  border-right: 1px solid rgba(163, 38, 45, 0.3);
+  box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.1);
+  z-index: 2;
+}
+
+.deathnote-book-cover .deathnote-cover-spine.spine-right {
+  left: 0;
+}
+
+.deathnote-book-cover .deathnote-cover-spine.spine-left {
+  right: 0;
+  border-right: none;
+  border-left: 1px solid rgba(163, 38, 45, 0.3);
+}
+
+.deathnote-book-cover .deathnote-cover-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 20px;
+  z-index: 3;
+}
+
+.deathnote-book-cover .deathnote-cover-logo {
+  width: 155px;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 4px rgba(255, 255, 255, 0.2));
+  letter-spacing: 2px;
+}
+
+.deathnote-book-cover .deathnote-cover-shinigami img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  opacity: 0.85;
+  filter: drop-shadow(0 0 8px rgba(163, 38, 45, 0.8));
+}
+
+/* 3D Book Swing Open Keyframes */
+@keyframes deathnoteCoverOpenRight {
+  0% {
+    transform: rotateY(0deg);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  20% {
+    transform: rotateY(-25deg);
+    opacity: 1;
+  }
+  60% {
+    transform: rotateY(-75deg);
+    opacity: 0.9;
+  }
+  90% {
+    transform: rotateY(-115deg);
+    opacity: 0.3;
+  }
+  100% {
+    transform: rotateY(-130deg);
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+  }
+}
+
+@keyframes deathnoteCoverCloseRight {
+  0% {
+    transform: rotateY(-130deg);
+    opacity: 0;
+  }
+  30% {
+    transform: rotateY(-75deg);
+    opacity: 0.6;
+  }
+  100% {
+    transform: rotateY(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes deathnoteCoverOpenLeft {
+  0% {
+    transform: rotateY(0deg);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  20% {
+    transform: rotateY(25deg);
+    opacity: 1;
+  }
+  60% {
+    transform: rotateY(75deg);
+    opacity: 0.9;
+  }
+  90% {
+    transform: rotateY(115deg);
+    opacity: 0.3;
+  }
+  100% {
+    transform: rotateY(130deg);
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+  }
+}
+
+@keyframes deathnoteCoverCloseLeft {
+  0% {
+    transform: rotateY(130deg);
+    opacity: 0;
+  }
+  30% {
+    transform: rotateY(75deg);
+    opacity: 0.6;
+  }
+  100% {
+    transform: rotateY(0deg);
+    opacity: 1;
+  }
+}
+
+.cover-open-right {
+  transform-origin: left center;
+  animation: deathnoteCoverOpenRight 0.44s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.cover-close-right {
+  transform-origin: left center;
+  animation: deathnoteCoverCloseRight 0.22s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.cover-open-left {
+  transform-origin: right center;
+  animation: deathnoteCoverOpenLeft 0.44s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.cover-close-left {
+  transform-origin: right center;
+  animation: deathnoteCoverCloseLeft 0.22s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  will-change: transform, opacity;
+}
+
+/* Inner Pages Reveal */
+@keyframes deathnotePageReveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.96) translateZ(-10px);
+    filter: brightness(0.8);
+  }
+  50% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateZ(0);
+    filter: brightness(1);
+  }
+}
+
+@keyframes deathnotePageExit {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.96) translateZ(-10px);
+  }
+}
+
+.deathnote-book-pages.pages-enter {
+  animation: deathnotePageReveal 0.44s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.deathnote-book-pages.pages-exit {
+  animation: deathnotePageExit 0.20s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  will-change: transform, opacity;
+}
+
+/* Death Note Thematic Styling for Companion Modules */
+[data-theme="deathnote"] .dexter-calendar-card {
+  --bg: #0f0f12 !important;
+  --txt: #eae6df !important;
+  --txt-sec: #96908a !important;
+  --border-col: #a3262d !important;
+  --txt-status: #ffffff !important;
+  background-image: url('/deathnote/textures/texture_dark_1.jpg') !important;
+  background-size: cover !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(163, 38, 45, 0.45) !important;
+}
+
+[data-theme="deathnote"] .dexter-calendar-card .day-header {
+  color: #c13239 !important;
+  font-family: var(--font-gothic);
+}
+
+[data-theme="deathnote"] .dexter-calendar-card .date-cell {
+  color: #eae6df !important;
+}
+
+[data-theme="deathnote"] .dexter-calendar-card .date-cell.today {
+  background-color: #a3262d !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  box-shadow: 0 0 10px rgba(163, 38, 45, 0.8) !important;
+}
+
+[data-theme="deathnote"] .uiverse-weather-wrap .card {
+  background: #0f0f12 url('/deathnote/textures/texture_dark_2.jpg') !important;
+  background-size: cover !important;
+  color: #eae6df !important;
+  border: 1px solid rgba(163, 38, 45, 0.45) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.95), inset 0 0 16px rgba(0, 0, 0, 0.8) !important;
+}
+
+[data-theme="deathnote"] .uiverse-weather-wrap .main-temp {
+  color: #eae6df !important;
+  font-family: var(--font-gothic);
+}
+
+[data-theme="deathnote"] .uiverse-weather-wrap .main-sub,
+[data-theme="deathnote"] .uiverse-weather-wrap .weather-date-badge {
+  color: #c13239 !important;
+}
+
+[data-theme="deathnote"] .uiverse-weather-wrap .card2 {
+  background: rgba(12, 12, 15, 0.94) !important;
+  border-color: rgba(163, 38, 45, 0.35) !important;
+}
+
+[data-theme="deathnote"] .uiverse-weather-wrap .humiditytext,
+[data-theme="deathnote"] .uiverse-weather-wrap .airtext,
+[data-theme="deathnote"] .uiverse-weather-wrap .aqi,
+[data-theme="deathnote"] .uiverse-weather-wrap .realfeel {
+  color: #96908a !important;
+}
+
+[data-theme="deathnote"] .uiverse-weather-wrap .forecast-day,
+[data-theme="deathnote"] .uiverse-weather-wrap .forecast-temp {
+  color: #eae6df !important;
+}
+
+[data-theme="deathnote"] .uiverse-weather-wrap .forecast-date {
+  color: #96908a !important;
+}
+
+[data-theme="deathnote"] .uiverse-music-container .player-card {
+  background: #0f0f12 url('/deathnote/textures/texture_dark_1.jpg') !important;
+  background-size: cover !important;
+  border: 1.5px solid rgba(163, 38, 45, 0.45) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.95), inset 0 0 16px rgba(0, 0, 0, 0.8) !important;
+}
+
+[data-theme="deathnote"] .uiverse-music-container .track-title {
+  color: #eae6df !important;
+  font-family: var(--font-gothic);
+  letter-spacing: 0.3px;
+}
+
+[data-theme="deathnote"] .uiverse-music-container .track-artist {
+  color: #c13239 !important;
+}
+
+[data-theme="deathnote"] .uiverse-music-container .time-label {
+  color: #96908a !important;
+}
+
+[data-theme="deathnote"] .uiverse-music-container .top-disc-svg {
+  border-color: #a3262d !important;
+  box-shadow: 0 4px 16px rgba(163, 38, 45, 0.45) !important;
+}
+
+

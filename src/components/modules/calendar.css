@@ -1,0 +1,191 @@
+/* From Uiverse.io by dexter-st - UI Theme Matched */
+
+.dexter-calendar-card {
+  --bg: var(--bg-surface, #121214);
+  --txt: var(--text-primary, #f8fafc);
+  --txt-sec: var(--text-secondary, #a1a1aa);
+
+  --border-col: #f7414a;
+  --border: 4px;
+  --shadow-alpha: 0.5;
+  --radius: 22px;
+  --notch-h: 30px;
+  --notch-w: 70px;
+
+  --status: "2026";
+  --txt-status: #ffffff;
+  --event: "Daily Standup";
+
+  position: relative;
+  width: 260px;
+  border-radius: var(--radius);
+  box-shadow:
+    inset 0 3px 10px rgba(0, 0, 0, 0.75),
+    inset 0 -2px 6px rgba(255, 255, 255, 0.1),
+    inset 0 0 0 2px rgba(0, 0, 0, 0.45),
+    0 0 0 var(--border) var(--border-col),
+    0 10px 28px rgba(0, 0, 0, 0.6);
+  background-color: var(--bg);
+  border: 1px solid var(--border-hover, rgba(255, 255, 255, 0.15));
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 0.95rem;
+  color: var(--txt);
+  display: grid;
+  grid-template-rows: var(--notch-h) 1fr auto;
+  grid-template-columns: calc(100% - var(--notch-w)) var(--notch-w);
+  grid-template-areas: "header notch" "body body" "footer footer";
+  padding: 0.85rem;
+  box-sizing: border-box;
+  user-select: none;
+  transition: all 0.3s ease;
+}
+
+[data-theme="light"] .dexter-calendar-card {
+  --bg: var(--bg-surface, #ffffff);
+  --txt: var(--text-primary, #0f172a);
+  --txt-sec: var(--text-secondary, #64748b);
+  border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.12));
+}
+
+.dexter-calendar-card::after {
+  content: var(--status);
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: var(--notch-w);
+  height: var(--notch-h);
+  display: grid;
+  place-items: center;
+  border-radius: 0 calc(0.9 * var(--radius));
+  background-color: var(--border-col);
+  text-transform: capitalize;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--txt-status);
+  box-shadow: 0 2px 8px rgba(247, 65, 74, 0.45);
+}
+
+.dexter-calendar-card .corner {
+  content: "";
+  position: absolute;
+  width: var(--notch-h);
+  height: var(--notch-h);
+  background-color: var(--border-col);
+  border-radius: 50% 0 50% 50%;
+  mask: radial-gradient(
+    circle at center,
+    #0000 calc(0.5 * var(--notch-h)),
+    blue calc(0.5 * var(--notch-h) + 1px)
+  );
+  -webkit-mask: radial-gradient(
+    circle at center,
+    #0000 calc(0.5 * var(--notch-h)),
+    blue calc(0.5 * var(--notch-h) + 1px)
+  );
+}
+
+.dexter-calendar-card .corner.c1 {
+  top: 0;
+  right: var(--notch-w);
+}
+
+.dexter-calendar-card .corner.c2 {
+  top: var(--notch-h);
+  right: 0;
+}
+
+.dexter-calendar-card .header {
+  grid-area: header;
+  position: relative;
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  padding-left: 0.25rem;
+  text-transform: capitalize;
+  margin-bottom: 0.6rem;
+}
+
+.dexter-calendar-card .header-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--txt);
+}
+
+.dexter-calendar-card .body {
+  position: relative;
+  grid-area: body;
+  grid-column: span 2;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  font-size: 0.85rem;
+  gap: 2px;
+  padding-bottom: 0.6rem;
+}
+
+.dexter-calendar-card .day-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--txt-sec);
+  height: 20px;
+}
+
+.dexter-calendar-card .date-cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  color: var(--txt-sec);
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  transition: all 0.15s ease;
+}
+
+.dexter-calendar-card .date-cell:hover {
+  color: var(--txt);
+  background: var(--bg-surface-hover, rgba(255, 255, 255, 0.1));
+}
+
+.dexter-calendar-card .date-cell.today {
+  font-weight: 800;
+  color: #ffffff !important;
+  background-color: var(--border-col);
+  box-shadow: 0 0 10px rgba(247, 65, 74, 0.65);
+  border-radius: 6px;
+  z-index: 2;
+}
+
+.dexter-calendar-card .date-cell.event {
+  font-weight: bold;
+  color: var(--border-col);
+}
+
+.dexter-calendar-card .date-cell.today.event {
+  color: #ffffff !important;
+  background-color: var(--border-col);
+  font-weight: 800;
+}
+
+.dexter-calendar-card .footer {
+  grid-area: footer;
+  grid-column: span 2;
+  color: var(--txt-sec);
+  font-size: 0.8rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  border-top: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  padding-top: 6px;
+}
+
+.dexter-calendar-card .footer .event-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 11px;
+}

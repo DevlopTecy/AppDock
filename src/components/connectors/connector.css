@@ -1,0 +1,178 @@
+/* Connector Spine & Small Handles Styles */
+/* Inspired by Uiverse.io by vinodjangid07 */
+
+.connector-spine {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  position: relative;
+  z-index: 50;
+  user-select: none;
+  padding: 6px 4px;
+}
+
+.connector-stem {
+  position: absolute;
+  top: 10%;
+  bottom: 10%;
+  width: 2px;
+  background: linear-gradient(
+    180deg,
+    rgba(65, 88, 208, 0.2) 0%,
+    rgba(200, 80, 192, 0.6) 50%,
+    rgba(255, 204, 112, 0.3) 100%
+  );
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.connector-spine.top-spine {
+  flex-direction: row !important;
+  gap: 8px;
+  padding: 4px 6px;
+}
+
+.connector-spine.top-spine .connector-stem {
+  top: 50%;
+  bottom: auto;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  width: auto;
+  background: linear-gradient(
+    90deg,
+    rgba(65, 88, 208, 0.2) 0%,
+    rgba(200, 80, 192, 0.6) 50%,
+    rgba(255, 204, 112, 0.3) 100%
+  );
+}
+
+/* Individual small handle button with vinodjangid07 layered geometry */
+.small-handle-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  background: linear-gradient(43deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 2;
+  outline: none;
+  overflow: hidden;
+}
+
+/* Internal glass layer (.box from Uiverse) */
+.small-handle-btn .handle-inner-glass {
+  position: absolute;
+  inset: 0;
+  background: rgba(18, 18, 20, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: inherit;
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+/* Hover radial gradient overlays per module */
+.small-handle-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  z-index: 2;
+}
+
+/* Box 1: Music Glow */
+.small-handle-btn.music-handle::before {
+  background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #ff53d4 60%, #62c2fe 90%);
+}
+
+/* Box 2: Weather Glow */
+.small-handle-btn.weather-handle::before {
+  background: radial-gradient(circle at 30% 107%, #91e9ff 0%, #00ACEE 90%);
+}
+
+/* Box 3: Calendar Glow */
+.small-handle-btn.calendar-handle::before {
+  background: radial-gradient(circle at 30% 107%, #969fff 0%, #b349ff 90%);
+}
+
+.small-handle-btn:hover {
+  transform: scale(1.12) translateY(-1px);
+  border-color: #ffffff;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.7), 0 0 14px rgba(255, 255, 255, 0.3);
+}
+
+.small-handle-btn:hover::before {
+  opacity: 1;
+}
+
+.small-handle-btn:hover .handle-icon {
+  filter: drop-shadow(0 0 6px #ffffff);
+  color: #ffffff;
+  transform: scale(1.08);
+}
+
+.small-handle-btn:active {
+  transform: scale(0.96);
+}
+
+/* Icon layer */
+.small-handle-btn .handle-icon {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  transition: all 0.25s ease;
+}
+
+/* Active handle state */
+.small-handle-btn.is-active {
+  border-color: #ffffff;
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+.small-handle-btn.is-active::before {
+  opacity: 0.95;
+}
+
+.small-handle-btn.is-active .handle-icon {
+  filter: drop-shadow(0 0 6px #ffffff);
+}
+
+/* Tooltip badge for small handles */
+.handle-tooltip {
+  position: absolute;
+  white-space: nowrap;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(10, 10, 12, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-size: 10.5px;
+  font-weight: 600;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(4px);
+  transition: all 0.2s ease;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.7);
+  z-index: 100;
+}
+
+.small-handle-btn:hover .handle-tooltip {
+  opacity: 1;
+  transform: translateX(0);
+}
