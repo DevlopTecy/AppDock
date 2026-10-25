@@ -11,8 +11,8 @@
     "build": "tsc -b && vite build",
     "start": "cross-env SERVE_DIST=1 electron .",
     "electron:start": "cross-env SERVE_DIST=1 electron .",
-    "electron:pack": "npm run build && electron-builder --dir",
-    "dist": "npm run build && electron-builder",
+    "electron:pack": "npm run build && electron-builder --dir -p never",
+    "dist": "npm run build && electron-builder -p never",
     "test": "node tests/scaffold.test.cjs && node tests/storage.test.cjs && node tests/dock-bounds.test.cjs && node tests/native-ops.test.cjs && node tests/integration.test.cjs && node tests/launch.test.cjs",
     "preview": "vite preview"
   },
