@@ -52,6 +52,15 @@ cd AppDock
 npm install
 ```
 
+### Launching the Desktop App
+
+To launch the compiled desktop application directly:
+```bash
+npm start
+# or
+npm run electron:start
+```
+
 ### Development
 
 Run the frontend in Vite dev mode:
@@ -59,7 +68,7 @@ Run the frontend in Vite dev mode:
 npm run dev
 ```
 
-Run the complete Electron desktop app:
+Run the complete Electron desktop app with live reload:
 ```bash
 npm run dev:electron
 ```

@@ -94,12 +94,22 @@ function updateWindowBounds() {
   }, 50);
 }
 
+function resolveAsset(...segments) {
+  const primary = path.join(__dirname, ...segments);
+  if (fs.existsSync(primary)) return primary;
+  if (segments[0] === '../public') {
+    const distFallback = path.join(__dirname, '../dist', ...segments.slice(1));
+    if (fs.existsSync(distFallback)) return distFallback;
+  }
+  return primary;
+}
+
 function createWindow() {
   const primaryDisplay = screen.getPrimaryDisplay();
   const workArea = primaryDisplay.workArea;
   const initialBounds = calculateBounds(currentPosition, false, workArea);
 
-  const appIconPath = path.join(__dirname, '../public/app-logo.png');
+  const appIconPath = resolveAsset('../public/app-logo.png');
 
   mainWindow = new BrowserWindow({
     ...initialBounds,
@@ -130,7 +140,7 @@ function createWindow() {
   // Always keep on top across desktop workspaces
   mainWindow.setAlwaysOnTop(true);
 
-  const isDev = process.env.NODE_ENV !== 'production' && !process.env.SERVE_DIST;
+  const isDev = !app.isPackaged && process.env.NODE_ENV !== 'production' && !process.env.SERVE_DIST;
   if (isDev) {
     const port = process.env.VITE_PORT || 5178;
     const devUrl = `http://localhost:${port}`;
@@ -253,7 +263,7 @@ function updateTrayMenu() {
 function createTray() {
   if (tray && !tray.isDestroyed()) return;
   try {
-    const trayIconPath = path.join(__dirname, '../public/tray-icon.png');
+    const trayIconPath = resolveAsset('../public/tray-icon.png');
     const icon = nativeImage.createFromPath(trayIconPath);
     tray = new Tray(icon);
     tray.setToolTip('AppDock - Desktop Dock Launcher');

@@ -9,19 +9,24 @@
     "dev": "vite",
     "dev:electron": "concurrently -k \"vite\" \"electron .\"",
     "build": "tsc -b && vite build",
+    "start": "cross-env SERVE_DIST=1 electron .",
+    "electron:start": "cross-env SERVE_DIST=1 electron .",
+    "electron:pack": "npm run build && electron-builder --dir",
     "dist": "npm run build && electron-builder",
-    "test": "node tests/scaffold.test.cjs && node tests/storage.test.cjs && node tests/dock-bounds.test.cjs && node tests/native-ops.test.cjs && node tests/integration.test.cjs",
+    "test": "node tests/scaffold.test.cjs && node tests/storage.test.cjs && node tests/dock-bounds.test.cjs && node tests/native-ops.test.cjs && node tests/integration.test.cjs && node tests/launch.test.cjs",
     "preview": "vite preview"
   },
   "build": {
     "appId": "com.appdock.launcher",
     "productName": "AppDock",
     "directories": {
-      "output": "release"
+      "output": "release",
+      "buildResources": "build"
     },
     "files": [
       "dist/**/*",
       "electron/**/*",
+      "public/**/*",
       "package.json"
     ],
     "publish": {
@@ -31,14 +36,10 @@
     },
     "win": {
       "target": [
-        {
-          "target": "nsis",
-          "arch": [
-            "x64"
-          ]
-        }
+        "nsis",
+        "portable"
       ],
-      "icon": "public/favicon.ico"
+      "icon": "build/icon.ico"
     },
     "nsis": {
       "oneClick": false,
