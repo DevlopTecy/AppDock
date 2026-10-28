@@ -232,7 +232,7 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
         }}
       >
         {[
-          { id: 'scan' as TabType, label: 'Scan', icon: <Scan size={13} /> },
+          { id: 'scan' as TabType, label: 'Desktop Apps', icon: <Scan size={13} /> },
           { id: 'browse' as TabType, label: 'Browse', icon: <FolderOpen size={13} /> },
           { id: 'url' as TabType, label: 'URL', icon: <Globe size={13} /> }
         ].map((tab) => {

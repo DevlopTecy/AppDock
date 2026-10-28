@@ -674,67 +674,68 @@ ipcMain.handle('app:resolve-item', async (event, { name, target }) => {
 });
 
 ipcMain.handle('app:scan-system', async () => {
-  let desktopPath = '';
   try {
-    desktopPath = app.getPath('desktop');
-  } catch (e) {}
-
-  const desktopDirs = [
-    desktopPath,
-    path.join(process.env.USERPROFILE || '', 'Desktop'),
-    path.join(process.env.USERPROFILE || '', 'OneDrive', 'Desktop'),
-    path.join(process.env.PUBLIC || 'C:\\Users\\Public', 'Desktop'),
-    path.join(process.env.APPDATA || '', 'Microsoft', 'Windows', 'Start Menu', 'Programs'),
-    path.join(process.env.PROGRAMDATA || 'C:\\ProgramData', 'Microsoft', 'Windows', 'Start Menu', 'Programs')
-  ].filter(Boolean).filter((d, i, arr) => arr.indexOf(d) === i);
-
-  const results = [];
-  const seenNames = new Set();
-
-  function scanDir(dir, depth = 0) {
-    if (depth > 2 || !fs.existsSync(dir)) return;
+    let desktopPath = '';
     try {
-      const entries = fs.readdirSync(dir, { withFileTypes: true });
-      for (const entry of entries) {
-        const fullPath = path.join(dir, entry.name);
-        if (entry.isDirectory()) {
-          scanDir(fullPath, depth + 1);
-        } else if (entry.isFile()) {
+      desktopPath = app.getPath('desktop');
+    } catch (e) {}
+
+    // Only scan Desktop folders (fast, completely stable, pure desktop shortcuts)
+    const desktopDirs = [
+      desktopPath,
+      path.join(process.env.USERPROFILE || '', 'Desktop'),
+      path.join(process.env.OneDrive || '', 'Desktop'),
+      path.join(process.env.USERPROFILE || '', 'OneDrive', 'Desktop'),
+      path.join(process.env.PUBLIC || 'C:\\Users\\Public', 'Desktop')
+    ].filter(Boolean).filter((d, i, arr) => arr.indexOf(d) === i);
+
+    const results = [];
+    const seenNames = new Set();
+
+    for (const dir of desktopDirs) {
+      if (!fs.existsSync(dir)) continue;
+      try {
+        const entries = fs.readdirSync(dir, { withFileTypes: true });
+        for (const entry of entries) {
+          // Strictly files directly on the desktop (depth 0, no folder recursion)
+          if (!entry.isFile()) continue;
           const ext = path.extname(entry.name).toLowerCase();
           if (['.lnk', '.exe', '.url'].includes(ext)) {
             const name = path.basename(entry.name, ext);
             if (!seenNames.has(name.toLowerCase()) && !name.toLowerCase().includes('uninstall')) {
               seenNames.add(name.toLowerCase());
-              results.push({ name, path: fullPath, ext });
+              results.push({ name, path: path.join(dir, entry.name), ext });
             }
           }
         }
+      } catch (e) {
+        // Ignore folder read or permission errors
       }
-    } catch (e) {
-      // Ignore permission errors
     }
-  }
 
-  for (const d of desktopDirs) {
-    scanDir(d);
-  }
+    // Extract icons safely in small batches of 4
+    const withIcons = [];
+    const chunkSize = 4;
+    for (let i = 0; i < results.length; i += chunkSize) {
+      const chunk = results.slice(i, i + chunkSize);
+      const chunkRes = await Promise.all(
+        chunk.map(async (item) => {
+          try {
+            const icon = await extractNativeIcon(item.path);
+            return { ...item, icon };
+          } catch (e) {
+            return { ...item, icon: null };
+          }
+        })
+      );
+      withIcons.push(...chunkRes);
+    }
 
-  // Limit and extract in small concurrent batches of 4 to avoid CPU/RAM thrashing
-  const topItems = results.slice(0, 80);
-  const withIcons = [];
-  const chunkSize = 4;
-  for (let i = 0; i < topItems.length; i += chunkSize) {
-    const chunk = topItems.slice(i, i + chunkSize);
-    const chunkRes = await Promise.all(
-      chunk.map(async (item) => {
-        const icon = await extractNativeIcon(item.path);
-        return { ...item, icon };
-      })
-    );
-    withIcons.push(...chunkRes);
+    return withIcons;
+  } catch (err) {
+    console.error('[app:scan-system] Desktop scan error:', err);
+    return [];
   }
-
-  return withIcons;
 });
 
 // ----------------- MEDIA IPC HANDLERS -----------------
