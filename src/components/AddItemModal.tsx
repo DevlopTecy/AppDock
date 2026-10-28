@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getAssetUrl } from '../utils/assets';
 import { AppGroup, AppItem, DockTheme } from '../types/dock';
 import { QuickScanner } from './QuickScanner';
 import { normalizeUrl } from '../utils/storage';
@@ -154,7 +155,7 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
             style={{
               position: 'absolute',
               inset: 0,
-              backgroundImage: "url('/deathnote/backgrounds/wallpaper_main_1.jpg')",
+              backgroundImage: `url('${getAssetUrl('/deathnote/backgrounds/wallpaper_main_1.jpg')}')`,
               backgroundSize: 'cover',
               backgroundPosition: 'center 20%',
               filter: 'brightness(0.65) contrast(1.15)',
@@ -187,7 +188,7 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           {isDeathNote && (
             <img
-              src="/deathnote/icons/logo_deathnote_white.png"
+              src={getAssetUrl('/deathnote/icons/logo_deathnote_white.png')}
               alt="Death Note"
               style={{ height: '15px', objectFit: 'contain' }}
             />

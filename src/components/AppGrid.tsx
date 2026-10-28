@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getAssetUrl } from '../utils/assets';
 import { AppGroup, AppItem, GroupDensity, DockTheme } from '../types/dock';
 import { AppCard } from './AppCard';
 import { Plus, UploadCloud, FolderPlus, Sparkles, LayoutGrid } from 'lucide-react';
@@ -215,7 +216,7 @@ export const AppGrid: React.FC<AppGridProps> = ({
             {theme === 'kawaii' && '💖 🍬'}
             {theme === 'aether' && (
               <img
-                src="/aether/feather.png"
+                src={getAssetUrl('/aether/feather.png')}
                 alt="Aether Feather"
                 style={{ width: '13px', height: '13px', objectFit: 'contain', imageRendering: 'pixelated' }}
                 title="Aether Weightless Feather"

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { getAssetUrl } from '../utils/assets';
 import { AppGroup, AppItem, DockTheme } from '../types/dock';
 import { AppCard } from './AppCard';
 import { Search, X } from 'lucide-react';
@@ -80,7 +81,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             style={{
               position: 'absolute',
               inset: 0,
-              backgroundImage: "url('/deathnote/backgrounds/wallpaper_main_4.jpg')",
+              backgroundImage: `url('${getAssetUrl('/deathnote/backgrounds/wallpaper_main_4.jpg')}')`,
               backgroundSize: 'cover',
               backgroundPosition: 'center 20%',
               filter: 'brightness(0.65) contrast(1.15)',

@@ -494,9 +494,25 @@ function resolveShortcutPath(inputPath) {
 function extractTargetFromLnk(lnkPath) {
   try {
     if (!fs.existsSync(lnkPath)) return null;
-    const buf = fs.readFileSync(lnkPath);
 
-    // 1. Scan Latin1 string for standard Windows path to an executable
+    // 1. Try Electron native shell.readShortcutLink
+    if (shell && typeof shell.readShortcutLink === 'function') {
+      try {
+        const link = shell.readShortcutLink(lnkPath);
+        if (link) {
+          if (link.icon && fs.existsSync(link.icon)) {
+            return link.icon;
+          }
+          if (link.target) {
+            const expanded = link.target.replace(/%([^%]+)%/g, (_, n) => process.env[n] || '');
+            if (fs.existsSync(expanded)) return expanded;
+          }
+        }
+      } catch (e) {}
+    }
+
+    // 2. Scan Latin1 string for standard Windows path to an executable
+    const buf = fs.readFileSync(lnkPath);
     const latin1 = buf.toString('latin1');
     const asciiMatches = latin1.match(/[A-Za-z]:\\[^<>:"/|?*\x00-\x1f]+\.(?:exe|ico|bat|cmd)/gi);
     if (asciiMatches) {
@@ -505,7 +521,7 @@ function extractTargetFromLnk(lnkPath) {
       }
     }
 
-    // 2. Scan UTF-16LE unicode sequences for Windows path
+    // 3. Scan UTF-16LE unicode sequences for Windows path
     const unicodeMatches = [];
     for (let i = 0; i < buf.length - 8; i += 2) {
       if (
@@ -533,6 +549,25 @@ function extractTargetFromLnk(lnkPath) {
         }
       }
     }
+
+    // 4. Fallback for common Windows Accessibility and System tools
+    const baseName = path.basename(lnkPath, '.lnk').toLowerCase().replace(/\s+/g, '');
+    const sys32 = path.join(process.env.SystemRoot || 'C:\\Windows', 'System32');
+    const systemMap = {
+      livecaptions: path.join(sys32, 'LiveCaptions.exe'),
+      magnify: path.join(sys32, 'magnify.exe'),
+      narrator: path.join(sys32, 'Narrator.exe'),
+      voiceaccess: path.join(sys32, 'VoiceAccess.exe'),
+      taskmgr: path.join(sys32, 'Taskmgr.exe'),
+      cmd: path.join(sys32, 'cmd.exe'),
+      commandprompt: path.join(sys32, 'cmd.exe'),
+      powershell: path.join(sys32, 'WindowsPowerShell\\v1.0\\powershell.exe'),
+      snippingtool: path.join(sys32, 'SnippingTool.exe'),
+      paint: path.join(sys32, 'mspaint.exe')
+    };
+    if (systemMap[baseName] && fs.existsSync(systemMap[baseName])) {
+      return systemMap[baseName];
+    }
   } catch (e) {}
   return null;
 }
@@ -548,10 +583,33 @@ async function extractNativeIcon(filePath) {
 
   const ext = path.extname(resolvedPath).toLowerCase();
 
-  // If it's a shortcut .lnk, try extracting the target executable icon first
+  // If the path itself is an image/icon file
+  if (['.ico', '.png', '.jpg', '.jpeg', '.svg', '.webp'].includes(ext)) {
+    try {
+      const mime = ext === '.ico' ? 'image/x-icon' : ext === '.svg' ? 'image/svg+xml' : ext === '.png' ? 'image/png' : 'image/jpeg';
+      const buf = fs.readFileSync(resolvedPath);
+      const dataUrl = `data:${mime};base64,${buf.toString('base64')}`;
+      iconMemoryCache.set(resolvedPath, dataUrl);
+      iconMemoryCache.set(filePath, dataUrl);
+      return dataUrl;
+    } catch (e) {}
+  }
+
+  // If it's a shortcut .lnk, try extracting the target executable or custom icon first
   if (ext === '.lnk') {
     const targetExe = extractTargetFromLnk(resolvedPath);
     if (targetExe && fs.existsSync(targetExe)) {
+      const targetExt = path.extname(targetExe).toLowerCase();
+      if (['.ico', '.png', '.jpg', '.jpeg', '.svg', '.webp'].includes(targetExt)) {
+        try {
+          const mime = targetExt === '.ico' ? 'image/x-icon' : targetExt === '.svg' ? 'image/svg+xml' : targetExt === '.png' ? 'image/png' : 'image/jpeg';
+          const buf = fs.readFileSync(targetExe);
+          const dataUrl = `data:${mime};base64,${buf.toString('base64')}`;
+          iconMemoryCache.set(resolvedPath, dataUrl);
+          iconMemoryCache.set(filePath, dataUrl);
+          return dataUrl;
+        } catch (e) {}
+      }
       try {
         if (app && typeof app.getFileIcon === 'function') {
           const exeIcon = await app.getFileIcon(targetExe, { size: 'large' });
@@ -863,9 +921,9 @@ function compareSemver(v1, v2) {
   return 0;
 }
 
-function checkGitHubReleases(repoSlug = 'AppDock/AppDock') {
+function checkGitHubReleases(repoSlug = 'DevlopTecy/AppDock') {
   return new Promise((resolve) => {
-    const slug = (repoSlug && repoSlug.includes('/')) ? repoSlug.trim() : 'AppDock/AppDock';
+    const slug = (repoSlug && repoSlug.includes('/')) ? repoSlug.trim() : 'DevlopTecy/AppDock';
     const options = {
       hostname: 'api.github.com',
       path: `/repos/${slug}/releases/latest`,
@@ -881,10 +939,10 @@ function checkGitHubReleases(repoSlug = 'AppDock/AppDock') {
       res.on('data', (chunk) => { data += chunk; });
       res.on('end', () => {
         try {
+          const currentVersion = app.getVersion();
           if (res.statusCode === 200) {
             const release = JSON.parse(data);
             const latestVersion = (release.tag_name || '').replace(/^v/, '');
-            const currentVersion = app.getVersion();
             const isNewer = compareSemver(latestVersion, currentVersion) > 0;
             if (isNewer) {
               const info = {
@@ -906,6 +964,15 @@ function checkGitHubReleases(repoSlug = 'AppDock/AppDock') {
               }
               resolve({ hasUpdate: false, currentVersion, latestVersion });
             }
+          } else if (res.statusCode === 404) {
+            // No releases published yet on this repository; app is currently at the latest/newest version
+            if (mainWindow && !mainWindow.isDestroyed()) {
+              mainWindow.webContents.send('dock:update-not-available', {
+                version: currentVersion,
+                currentVersion
+              });
+            }
+            resolve({ hasUpdate: false, currentVersion, latestVersion: currentVersion });
           } else {
             resolve({ hasUpdate: false, error: `GitHub API returned ${res.statusCode}` });
           }

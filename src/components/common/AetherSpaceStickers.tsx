@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getAssetUrl } from '../../utils/assets';
 
 interface AetherItem {
   id: string;
@@ -93,7 +94,7 @@ export const AetherSpaceStickers: React.FC = () => {
             }}
           >
             <img
-              src={item.src}
+              src={getAssetUrl(item.src)}
               alt={item.label}
               style={{
                 width: '100%',

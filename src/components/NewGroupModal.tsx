@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getAssetUrl } from '../utils/assets';
 import { AppGroup, GroupDensity, DockTheme } from '../types/dock';
 import { getGroupIcon } from './GroupTabs';
 import { X, Plus, Sparkles } from 'lucide-react';
@@ -81,7 +82,7 @@ export const NewGroupModal: React.FC<NewGroupModalProps> = ({
             style={{
               position: 'absolute',
               inset: 0,
-              backgroundImage: "url('/deathnote/backgrounds/wallpaper_main_4.jpg')",
+              backgroundImage: `url('${getAssetUrl('/deathnote/backgrounds/wallpaper_main_4.jpg')}')`,
               backgroundSize: 'cover',
               backgroundPosition: 'center 20%',
               filter: 'brightness(0.65) contrast(1.15)',
@@ -114,7 +115,7 @@ export const NewGroupModal: React.FC<NewGroupModalProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           {isDeathNote && (
             <img
-              src="/deathnote/icons/logo_deathnote_white.png"
+              src={getAssetUrl('/deathnote/icons/logo_deathnote_white.png')}
               alt="Death Note"
               style={{ height: '15px', objectFit: 'contain' }}
             />

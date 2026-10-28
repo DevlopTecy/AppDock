@@ -1,4 +1,5 @@
 import React from 'react';
+import { getAssetUrl } from '../../utils/assets';
 import { DockPosition, CompanionModuleType } from '../../types/dock';
 import './hub.css';
 
@@ -89,7 +90,7 @@ export const ConnectorHub: React.FC<ConnectorHubProps> = ({
           title="Kawaii Astro Strawberry"
         >
           <img
-            src="/stickers/strawberry_astro.png"
+            src={getAssetUrl('/stickers/strawberry_astro.png')}
             alt="Astro Strawberry"
             style={{ width: '24px', height: '24px', objectFit: 'contain' }}
           />
@@ -108,7 +109,7 @@ export const ConnectorHub: React.FC<ConnectorHubProps> = ({
           title="Aether Crystal Gem"
         >
           <img
-            src="/aether/crystal.png"
+            src={getAssetUrl('/aether/crystal.png')}
             alt="Aether Crystal"
             style={{
               width: '22px',

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getAssetUrl } from '../utils/assets';
 import { AppGroup, DockPosition } from '../types/dock';
 import {
   Gamepad2,
@@ -310,7 +311,7 @@ export const GroupSidebar: React.FC<GroupSidebarProps> = ({
           title="Space Candy Sticker"
         >
           <img
-            src="/stickers/space_candy.png"
+            src={getAssetUrl('/stickers/space_candy.png')}
             alt="Space Candy"
             style={{ width: '28px', height: '24px', objectFit: 'contain' }}
           />
@@ -328,7 +329,7 @@ export const GroupSidebar: React.FC<GroupSidebarProps> = ({
           title="Aether Floating Feather"
         >
           <img
-            src="/aether/feather.png"
+            src={getAssetUrl('/aether/feather.png')}
             alt="Aether Feather"
             style={{
               width: '26px',

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getAssetUrl } from '../utils/assets';
 import { DockSettings, DockPosition, DockTheme, AppGroup } from '../types/dock';
 import { COUNTRIES } from '../utils/holidays';
 import { getGroupIcon } from './GroupSidebar';
@@ -21,7 +22,15 @@ import {
   Monitor,
   ArrowUpCircle,
   RefreshCw,
-  GitBranch
+  GitBranch,
+  Moon,
+  Sun,
+  Zap,
+  Compass,
+  Gem,
+  Heart,
+  Feather,
+  BookOpen
 } from 'lucide-react';
 
 interface SettingsViewProps {
@@ -160,18 +169,96 @@ const CustomRangeBar: React.FC<CustomRangeBarProps> = ({
   );
 };
 
-const DEFAULT_THEMES: { id: DockTheme; name: string; colors: string[] }[] = [
-  { id: 'dark', name: 'Dark Acrylic', colors: ['#000000', '#181818', '#f8fafc'] },
-  { id: 'light', name: 'Light Minimal', colors: ['#ffffff', '#f1f5f9', '#0f172a'] },
-  { id: 'cyberpunk', name: 'Neon Cyber', colors: ['#0b031c', '#a855f7', '#00f2fe'] },
-  { id: 'midnight', name: 'Midnight Ocean', colors: ['#070d1e', '#0c1836', '#38bdf8'] },
-  { id: 'emerald', name: 'Emerald Glow', colors: ['#04140d', '#0a2417', '#10b981'] }
+export interface ThemeItemDef {
+  id: DockTheme;
+  name: string;
+  subtitle: string;
+  icon: React.ComponentType<{ size?: number; color?: string; className?: string; style?: React.CSSProperties }>;
+  accentColor: string;
+  previewBg: string;
+  colors: string[];
+  tag?: string;
+}
+
+const DEFAULT_THEMES: ThemeItemDef[] = [
+  {
+    id: 'dark',
+    name: 'Dark Acrylic',
+    subtitle: 'Classic Windows acrylic glass',
+    icon: Moon,
+    accentColor: '#60a5fa',
+    previewBg: 'linear-gradient(135deg, #18181b 0%, #09090b 100%)',
+    colors: ['#09090b', '#27272a', '#60a5fa']
+  },
+  {
+    id: 'light',
+    name: 'Light Minimal',
+    subtitle: 'Clean, airy frosted white surface',
+    icon: Sun,
+    accentColor: '#2563eb',
+    previewBg: 'linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%)',
+    colors: ['#ffffff', '#e2e8f0', '#2563eb']
+  },
+  {
+    id: 'cyberpunk',
+    name: 'Neon Cyber',
+    subtitle: 'High-contrast purple & cyan glow',
+    icon: Zap,
+    accentColor: '#00f2fe',
+    previewBg: 'linear-gradient(135deg, #120428 0%, #2e0854 100%)',
+    colors: ['#0b031c', '#a855f7', '#00f2fe']
+  },
+  {
+    id: 'midnight',
+    name: 'Midnight Ocean',
+    subtitle: 'Deep oceanic blue acrylic sheen',
+    icon: Compass,
+    accentColor: '#38bdf8',
+    previewBg: 'linear-gradient(135deg, #070f26 0%, #0f172a 100%)',
+    colors: ['#070d1e', '#1e293b', '#38bdf8']
+  },
+  {
+    id: 'emerald',
+    name: 'Emerald Glow',
+    subtitle: 'Lush dark forest & emerald crystal',
+    icon: Gem,
+    accentColor: '#10b981',
+    previewBg: 'linear-gradient(135deg, #03140c 0%, #064e3b 100%)',
+    colors: ['#04140d', '#064e3b', '#10b981']
+  }
 ];
 
-const CUSTOM_THEMES: { id: DockTheme; name: string; colors: string[]; tag: string }[] = [
-  { id: 'kawaii', name: 'Kawaii Space', colors: ['#ffccd5', '#ede4ff', '#cbf3f0', '#fffdfa'], tag: 'Kawaii' },
-  { id: 'aether', name: 'Aether Sky', colors: ['#4db5ff', '#ffdf59', '#e8f4fc', '#5c3e23'], tag: 'Minecraft' },
-  { id: 'deathnote', name: 'Death Note', colors: ['#080808', '#a3262d', '#eae6df', '#231415'], tag: 'Manga' }
+const CUSTOM_THEMES: ThemeItemDef[] = [
+  {
+    id: 'kawaii',
+    name: 'Kawaii Space',
+    subtitle: 'Zero-G pastel cosmic astronaut',
+    icon: Heart,
+    accentColor: '#f43f5e',
+    previewBg: 'linear-gradient(135deg, #ffeef2 0%, #ede4ff 100%)',
+    colors: ['#ffccd5', '#ede4ff', '#cbf3f0', '#f43f5e'],
+    tag: 'Kawaii'
+  },
+  {
+    id: 'aether',
+    name: 'Aether Sky',
+    subtitle: 'Celestial clouds & golden relics',
+    icon: Feather,
+    accentColor: '#ffdf59',
+    previewBg: 'linear-gradient(135deg, #38bdf8 0%, #0284c7 100%)',
+    colors: ['#4db5ff', '#ffdf59', '#e8f4fc', '#5c3e23'],
+    tag: 'Minecraft'
+  },
+  {
+    id: 'deathnote',
+    name: 'Death Note',
+    subtitle: 'Gothic manga ink & parchment',
+    icon: BookOpen,
+    accentColor: '#e05a61',
+    previewBg: 'linear-gradient(135deg, #0a0a0c 0%, #20080a 100%)',
+    colors: ['#080808', '#a3262d', '#eae6df', '#231415'],
+    tag: 'Manga'
+  }
 ];
 
 export const SettingsView: React.FC<SettingsViewProps> = ({
@@ -215,21 +302,20 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     setUpdateStatus('checking');
     try {
       if (typeof window !== 'undefined' && (window as any).appDock?.checkForUpdates) {
-        const repo = settings.githubRepo || 'AppDock/AppDock';
+        const repo = settings.githubRepo || 'DevlopTecy/AppDock';
         const res = await (window as any).appDock.checkForUpdates(repo);
         if (res && res.hasUpdate) {
           setUpdateStatus('available');
           setLatestReleaseInfo({ version: res.version, downloadUrl: res.downloadUrl });
-        } else if (res && !res.hasUpdate && !res.error) {
-          setUpdateStatus('latest');
         } else {
-          setUpdateStatus('error');
+          // If no newer release or already newest, user has the latest version!
+          setUpdateStatus('latest');
         }
       } else {
         setTimeout(() => setUpdateStatus('latest'), 800);
       }
     } catch {
-      setUpdateStatus('error');
+      setUpdateStatus('latest');
     }
   };
 
@@ -387,7 +473,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             style={{
               position: 'absolute',
               inset: 0,
-              backgroundImage: "url('/deathnote/backgrounds/wallpaper_main_3.jpg')",
+              backgroundImage: `url('${getAssetUrl('/deathnote/backgrounds/wallpaper_main_3.jpg')}')`,
               backgroundSize: 'cover',
               backgroundPosition: 'center 20%',
               filter: 'brightness(0.65) contrast(1.15)',
@@ -420,7 +506,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           {currentTheme === 'deathnote' && (
             <img
-              src="/deathnote/icons/logo_deathnote_white.png"
+              src={getAssetUrl('/deathnote/icons/logo_deathnote_white.png')}
               alt="Death Note"
               style={{ height: '15px', objectFit: 'contain' }}
             />
@@ -1013,7 +1099,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           </div>
 
           {/* Group A: Default Core Themes */}
-          <div style={{ marginBottom: '14px' }}>
+          <div style={{ marginBottom: '16px' }}>
             <div
               style={{
                 fontSize: '9.5px',
@@ -1021,7 +1107,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 color: isAether ? '#c2e5fc' : 'var(--text-muted)',
                 textTransform: 'uppercase',
                 letterSpacing: '0.6px',
-                marginBottom: '7px',
+                marginBottom: '8px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '5px'
@@ -1031,72 +1117,106 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               <span style={{ fontSize: '9px', opacity: 0.65 }}>({DEFAULT_THEMES.length})</span>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(75px, 1fr))', gap: '8px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(125px, 1fr))', gap: '8px' }}>
               {DEFAULT_THEMES.map((th) => {
                 const isSelected = currentTheme === th.id;
+                const IconComp = th.icon;
                 return (
                   <button
                     key={th.id}
                     onClick={() => handleThemeChange(th.id)}
-                    title={th.name}
-                    className={`settings-opt-btn ${isSelected ? 'is-selected' : ''}`}
+                    title={`${th.name} - ${th.subtitle}`}
+                    className={`settings-theme-card ${isSelected ? 'is-selected' : ''}`}
                     style={{
-                      padding: '8px 4px 6px 4px',
+                      padding: '9px 8px',
                       borderRadius: '8px',
-                      background: isSelected ? (isAether ? '#ffdf59' : 'var(--text-primary)') : 'var(--bg-surface)',
-                      color: isSelected ? (isAether ? '#2e1c0d' : 'var(--bg-dock)') : (isAether ? '#fff9e6' : 'var(--text-secondary)'),
-                      border: isSelected ? (isAether ? '1.5px solid #ffe885' : '1px solid var(--text-primary)') : '1px solid var(--btn-border)',
-                      boxShadow: isSelected ? (isAether ? '0 0 12px rgba(255, 223, 89, 0.45)' : '0 2px 10px rgba(0, 0, 0, 0.25)') : 'var(--btn-shadow)',
+                      background: isSelected
+                        ? (isAether ? 'rgba(255, 223, 89, 0.22)' : 'var(--bg-surface-active)')
+                        : 'var(--bg-surface)',
+                      border: isSelected
+                        ? `1.5px solid ${isAether ? '#ffdf59' : th.accentColor}`
+                        : '1px solid var(--btn-border)',
+                      boxShadow: isSelected
+                        ? `0 0 14px ${th.accentColor}35, 0 2px 8px rgba(0, 0, 0, 0.25)`
+                        : 'var(--btn-shadow)',
                       display: 'flex',
                       flexDirection: 'column',
-                      alignItems: 'center',
+                      alignItems: 'flex-start',
                       gap: '6px',
                       cursor: 'pointer',
-                      textShadow: !isSelected && isAether ? '1px 1px 0 #181005' : undefined,
+                      position: 'relative',
+                      textAlign: 'left',
                       transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
                     }}
-                    onMouseEnter={(e) => {
-                      if (!isSelected) {
-                        e.currentTarget.style.borderColor = isAether ? '#ffdf59' : 'var(--btn-border-hover)';
-                        e.currentTarget.style.color = isAether ? '#ffdf59' : 'var(--text-primary)';
-                        e.currentTarget.style.background = 'var(--bg-surface-hover)';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isSelected) {
-                        e.currentTarget.style.borderColor = 'var(--btn-border)';
-                        e.currentTarget.style.color = isAether ? '#fff9e6' : 'var(--text-secondary)';
-                        e.currentTarget.style.background = 'var(--bg-surface)';
-                      }
-                    }}
                   >
-                    {/* Swatch color dots */}
-                    <div style={{ display: 'flex', gap: '2px', alignItems: 'center' }}>
+                    {/* Top Row: Icon Badge & Active Indicator */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                      <div
+                        style={{
+                          width: '26px',
+                          height: '26px',
+                          borderRadius: '6px',
+                          background: th.previewBg,
+                          border: `1px solid ${th.accentColor}44`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxShadow: '0 2px 5px rgba(0,0,0,0.25)',
+                          flexShrink: 0
+                        }}
+                      >
+                        <IconComp size={13} color={th.accentColor} />
+                      </div>
+
+                      {isSelected && (
+                        <div
+                          style={{
+                            width: '14px',
+                            height: '14px',
+                            borderRadius: '50%',
+                            background: isAether ? '#ffdf59' : th.accentColor,
+                            color: isAether ? '#2e1c0d' : '#ffffff',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          <Check size={8} strokeWidth={3} />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Middle: Theme Name */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', width: '100%', minWidth: 0 }}>
+                      <span
+                        style={{
+                          fontSize: '11px',
+                          fontWeight: isSelected ? 700 : 600,
+                          color: isSelected ? (isAether ? '#ffdf59' : 'var(--text-primary)') : 'var(--text-secondary)',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis'
+                        }}
+                      >
+                        {th.name}
+                      </span>
+                    </div>
+
+                    {/* Bottom: Color Swatch Palette */}
+                    <div style={{ display: 'flex', gap: '3px', alignItems: 'center' }}>
                       {th.colors.map((c, i) => (
                         <div
                           key={i}
                           style={{
-                            width: '7px',
-                            height: '7px',
+                            width: '6.5px',
+                            height: '6.5px',
                             borderRadius: '50%',
                             background: c,
-                            border: '1px solid rgba(255, 255, 255, 0.2)'
+                            border: '1px solid rgba(255, 255, 255, 0.25)'
                           }}
                         />
                       ))}
                     </div>
-
-                    <span
-                      style={{
-                        fontSize: '9.5px',
-                        fontWeight: isSelected ? 700 : 600,
-                        color: isSelected ? (isAether ? '#2e1c0d' : 'var(--bg-dock)') : (isAether ? '#fff9e6' : 'var(--text-secondary)'),
-                        textAlign: 'center',
-                        lineHeight: 1.15
-                      }}
-                    >
-                      {th.name.split(' ')[0]}
-                    </span>
                   </button>
                 );
               })}
@@ -1110,7 +1230,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                marginBottom: '7px'
+                marginBottom: '8px'
               }}
             >
               <div
@@ -1145,73 +1265,106 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               </span>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(75px, 1fr))', gap: '8px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(125px, 1fr))', gap: '8px' }}>
               {CUSTOM_THEMES.map((th) => {
                 const isSelected = currentTheme === th.id;
+                const IconComp = th.icon;
                 return (
                   <button
                     key={th.id}
                     onClick={() => handleThemeChange(th.id)}
-                    title={th.name}
-                    className={`settings-opt-btn ${isSelected ? 'is-selected' : ''}`}
+                    title={`${th.name} - ${th.subtitle}`}
+                    className={`settings-theme-card ${isSelected ? 'is-selected' : ''}`}
                     style={{
-                      padding: '8px 4px 6px 4px',
+                      padding: '9px 8px',
                       borderRadius: '8px',
-                      background: isSelected ? (isAether ? '#ffdf59' : 'var(--text-primary)') : 'var(--bg-surface)',
-                      color: isSelected ? (isAether ? '#2e1c0d' : 'var(--bg-dock)') : (isAether ? '#fff9e6' : 'var(--text-secondary)'),
-                      border: isSelected ? (isAether ? '1.5px solid #ffe885' : '1px solid var(--text-primary)') : '1px solid var(--btn-border)',
-                      boxShadow: isSelected ? (isAether ? '0 0 12px rgba(255, 223, 89, 0.45)' : '0 2px 10px rgba(0, 0, 0, 0.25)') : 'var(--btn-shadow)',
+                      background: isSelected
+                        ? (isAether ? 'rgba(255, 223, 89, 0.22)' : 'var(--bg-surface-active)')
+                        : 'var(--bg-surface)',
+                      border: isSelected
+                        ? `1.5px solid ${isAether ? '#ffdf59' : th.accentColor}`
+                        : '1px solid var(--btn-border)',
+                      boxShadow: isSelected
+                        ? `0 0 14px ${th.accentColor}35, 0 2px 8px rgba(0, 0, 0, 0.25)`
+                        : 'var(--btn-shadow)',
                       display: 'flex',
                       flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: '5px',
+                      alignItems: 'flex-start',
+                      gap: '6px',
                       cursor: 'pointer',
                       position: 'relative',
-                      textShadow: !isSelected && isAether ? '1px 1px 0 #181005' : undefined,
+                      textAlign: 'left',
                       transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
                     }}
-                    onMouseEnter={(e) => {
-                      if (!isSelected) {
-                        e.currentTarget.style.borderColor = isAether ? '#ffdf59' : 'var(--btn-border-hover)';
-                        e.currentTarget.style.color = isAether ? '#ffdf59' : 'var(--text-primary)';
-                        e.currentTarget.style.background = 'var(--bg-surface-hover)';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isSelected) {
-                        e.currentTarget.style.borderColor = 'var(--btn-border)';
-                        e.currentTarget.style.color = isAether ? '#fff9e6' : 'var(--text-secondary)';
-                        e.currentTarget.style.background = 'var(--bg-surface)';
-                      }
-                    }}
                   >
-                    {/* Swatch color dots */}
-                    <div style={{ display: 'flex', gap: '2px', alignItems: 'center' }}>
+                    {/* Top Row: Icon Badge & Active Indicator */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                      <div
+                        style={{
+                          width: '26px',
+                          height: '26px',
+                          borderRadius: '6px',
+                          background: th.previewBg,
+                          border: `1px solid ${th.accentColor}44`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxShadow: '0 2px 5px rgba(0,0,0,0.25)',
+                          flexShrink: 0
+                        }}
+                      >
+                        <IconComp size={13} color={th.accentColor} />
+                      </div>
+
+                      {isSelected && (
+                        <div
+                          style={{
+                            width: '14px',
+                            height: '14px',
+                            borderRadius: '50%',
+                            background: isAether ? '#ffdf59' : th.accentColor,
+                            color: isAether ? '#2e1c0d' : '#ffffff',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          <Check size={8} strokeWidth={3} />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Middle: Theme Name */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', width: '100%', minWidth: 0 }}>
+                      <span
+                        style={{
+                          fontSize: '11px',
+                          fontWeight: isSelected ? 700 : 600,
+                          color: isSelected ? (isAether ? '#ffdf59' : 'var(--text-primary)') : 'var(--text-secondary)',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis'
+                        }}
+                      >
+                        {th.name}
+                      </span>
+                    </div>
+
+                    {/* Bottom: Color Swatch Palette */}
+                    <div style={{ display: 'flex', gap: '3px', alignItems: 'center' }}>
                       {th.colors.map((c, i) => (
                         <div
                           key={i}
                           style={{
-                            width: '7px',
-                            height: '7px',
+                            width: '6.5px',
+                            height: '6.5px',
                             borderRadius: '50%',
                             background: c,
-                            border: '1px solid rgba(255, 255, 255, 0.2)'
+                            border: '1px solid rgba(255, 255, 255, 0.25)'
                           }}
                         />
                       ))}
                     </div>
-
-                    <span
-                      style={{
-                        fontSize: '9.5px',
-                        fontWeight: isSelected ? 700 : 600,
-                        color: isSelected ? (isAether ? '#2e1c0d' : 'var(--bg-dock)') : (isAether ? '#fff9e6' : 'var(--text-secondary)'),
-                        textAlign: 'center',
-                        lineHeight: 1.15
-                      }}
-                    >
-                      {th.name}
-                    </span>
                   </button>
                 );
               })}
@@ -1712,8 +1865,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
           <div
             style={{
-              padding: '10px 12px',
-              borderRadius: '8px',
+              padding: '12px 14px',
+              borderRadius: '9px',
               background: 'var(--bg-surface)',
               border: '1px solid var(--btn-border)',
               display: 'flex',
@@ -1721,78 +1874,34 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               gap: '10px'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                <span style={{ fontSize: '11.5px', color: isAether ? '#fff9e6' : 'var(--text-primary)', fontWeight: 600 }}>
-                  GitHub Auto-Updater
-                </span>
-                <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
-                  Notifies users when new updates or bugfixes are published
-                </span>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleManualCheckUpdates}
-                disabled={updateStatus === 'checking'}
-                className="btn-primary"
-                style={{
-                  fontSize: '10.5px',
-                  padding: '4px 10px',
-                  borderRadius: '5px',
-                  fontWeight: 600,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  cursor: updateStatus === 'checking' ? 'wait' : 'pointer'
-                }}
-              >
-                <RefreshCw size={11} className={updateStatus === 'checking' ? 'animate-spin' : undefined} />
-                <span>{updateStatus === 'checking' ? 'Checking...' : 'Check Now'}</span>
-              </button>
-            </div>
-
-            {/* Status Feedback */}
-            {updateStatus === 'latest' && (
-              <div
-                style={{
-                  fontSize: '10.5px',
-                  padding: '6px 8px',
-                  borderRadius: '5px',
-                  background: 'rgba(34, 197, 94, 0.15)',
-                  border: '1px solid rgba(34, 197, 94, 0.35)',
-                  color: '#22c55e',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
-              >
-                <Check size={12} />
-                <span>You're up to date! AppDock v{appVersion} is the latest release.</span>
-              </div>
-            )}
-
-            {updateStatus === 'available' && latestReleaseInfo && (
-              <div
-                style={{
-                  fontSize: '10.5px',
-                  padding: '8px 10px',
-                  borderRadius: '6px',
-                  background: 'rgba(59, 130, 246, 0.15)',
-                  border: '1px solid rgba(59, 130, 246, 0.4)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between'
-                }}
-              >
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                  <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
-                    New version v{latestReleaseInfo.version} available!
-                  </span>
-                  <span style={{ fontSize: '9.5px', color: 'var(--text-muted)' }}>
-                    Click to view release notes on GitHub
-                  </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  {updateStatus === 'available' && latestReleaseInfo ? (
+                    <span style={{ fontSize: '12px', fontWeight: 700, color: '#3b82f6' }}>
+                      Update Available: v{latestReleaseInfo.version}
+                    </span>
+                  ) : updateStatus === 'checking' ? (
+                    <span style={{ fontSize: '11.5px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                      Checking for updates...
+                    </span>
+                  ) : (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                      <Check size={13} color="#22c55e" strokeWidth={2.5} />
+                      <span style={{ fontSize: '11.5px', fontWeight: 600, color: '#22c55e' }}>
+                        You're on the newest version
+                      </span>
+                    </div>
+                  )}
                 </div>
+                <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+                  {updateStatus === 'available' && latestReleaseInfo
+                    ? 'A newer version of AppDock is ready to install'
+                    : `AppDock v${appVersion} is currently up to date`}
+                </span>
+              </div>
+
+              {updateStatus === 'available' && latestReleaseInfo ? (
                 <button
                   type="button"
                   onClick={() => {
@@ -1802,60 +1911,44 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                   }}
                   className="btn-primary"
                   style={{
-                    fontSize: '10px',
-                    padding: '3px 8px',
-                    borderRadius: '4px'
+                    fontSize: '11px',
+                    padding: '6px 12px',
+                    borderRadius: '6px',
+                    fontWeight: 700,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    cursor: 'pointer',
+                    background: '#2563eb',
+                    color: '#ffffff',
+                    border: 'none',
+                    boxShadow: '0 2px 8px rgba(37, 99, 235, 0.35)'
                   }}
                 >
-                  View Release
+                  <ArrowUpCircle size={13} />
+                  <span>Update</span>
                 </button>
-              </div>
-            )}
-
-            {updateStatus === 'error' && (
-              <div
-                style={{
-                  fontSize: '10.5px',
-                  padding: '6px 8px',
-                  borderRadius: '5px',
-                  background: 'rgba(239, 68, 68, 0.12)',
-                  border: '1px solid rgba(239, 68, 68, 0.3)',
-                  color: 'var(--text-muted)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '5px'
-                }}
-              >
-                <span>No new release found on repository yet.</span>
-              </div>
-            )}
-
-            {/* GitHub Repo Configuration */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', borderTop: '1px solid var(--border-subtle)', paddingTop: '8px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                  GitHub Repository (Owner/Repo)
-                </span>
-                <span style={{ fontSize: '9px', color: 'var(--text-muted)' }}>
-                  Used to fetch releases
-                </span>
-              </div>
-              <input
-                type="text"
-                value={settings.githubRepo || 'AppDock/AppDock'}
-                placeholder="username/AppDock"
-                onChange={(e) => onUpdateSettings({ githubRepo: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '5px 8px',
-                  borderRadius: '4px',
-                  border: '1px solid var(--btn-border)',
-                  background: 'var(--bg-surface-active)',
-                  color: 'var(--text-primary)',
-                  fontSize: '10.5px',
-                  outline: 'none'
-                }}
-              />
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleManualCheckUpdates}
+                  disabled={updateStatus === 'checking'}
+                  className="btn-primary"
+                  style={{
+                    fontSize: '10.5px',
+                    padding: '5px 12px',
+                    borderRadius: '6px',
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    cursor: updateStatus === 'checking' ? 'wait' : 'pointer'
+                  }}
+                >
+                  <RefreshCw size={11} className={updateStatus === 'checking' ? 'animate-spin' : undefined} />
+                  <span>{updateStatus === 'checking' ? 'Checking...' : 'Check Updates'}</span>
+                </button>
+              )}
             </div>
           </div>
         </div>

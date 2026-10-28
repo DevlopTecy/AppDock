@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getAssetUrl } from '../../utils/assets';
 
 interface StickerItem {
   id: string;
@@ -81,7 +82,7 @@ export const KawaiiSpaceStickers: React.FC = () => {
             }}
           >
             <img
-              src={st.src}
+              src={getAssetUrl(st.src)}
               alt={st.label}
               style={{
                 width: '100%',

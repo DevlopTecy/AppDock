@@ -1098,7 +1098,7 @@ input {
   inset: 0;
   border-radius: 12px;
   background-color: #0b0b0e;
-  background-image: url('/deathnote/textures/texture_dark_3.jpg');
+  background-image: url('../deathnote/textures/texture_dark_3.jpg');
   background-size: cover;
   background-position: center;
   border: 1.5px solid #3c1e22;
@@ -1314,7 +1314,7 @@ input {
   --txt-sec: #96908a !important;
   --border-col: #a3262d !important;
   --txt-status: #ffffff !important;
-  background-image: url('/deathnote/textures/texture_dark_1.jpg') !important;
+  background-image: url('../deathnote/textures/texture_dark_1.jpg') !important;
   background-size: cover !important;
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(163, 38, 45, 0.45) !important;
 }
@@ -1336,7 +1336,7 @@ input {
 }
 
 [data-theme="deathnote"] .uiverse-weather-wrap .card {
-  background: #0f0f12 url('/deathnote/textures/texture_dark_2.jpg') !important;
+  background: #0f0f12 url('../deathnote/textures/texture_dark_2.jpg') !important;
   background-size: cover !important;
   color: #eae6df !important;
   border: 1px solid rgba(163, 38, 45, 0.45) !important;
@@ -1375,7 +1375,7 @@ input {
 }
 
 [data-theme="deathnote"] .uiverse-music-container .player-card {
-  background: #0f0f12 url('/deathnote/textures/texture_dark_1.jpg') !important;
+  background: #0f0f12 url('../deathnote/textures/texture_dark_1.jpg') !important;
   background-size: cover !important;
   border: 1.5px solid rgba(163, 38, 45, 0.45) !important;
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.95), inset 0 0 16px rgba(0, 0, 0, 0.8) !important;

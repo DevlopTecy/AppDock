@@ -28,7 +28,7 @@ export const UpdateNotification: React.FC<UpdateNotificationProps> = ({ theme })
         setUpdateInfo({
           version: '1.0.1',
           releaseNotes: 'Fixed dock transitions and updated theme rendering.',
-          downloadUrl: 'https://github.com/AppDock/AppDock/releases/tag/v1.0.1'
+          downloadUrl: 'https://github.com/DevlopTecy/AppDock/releases'
         });
       }
     }

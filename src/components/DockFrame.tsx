@@ -1,4 +1,5 @@
 import React from 'react';
+import { getAssetUrl } from '../utils/assets';
 import { DockPosition, CompanionModuleType, DockTheme } from '../types/dock';
 import { EdgeToggle } from './EdgeToggle';
 import { ConnectorHub } from './connectors/ConnectorHub';
@@ -226,7 +227,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                   <div className="deathnote-cover-spine spine-right" />
                   <div className="deathnote-cover-inner">
                     <img
-                      src="/deathnote/icons/logo_deathnote_white.png"
+                      src={getAssetUrl('/deathnote/icons/logo_deathnote_white.png')}
                       alt="Death Note"
                       className="deathnote-cover-logo"
                     />
@@ -389,7 +390,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
               style={{
                 position: 'absolute',
                 inset: 0,
-                backgroundImage: "url('/deathnote/backgrounds/wallpaper_main_2.jpg')",
+                backgroundImage: `url('${getAssetUrl('/deathnote/backgrounds/wallpaper_main_2.jpg')}')`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center 20%',
                 backgroundRepeat: 'no-repeat',
@@ -401,7 +402,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
               style={{
                 position: 'absolute',
                 inset: 0,
-                backgroundImage: "url('/deathnote/textures/texture_dark_1.jpg')",
+                backgroundImage: `url('${getAssetUrl('/deathnote/textures/texture_dark_1.jpg')}')`,
                 backgroundRepeat: 'repeat',
                 opacity: 0.16,
                 mixBlendMode: 'overlay',
@@ -413,7 +414,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
               style={{
                 position: 'absolute',
                 inset: 0,
-                backgroundImage: "url('/deathnote/textures/texture_ink.jpg')",
+                backgroundImage: `url('${getAssetUrl('/deathnote/textures/texture_ink.jpg')}')`,
                 backgroundSize: 'cover',
                 opacity: 0.12,
                 mixBlendMode: 'color-dodge',
@@ -432,7 +433,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
             />
             {/* Decorative Element 1: Dark Crimson Blood Splatter in Top Corner */}
             <img
-              src="/deathnote/decorations/blood_splatter.png"
+              src={getAssetUrl('/deathnote/decorations/blood_splatter.png')}
               alt="Blood Splatter"
               style={{
                 position: 'absolute',
@@ -446,7 +447,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
             />
             {/* Decorative Element 2: Ryuk Shinigami Feather in Bottom Left */}
             <img
-              src="/deathnote/decorations/feather.png"
+              src={getAssetUrl('/deathnote/decorations/feather.png')}
               alt="Ryuk Feather"
               style={{
                 position: 'absolute',
@@ -460,7 +461,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
             />
             {/* Decorative Element 3: Ryuk Winged Silhouette */}
             <img
-              src="/deathnote/decorations/ryuk_silhouette.png"
+              src={getAssetUrl('/deathnote/decorations/ryuk_silhouette.png')}
               alt="Ryuk Silhouette"
               style={{
                 position: 'absolute',
@@ -504,7 +505,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
               style={{
                 position: 'absolute',
                 inset: 0,
-                backgroundImage: "url('/aether/wallpaper_aether_sky.jpg')",
+                backgroundImage: `url('${getAssetUrl('/aether/wallpaper_aether_sky.jpg')}')`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center top',
                 backgroundRepeat: 'no-repeat',
@@ -530,7 +531,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 left: 0,
                 right: 0,
                 height: '145px',
-                backgroundImage: "url('/aether/clouds_bottom_bank.png')",
+                backgroundImage: `url('${getAssetUrl('/aether/clouds_bottom_bank.png')}')`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center bottom',
                 backgroundRepeat: 'no-repeat',
@@ -574,7 +575,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
             </span>
             {theme === 'kawaii' && (
               <img
-                src="/stickers/rocket_ship.png"
+                src={getAssetUrl('/stickers/rocket_ship.png')}
                 alt="Rocket"
                 style={{ width: '20px', height: '20px', objectFit: 'contain', animation: 'kawaiiStickerDrift 3s ease-in-out infinite' }}
                 title="Antigravity Rocket"
@@ -582,7 +583,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
             )}
             {theme === 'aether' && (
               <img
-                src="/aether/sword.png"
+                src={getAssetUrl('/aether/sword.png')}
                 alt="Sword"
                 style={{ width: '18px', height: '18px', objectFit: 'contain', imageRendering: 'pixelated', transform: 'rotate(15deg)' }}
                 title="Aether Sword"
@@ -591,12 +592,12 @@ export const DockFrame: React.FC<DockFrameProps> = ({
             {theme === 'deathnote' && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <img
-                  src="/deathnote/icons/logo_deathnote_white.png"
+                  src={getAssetUrl('/deathnote/icons/logo_deathnote_white.png')}
                   alt="Death Note"
                   style={{ height: '13px', objectFit: 'contain', opacity: 0.9 }}
                 />
                 <img
-                  src="/deathnote/decorations/apple.png"
+                  src={getAssetUrl('/deathnote/decorations/apple.png')}
                   alt="Shinigami Apple"
                   style={{
                     width: '20px',
@@ -637,7 +638,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
             >
               {theme === 'aether' ? (
                 <img
-                  src="/aether/search_gold.png"
+                  src={getAssetUrl('/aether/search_gold.png')}
                   alt="Search"
                   style={{ width: '20px', height: '20px', objectFit: 'contain', imageRendering: 'pixelated' }}
                 />
@@ -852,13 +853,13 @@ export const DockFrame: React.FC<DockFrameProps> = ({
           >
             {theme === 'kawaii' ? (
               <img
-                src="/stickers/swirl_galaxy.png"
+                src={getAssetUrl('/stickers/swirl_galaxy.png')}
                 alt="Galaxy"
                 style={{ width: '18px', height: '18px', objectFit: 'contain', animation: 'galaxySpin 8s linear infinite' }}
               />
             ) : theme === 'aether' ? (
               <img
-                src="/aether/crystal.png"
+                src={getAssetUrl('/aether/crystal.png')}
                 alt="Aether Gem"
                 style={{ width: '16px', height: '16px', objectFit: 'contain', imageRendering: 'pixelated', filter: 'drop-shadow(0 0 3px #4db5ff)' }}
               />
@@ -870,7 +871,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
 
           {theme === 'kawaii' && (
             <img
-              src="/stickers/star_helmet.png"
+              src={getAssetUrl('/stickers/star_helmet.png')}
               alt="Astro Star"
               style={{
                 width: '24px',
@@ -999,7 +1000,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                   <div className="deathnote-cover-spine spine-left" />
                   <div className="deathnote-cover-inner">
                     <img
-                      src="/deathnote/icons/logo_deathnote_white.png"
+                      src={getAssetUrl('/deathnote/icons/logo_deathnote_white.png')}
                       alt="Death Note"
                       className="deathnote-cover-logo"
                     />
