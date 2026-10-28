@@ -167,7 +167,11 @@ export const QuickScanner: React.FC<QuickScannerProps> = ({
           </div>
         ) : (
           filteredApps.map((app) => {
-            const isAlreadyAdded = existingTargetPaths.has(app.path) || addedPaths.has(app.path);
+            const isAlreadyAdded =
+              existingTargetPaths.has(app.path) ||
+              existingTargetPaths.has(app.path.toLowerCase()) ||
+              existingTargetPaths.has(app.name.toLowerCase()) ||
+              addedPaths.has(app.path);
             return (
               <button
                 key={app.path}
@@ -260,7 +264,7 @@ export const QuickScanner: React.FC<QuickScannerProps> = ({
                         width: '22px',
                         height: '22px',
                         objectFit: 'contain',
-                        imageRendering: '-webkit-optimize-contrast'
+                        imageRendering: 'auto'
                       }}
                     />
                   ) : (

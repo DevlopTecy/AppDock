@@ -172,92 +172,61 @@ const CustomRangeBar: React.FC<CustomRangeBarProps> = ({
 export interface ThemeItemDef {
   id: DockTheme;
   name: string;
-  subtitle: string;
-  icon: React.ComponentType<{ size?: number; color?: string; className?: string; style?: React.CSSProperties }>;
+  icon: React.ComponentType<{ size?: number; color?: string; strokeWidth?: number; className?: string; style?: React.CSSProperties }>;
   accentColor: string;
-  previewBg: string;
-  colors: string[];
-  tag?: string;
 }
 
 const DEFAULT_THEMES: ThemeItemDef[] = [
   {
     id: 'dark',
-    name: 'Dark Acrylic',
-    subtitle: 'Classic Windows acrylic glass',
+    name: 'Dark',
     icon: Moon,
-    accentColor: '#60a5fa',
-    previewBg: 'linear-gradient(135deg, #18181b 0%, #09090b 100%)',
-    colors: ['#09090b', '#27272a', '#60a5fa']
+    accentColor: '#60a5fa'
   },
   {
     id: 'light',
-    name: 'Light Minimal',
-    subtitle: 'Clean, airy frosted white surface',
+    name: 'Light',
     icon: Sun,
-    accentColor: '#2563eb',
-    previewBg: 'linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%)',
-    colors: ['#ffffff', '#e2e8f0', '#2563eb']
+    accentColor: '#2563eb'
   },
   {
     id: 'cyberpunk',
-    name: 'Neon Cyber',
-    subtitle: 'High-contrast purple & cyan glow',
+    name: 'Cyber',
     icon: Zap,
-    accentColor: '#00f2fe',
-    previewBg: 'linear-gradient(135deg, #120428 0%, #2e0854 100%)',
-    colors: ['#0b031c', '#a855f7', '#00f2fe']
+    accentColor: '#00f2fe'
   },
   {
     id: 'midnight',
-    name: 'Midnight Ocean',
-    subtitle: 'Deep oceanic blue acrylic sheen',
+    name: 'Midnight',
     icon: Compass,
-    accentColor: '#38bdf8',
-    previewBg: 'linear-gradient(135deg, #070f26 0%, #0f172a 100%)',
-    colors: ['#070d1e', '#1e293b', '#38bdf8']
+    accentColor: '#38bdf8'
   },
   {
     id: 'emerald',
-    name: 'Emerald Glow',
-    subtitle: 'Lush dark forest & emerald crystal',
+    name: 'Emerald',
     icon: Gem,
-    accentColor: '#10b981',
-    previewBg: 'linear-gradient(135deg, #03140c 0%, #064e3b 100%)',
-    colors: ['#04140d', '#064e3b', '#10b981']
+    accentColor: '#10b981'
   }
 ];
 
 const CUSTOM_THEMES: ThemeItemDef[] = [
   {
     id: 'kawaii',
-    name: 'Kawaii Space',
-    subtitle: 'Zero-G pastel cosmic astronaut',
+    name: 'Kawaii',
     icon: Heart,
-    accentColor: '#f43f5e',
-    previewBg: 'linear-gradient(135deg, #ffeef2 0%, #ede4ff 100%)',
-    colors: ['#ffccd5', '#ede4ff', '#cbf3f0', '#f43f5e'],
-    tag: 'Kawaii'
+    accentColor: '#f43f5e'
   },
   {
     id: 'aether',
-    name: 'Aether Sky',
-    subtitle: 'Celestial clouds & golden relics',
+    name: 'Aether',
     icon: Feather,
-    accentColor: '#ffdf59',
-    previewBg: 'linear-gradient(135deg, #38bdf8 0%, #0284c7 100%)',
-    colors: ['#4db5ff', '#ffdf59', '#e8f4fc', '#5c3e23'],
-    tag: 'Minecraft'
+    accentColor: '#ffdf59'
   },
   {
     id: 'deathnote',
     name: 'Death Note',
-    subtitle: 'Gothic manga ink & parchment',
     icon: BookOpen,
-    accentColor: '#e05a61',
-    previewBg: 'linear-gradient(135deg, #0a0a0c 0%, #20080a 100%)',
-    colors: ['#080808', '#a3262d', '#eae6df', '#231415'],
-    tag: 'Manga'
+    accentColor: '#e05a61'
   }
 ];
 
@@ -316,75 +285,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       }
     } catch {
       setUpdateStatus('latest');
-    }
-  };
-
-  // Clean Dock countdown timer state
-  const [cleanDockCountdown, setCleanDockCountdown] = useState<number | null>(null);
-  const countdownIntervalRef = React.useRef<any>(null);
-
-  React.useEffect(() => {
-    return () => {
-      if (countdownIntervalRef.current) {
-        clearInterval(countdownIntervalRef.current);
-      }
-    };
-  }, []);
-
-  const startCleanDockCountdown = () => {
-    if (countdownIntervalRef.current) {
-      clearInterval(countdownIntervalRef.current);
-    }
-    setCleanDockCountdown(5);
-    countdownIntervalRef.current = setInterval(() => {
-      setCleanDockCountdown((prev) => {
-        if (prev === null || prev <= 1) {
-          clearInterval(countdownIntervalRef.current);
-          countdownIntervalRef.current = null;
-          onUpdateSettings({ cleanDockEnabled: true });
-          if (onActivateCleanDock) {
-            onActivateCleanDock();
-          } else {
-            onClose();
-          }
-          return null;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  };
-
-  const cancelCleanDockCountdown = () => {
-    if (countdownIntervalRef.current) {
-      clearInterval(countdownIntervalRef.current);
-      countdownIntervalRef.current = null;
-    }
-    setCleanDockCountdown(null);
-  };
-
-  const triggerCleanDockImmediate = () => {
-    if (countdownIntervalRef.current) {
-      clearInterval(countdownIntervalRef.current);
-      countdownIntervalRef.current = null;
-    }
-    setCleanDockCountdown(null);
-    onUpdateSettings({ cleanDockEnabled: true });
-    if (onActivateCleanDock) {
-      onActivateCleanDock();
-    } else {
-      onClose();
-    }
-  };
-
-  const handleToggleCleanDock = () => {
-    if (cleanDockCountdown !== null) {
-      cancelCleanDockCountdown();
-      return;
-    }
-    if (settings.cleanDockEnabled) {
-      onUpdateSettings({ cleanDockEnabled: false });
-    } else {
-      startCleanDockCountdown();
     }
   };
 
@@ -719,382 +619,21 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           />
         </div>
 
-        {/* Priority: Clean Dock Mode */}
+        {/* Priority: Aesthetic Themes */}
         <div style={{ paddingBottom: '20px', borderBottom: '1px solid var(--border-subtle)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Sparkles className="settings-section-icon" size={13} color={isAether ? '#ffdf59' : 'var(--text-muted)'} />
-              <span
-                className="settings-section-title"
-                style={{
-                  fontSize: '11px',
-                  fontWeight: 700,
-                  color: isAether ? '#a3dbfe' : 'var(--text-secondary)',
-                  textShadow: isAether ? '0 1px 2px rgba(0, 0, 0, 0.7)' : undefined,
-                  letterSpacing: '0.2px'
-                }}
-              >
-                Clean Dock
-              </span>
-            </div>
-
-            {/* Master Toggle Switch */}
-            <button
-              type="button"
-              onClick={handleToggleCleanDock}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '4px 10px',
-                borderRadius: '999px',
-                background: settings.cleanDockEnabled
-                  ? (isAether ? '#ffdf59' : currentTheme === 'deathnote' ? '#a3262d' : 'var(--text-primary)')
-                  : cleanDockCountdown !== null
-                    ? '#eab308'
-                    : 'var(--bg-surface)',
-                border: '1px solid var(--btn-border)',
-                color: settings.cleanDockEnabled
-                  ? (isAether ? '#2e1c0d' : 'var(--bg-dock)')
-                  : cleanDockCountdown !== null
-                    ? '#000000'
-                    : 'var(--text-muted)',
-                fontSize: '11px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                transition: 'all 0.18s ease'
-              }}
-            >
-              <span>
-                {settings.cleanDockEnabled
-                  ? 'ON'
-                  : cleanDockCountdown !== null
-                    ? `Activating (${cleanDockCountdown}s)...`
-                    : 'OFF'}
-              </span>
-              <div
-                style={{
-                  width: '8px',
-                  height: '8px',
-                  borderRadius: '50%',
-                  background: settings.cleanDockEnabled
-                    ? '#22c55e'
-                    : cleanDockCountdown !== null
-                      ? '#ef4444'
-                      : 'var(--text-muted)',
-                  boxShadow: settings.cleanDockEnabled ? '0 0 6px #22c55e' : undefined
-                }}
-              />
-            </button>
-          </div>
-
-          <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '12px', lineHeight: 1.4 }}>
-            Minimal single-group mode. Hides search, settings, and hub modules. Open dock displays only your selected group, with a tiny X bar at the bottom to return to Main UI.
-          </div>
-
-          {/* 5-second Live Countdown Banner */}
-          {cleanDockCountdown !== null && (
-            <div
-              style={{
-                padding: '10px 12px',
-                borderRadius: '8px',
-                background: currentTheme === 'deathnote'
-                  ? 'rgba(163, 38, 45, 0.25)'
-                  : isAether
-                    ? 'rgba(255, 223, 89, 0.2)'
-                    : 'rgba(59, 130, 246, 0.15)',
-                border: currentTheme === 'deathnote'
-                  ? '1px solid rgba(163, 38, 45, 0.6)'
-                  : isAether
-                    ? '1px solid rgba(255, 223, 89, 0.6)'
-                    : '1px solid rgba(59, 130, 246, 0.4)',
-                marginBottom: '12px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '8px'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: '11.5px', fontWeight: 600, color: 'var(--text-primary)' }}>
-                  Switching to Clean Dock in {cleanDockCountdown}s...
-                </span>
-                <span
-                  style={{
-                    fontSize: '10px',
-                    padding: '2px 6px',
-                    borderRadius: '4px',
-                    background: 'var(--bg-dock)',
-                    color: 'var(--text-primary)',
-                    fontWeight: 700
-                  }}
-                >
-                  {cleanDockCountdown}s
-                </span>
-              </div>
-              <div style={{ fontSize: '10.5px', color: 'var(--text-muted)' }}>
-                App will collapse to screen edge handle normally. Click handle to view Clean Dock.
-              </div>
-              <div style={{ display: 'flex', gap: '8px', marginTop: '2px' }}>
-                <button
-                  type="button"
-                  onClick={triggerCleanDockImmediate}
-                  className="btn-primary"
-                  style={{
-                    fontSize: '11px',
-                    padding: '4px 10px',
-                    borderRadius: '5px',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
-                >
-                  Activate Now
-                </button>
-                <button
-                  type="button"
-                  onClick={cancelCleanDockCountdown}
-                  style={{
-                    fontSize: '11px',
-                    padding: '4px 10px',
-                    borderRadius: '5px',
-                    background: 'var(--bg-surface)',
-                    border: '1px solid var(--btn-border)',
-                    color: 'var(--text-muted)',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Sub-option 1: Icons Size */}
-          <div style={{ marginBottom: '14px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-              <span style={{ fontSize: '10.5px', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                Icons Size
-              </span>
-              <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
-                {settings.cleanDockIconSize === 'small' ? 'Small (26px)' : settings.cleanDockIconSize === 'large' ? 'Large (52px)' : settings.cleanDockIconSize === 'xlarge' ? 'Extra Large (66px)' : 'Medium (38px)'}
-              </span>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px' }}>
-              {[
-                { id: 'small', label: 'Small', px: '26px' },
-                { id: 'medium', label: 'Medium', px: '38px' },
-                { id: 'large', label: 'Large', px: '52px' },
-                { id: 'xlarge', label: 'X-Large', px: '66px' }
-              ].map((opt) => {
-                const isSelected = (settings.cleanDockIconSize || 'medium') === opt.id;
-                return (
-                  <button
-                    key={opt.id}
-                    type="button"
-                    onClick={() => onUpdateSettings({ cleanDockIconSize: opt.id as any })}
-                    style={{
-                      padding: '6px 4px',
-                      borderRadius: '6px',
-                      border: isSelected
-                        ? (isAether ? '1.5px solid #ffdf59' : currentTheme === 'deathnote' ? '1.5px solid #a3262d' : '1px solid var(--text-primary)')
-                        : '1px solid var(--btn-border)',
-                      background: isSelected
-                        ? (isAether ? '#ffdf59' : currentTheme === 'deathnote' ? '#a3262d' : 'var(--text-primary)')
-                        : 'var(--bg-surface)',
-                      color: isSelected ? (isAether ? '#2e1c0d' : 'var(--bg-dock)') : 'var(--text-secondary)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: '2px',
-                      cursor: 'pointer',
-                      fontSize: '10px',
-                      fontWeight: isSelected ? 700 : 500,
-                      transition: 'all 0.15s ease'
-                    }}
-                  >
-                    <span>{opt.label}</span>
-                    <span style={{ fontSize: '8.5px', opacity: 0.75 }}>{opt.px}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Sub-option 2: Dock Size */}
-          <div style={{ marginBottom: '14px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-              <span style={{ fontSize: '10.5px', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                Dock Size
-              </span>
-              <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
-                {settings.cleanDockWidth || 220}px × {settings.cleanDockHeight || 460}px
-              </span>
-            </div>
-
-            {/* Presets */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', marginBottom: '8px' }}>
-              {[
-                { label: 'Slim', w: 180, h: 380 },
-                { label: 'Compact', w: 220, h: 460 },
-                { label: 'Spacious', w: 280, h: 540 }
-              ].map((preset) => {
-                const isMatch = (settings.cleanDockWidth || 220) === preset.w && (settings.cleanDockHeight || 460) === preset.h;
-                return (
-                  <button
-                    key={preset.label}
-                    type="button"
-                    onClick={() => onUpdateSettings({ cleanDockWidth: preset.w, cleanDockHeight: preset.h })}
-                    style={{
-                      padding: '5px 4px',
-                      borderRadius: '6px',
-                      border: isMatch
-                        ? (isAether ? '1.5px solid #ffdf59' : currentTheme === 'deathnote' ? '1.5px solid #a3262d' : '1px solid var(--text-primary)')
-                        : '1px solid var(--btn-border)',
-                      background: isMatch
-                        ? (isAether ? '#ffdf59' : currentTheme === 'deathnote' ? '#a3262d' : 'var(--text-primary)')
-                        : 'var(--bg-surface)',
-                      color: isMatch ? (isAether ? '#2e1c0d' : 'var(--bg-dock)') : 'var(--text-secondary)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: '1px',
-                      cursor: 'pointer',
-                      fontSize: '10px',
-                      fontWeight: isMatch ? 700 : 500
-                    }}
-                  >
-                    <span>{preset.label}</span>
-                    <span style={{ fontSize: '8.5px', opacity: 0.75 }}>{preset.w}×{preset.h}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Width Range Slider */}
-            <div style={{ marginBottom: '6px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '9.5px', color: 'var(--text-muted)', marginBottom: '3px' }}>
-                <span>Width</span>
-                <span>{settings.cleanDockWidth || 220}px</span>
-              </div>
-              <CustomRangeBar
-                value={settings.cleanDockWidth || 220}
-                min={150}
-                max={360}
-                step={10}
-                unit="px"
-                onChange={(val) => onUpdateSettings({ cleanDockWidth: val })}
-              />
-            </div>
-
-            {/* Height Range Slider */}
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '9.5px', color: 'var(--text-muted)', marginBottom: '3px' }}>
-                <span>Height</span>
-                <span>{settings.cleanDockHeight || 460}px</span>
-              </div>
-              <CustomRangeBar
-                value={settings.cleanDockHeight || 460}
-                min={260}
-                max={640}
-                step={20}
-                unit="px"
-                onChange={(val) => onUpdateSettings({ cleanDockHeight: val })}
-              />
-            </div>
-          </div>
-
-          {/* Sub-option 3: Group Selection */}
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-              <span style={{ fontSize: '10.5px', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                Group Selection
-              </span>
-              <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
-                Displays only this group in Clean Dock
-              </span>
-            </div>
-
-            {groups.length === 0 ? (
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                No groups available.
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', maxHeight: '140px', overflowY: 'auto' }}>
-                {groups.map((grp) => {
-                  const isSelected = (settings.cleanDockGroupId || (groups[0]?.id)) === grp.id;
-                  return (
-                    <button
-                      key={grp.id}
-                      type="button"
-                      onClick={() => onUpdateSettings({ cleanDockGroupId: grp.id })}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '6px 10px',
-                        borderRadius: '6px',
-                        border: isSelected
-                          ? (isAether ? '1.5px solid #ffdf59' : currentTheme === 'deathnote' ? '1.5px solid #a3262d' : '1px solid var(--text-primary)')
-                          : '1px solid var(--btn-border)',
-                        background: isSelected
-                          ? (isAether ? 'rgba(255, 223, 89, 0.2)' : currentTheme === 'deathnote' ? 'rgba(163, 38, 45, 0.25)' : 'var(--bg-surface-active)')
-                          : 'var(--bg-surface)',
-                        color: isSelected ? 'var(--text-primary)' : 'var(--text-secondary)',
-                        cursor: 'pointer',
-                        textAlign: 'left',
-                        transition: 'all 0.15s ease'
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ display: 'flex', alignItems: 'center', color: grp.accentColor || 'var(--text-primary)' }}>
-                          {getGroupIcon(grp.iconName, 14)}
-                        </span>
-                        <span style={{ fontSize: '11px', fontWeight: isSelected ? 700 : 500 }}>
-                          {grp.name}
-                        </span>
-                        <span style={{ fontSize: '9.5px', color: 'var(--text-muted)' }}>
-                          ({grp.items.length} items)
-                        </span>
-                      </div>
-                      {isSelected && (
-                        <div
-                          style={{
-                            width: '16px',
-                            height: '16px',
-                            borderRadius: '50%',
-                            background: isAether ? '#ffdf59' : currentTheme === 'deathnote' ? '#a3262d' : 'var(--text-primary)',
-                            color: isAether ? '#2e1c0d' : 'var(--bg-dock)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                        >
-                          <Check size={10} strokeWidth={3} />
-                        </div>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Priority 3: Aesthetic Themes */}
-        <div style={{ paddingBottom: '20px', borderBottom: '1px solid var(--border-subtle)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
-            <Palette className="settings-section-icon" size={13} color={isAether ? '#ffdf59' : 'var(--text-muted)'} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>
+            <Palette className="settings-section-icon" size={14} color={isAether ? '#ffdf59' : 'var(--text-muted)'} />
             <span
               className="settings-section-title"
               style={{
-                fontSize: '11px',
+                fontSize: '12px',
                 fontWeight: 700,
                 color: isAether ? '#a3dbfe' : 'var(--text-secondary)',
                 textShadow: isAether ? '0 1px 2px rgba(0, 0, 0, 0.7)' : undefined,
                 letterSpacing: '0.2px'
               }}
             >
-              Themes
+              Themes & Styles
             </span>
           </div>
 
@@ -1117,254 +656,163 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               <span style={{ fontSize: '9px', opacity: 0.65 }}>({DEFAULT_THEMES.length})</span>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(125px, 1fr))', gap: '8px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(78px, 1fr))', gap: '8px' }}>
               {DEFAULT_THEMES.map((th) => {
                 const isSelected = currentTheme === th.id;
                 const IconComp = th.icon;
                 return (
                   <button
                     key={th.id}
+                    type="button"
                     onClick={() => handleThemeChange(th.id)}
-                    title={`${th.name} - ${th.subtitle}`}
-                    className={`settings-theme-card ${isSelected ? 'is-selected' : ''}`}
+                    title={th.name}
+                    className={`settings-opt-btn ${isSelected ? 'is-selected' : ''}`}
                     style={{
-                      padding: '9px 8px',
+                      padding: '10px 6px',
                       borderRadius: '8px',
                       background: isSelected
-                        ? (isAether ? 'rgba(255, 223, 89, 0.22)' : 'var(--bg-surface-active)')
+                        ? (isAether ? '#ffdf59' : 'var(--bg-surface-active)')
                         : 'var(--bg-surface)',
+                      color: isSelected
+                        ? (isAether ? '#2e1c0d' : 'var(--text-primary)')
+                        : (isAether ? '#fff9e6' : 'var(--text-secondary)'),
                       border: isSelected
-                        ? `1.5px solid ${isAether ? '#ffdf59' : th.accentColor}`
+                        ? (isAether ? '1.5px solid #ffe885' : `1.5px solid ${th.accentColor}`)
                         : '1px solid var(--btn-border)',
-                      boxShadow: isSelected
-                        ? `0 0 14px ${th.accentColor}35, 0 2px 8px rgba(0, 0, 0, 0.25)`
-                        : 'var(--btn-shadow)',
+                      boxShadow: 'var(--btn-shadow)',
                       display: 'flex',
                       flexDirection: 'column',
-                      alignItems: 'flex-start',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                       gap: '6px',
                       cursor: 'pointer',
-                      position: 'relative',
-                      textAlign: 'left',
-                      transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
+                      fontWeight: isSelected ? 700 : 500,
+                      textShadow: !isSelected && isAether ? '1px 1px 0 #181005' : undefined,
+                      transition: 'all 0.16s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isSelected) {
+                        e.currentTarget.style.borderColor = isAether ? '#ffdf59' : 'var(--btn-border-hover)';
+                        e.currentTarget.style.color = isAether ? '#ffdf59' : 'var(--text-primary)';
+                        e.currentTarget.style.background = 'var(--bg-surface-hover)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isSelected) {
+                        e.currentTarget.style.borderColor = 'var(--btn-border)';
+                        e.currentTarget.style.color = isAether ? '#fff9e6' : 'var(--text-secondary)';
+                        e.currentTarget.style.background = 'var(--bg-surface)';
+                      }
                     }}
                   >
-                    {/* Top Row: Icon Badge & Active Indicator */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                      <div
-                        style={{
-                          width: '26px',
-                          height: '26px',
-                          borderRadius: '6px',
-                          background: th.previewBg,
-                          border: `1px solid ${th.accentColor}44`,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          boxShadow: '0 2px 5px rgba(0,0,0,0.25)',
-                          flexShrink: 0
-                        }}
-                      >
-                        <IconComp size={13} color={th.accentColor} />
-                      </div>
-
-                      {isSelected && (
-                        <div
-                          style={{
-                            width: '14px',
-                            height: '14px',
-                            borderRadius: '50%',
-                            background: isAether ? '#ffdf59' : th.accentColor,
-                            color: isAether ? '#2e1c0d' : '#ffffff',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                        >
-                          <Check size={8} strokeWidth={3} />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Middle: Theme Name */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', width: '100%', minWidth: 0 }}>
-                      <span
-                        style={{
-                          fontSize: '11px',
-                          fontWeight: isSelected ? 700 : 600,
-                          color: isSelected ? (isAether ? '#ffdf59' : 'var(--text-primary)') : 'var(--text-secondary)',
-                          whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis'
-                        }}
-                      >
-                        {th.name}
-                      </span>
-                    </div>
-
-                    {/* Bottom: Color Swatch Palette */}
-                    <div style={{ display: 'flex', gap: '3px', alignItems: 'center' }}>
-                      {th.colors.map((c, i) => (
-                        <div
-                          key={i}
-                          style={{
-                            width: '6.5px',
-                            height: '6.5px',
-                            borderRadius: '50%',
-                            background: c,
-                            border: '1px solid rgba(255, 255, 255, 0.25)'
-                          }}
-                        />
-                      ))}
-                    </div>
+                    <IconComp
+                      size={18}
+                      strokeWidth={2.2}
+                      color={isSelected && isAether ? '#2e1c0d' : th.accentColor}
+                    />
+                    <span
+                      style={{
+                        fontSize: '11px',
+                        fontWeight: isSelected ? 700 : 500,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        maxWidth: '100%'
+                      }}
+                    >
+                      {th.name}
+                    </span>
                   </button>
                 );
               })}
             </div>
           </div>
 
-          {/* Group B: Custom Made Themes */}
+          {/* Group B: Custom Themes */}
           <div>
             <div
               style={{
+                fontSize: '9.5px',
+                fontWeight: 700,
+                color: isAether ? '#ffdf59' : 'var(--text-muted)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.6px',
+                marginBottom: '8px',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: '8px'
+                gap: '5px'
               }}
             >
-              <div
-                style={{
-                  fontSize: '9.5px',
-                  fontWeight: 700,
-                  color: isAether ? '#ffdf59' : 'var(--text-muted)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.6px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '5px'
-                }}
-              >
-                <span>Custom Themes</span>
-                <span style={{ fontSize: '9px', opacity: 0.65 }}>({CUSTOM_THEMES.length})</span>
-              </div>
-              <span
-                style={{
-                  fontSize: '8.5px',
-                  padding: '1.5px 6px',
-                  borderRadius: '4px',
-                  background: isAether ? 'rgba(255, 223, 89, 0.2)' : 'var(--accent-subtle)',
-                  color: isAether ? '#ffdf59' : 'var(--accent)',
-                  border: isAether ? '1px solid rgba(255, 223, 89, 0.4)' : '1px solid rgba(163, 38, 45, 0.3)',
-                  fontWeight: 700,
-                  letterSpacing: '0.3px',
-                  textTransform: 'uppercase'
-                }}
-              >
-                Custom Made
-              </span>
+              <span>Custom Themes</span>
+              <span style={{ fontSize: '9px', opacity: 0.65 }}>({CUSTOM_THEMES.length})</span>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(125px, 1fr))', gap: '8px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(78px, 1fr))', gap: '8px' }}>
               {CUSTOM_THEMES.map((th) => {
                 const isSelected = currentTheme === th.id;
                 const IconComp = th.icon;
                 return (
                   <button
                     key={th.id}
+                    type="button"
                     onClick={() => handleThemeChange(th.id)}
-                    title={`${th.name} - ${th.subtitle}`}
-                    className={`settings-theme-card ${isSelected ? 'is-selected' : ''}`}
+                    title={th.name}
+                    className={`settings-opt-btn ${isSelected ? 'is-selected' : ''}`}
                     style={{
-                      padding: '9px 8px',
+                      padding: '10px 6px',
                       borderRadius: '8px',
                       background: isSelected
-                        ? (isAether ? 'rgba(255, 223, 89, 0.22)' : 'var(--bg-surface-active)')
+                        ? (isAether ? '#ffdf59' : 'var(--bg-surface-active)')
                         : 'var(--bg-surface)',
+                      color: isSelected
+                        ? (isAether ? '#2e1c0d' : 'var(--text-primary)')
+                        : (isAether ? '#fff9e6' : 'var(--text-secondary)'),
                       border: isSelected
-                        ? `1.5px solid ${isAether ? '#ffdf59' : th.accentColor}`
+                        ? (isAether ? '1.5px solid #ffe885' : `1.5px solid ${th.accentColor}`)
                         : '1px solid var(--btn-border)',
-                      boxShadow: isSelected
-                        ? `0 0 14px ${th.accentColor}35, 0 2px 8px rgba(0, 0, 0, 0.25)`
-                        : 'var(--btn-shadow)',
+                      boxShadow: 'var(--btn-shadow)',
                       display: 'flex',
                       flexDirection: 'column',
-                      alignItems: 'flex-start',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                       gap: '6px',
                       cursor: 'pointer',
-                      position: 'relative',
-                      textAlign: 'left',
-                      transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
+                      fontWeight: isSelected ? 700 : 500,
+                      textShadow: !isSelected && isAether ? '1px 1px 0 #181005' : undefined,
+                      transition: 'all 0.16s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isSelected) {
+                        e.currentTarget.style.borderColor = isAether ? '#ffdf59' : 'var(--btn-border-hover)';
+                        e.currentTarget.style.color = isAether ? '#ffdf59' : 'var(--text-primary)';
+                        e.currentTarget.style.background = 'var(--bg-surface-hover)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isSelected) {
+                        e.currentTarget.style.borderColor = 'var(--btn-border)';
+                        e.currentTarget.style.color = isAether ? '#fff9e6' : 'var(--text-secondary)';
+                        e.currentTarget.style.background = 'var(--bg-surface)';
+                      }
                     }}
                   >
-                    {/* Top Row: Icon Badge & Active Indicator */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                      <div
-                        style={{
-                          width: '26px',
-                          height: '26px',
-                          borderRadius: '6px',
-                          background: th.previewBg,
-                          border: `1px solid ${th.accentColor}44`,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          boxShadow: '0 2px 5px rgba(0,0,0,0.25)',
-                          flexShrink: 0
-                        }}
-                      >
-                        <IconComp size={13} color={th.accentColor} />
-                      </div>
-
-                      {isSelected && (
-                        <div
-                          style={{
-                            width: '14px',
-                            height: '14px',
-                            borderRadius: '50%',
-                            background: isAether ? '#ffdf59' : th.accentColor,
-                            color: isAether ? '#2e1c0d' : '#ffffff',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                        >
-                          <Check size={8} strokeWidth={3} />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Middle: Theme Name */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', width: '100%', minWidth: 0 }}>
-                      <span
-                        style={{
-                          fontSize: '11px',
-                          fontWeight: isSelected ? 700 : 600,
-                          color: isSelected ? (isAether ? '#ffdf59' : 'var(--text-primary)') : 'var(--text-secondary)',
-                          whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis'
-                        }}
-                      >
-                        {th.name}
-                      </span>
-                    </div>
-
-                    {/* Bottom: Color Swatch Palette */}
-                    <div style={{ display: 'flex', gap: '3px', alignItems: 'center' }}>
-                      {th.colors.map((c, i) => (
-                        <div
-                          key={i}
-                          style={{
-                            width: '6.5px',
-                            height: '6.5px',
-                            borderRadius: '50%',
-                            background: c,
-                            border: '1px solid rgba(255, 255, 255, 0.25)'
-                          }}
-                        />
-                      ))}
-                    </div>
+                    <IconComp
+                      size={18}
+                      strokeWidth={2.2}
+                      color={isSelected && isAether ? '#2e1c0d' : th.accentColor}
+                    />
+                    <span
+                      style={{
+                        fontSize: '11px',
+                        fontWeight: isSelected ? 700 : 500,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        maxWidth: '100%'
+                      }}
+                    >
+                      {th.name}
+                    </span>
                   </button>
                 );
               })}
@@ -1829,128 +1277,88 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           </div>
         </div>
 
-        {/* Priority: App Updates & GitHub Releases */}
+        {/* Single Update Button */}
         <div style={{ paddingBottom: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <ArrowUpCircle className="settings-section-icon" size={13} color={isAether ? '#ffdf59' : 'var(--text-muted)'} />
-              <span
-                className="settings-section-title"
-                style={{
-                  fontSize: '11px',
-                  fontWeight: 700,
-                  color: isAether ? '#a3dbfe' : 'var(--text-secondary)',
-                  textShadow: isAether ? '0 1px 2px rgba(0, 0, 0, 0.7)' : undefined,
-                  letterSpacing: '0.2px'
-                }}
-              >
-                App Updates & Version
-              </span>
-            </div>
-
-            <span
+          {updateStatus === 'available' && latestReleaseInfo ? (
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window !== 'undefined' && (window as any).appDock?.openExternalUrl && latestReleaseInfo.downloadUrl) {
+                  (window as any).appDock.openExternalUrl(latestReleaseInfo.downloadUrl);
+                }
+              }}
+              className="btn-primary"
               style={{
-                fontSize: '10px',
+                width: '100%',
+                padding: '9px 12px',
+                borderRadius: '8px',
+                fontSize: '11.5px',
                 fontWeight: 600,
-                color: 'var(--text-muted)',
-                background: 'var(--bg-surface)',
-                padding: '2px 7px',
-                borderRadius: '4px',
-                border: '1px solid var(--border-subtle)'
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '7px',
+                cursor: 'pointer',
+                background: '#2563eb',
+                color: '#ffffff',
+                border: 'none',
+                boxShadow: 'var(--btn-shadow)',
+                transition: 'all 0.16s ease'
               }}
             >
-              v{appVersion}
-            </span>
-          </div>
-
-          <div
-            style={{
-              padding: '12px 14px',
-              borderRadius: '9px',
-              background: 'var(--bg-surface)',
-              border: '1px solid var(--btn-border)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '10px'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  {updateStatus === 'available' && latestReleaseInfo ? (
-                    <span style={{ fontSize: '12px', fontWeight: 700, color: '#3b82f6' }}>
-                      Update Available: v{latestReleaseInfo.version}
-                    </span>
-                  ) : updateStatus === 'checking' ? (
-                    <span style={{ fontSize: '11.5px', fontWeight: 600, color: 'var(--text-primary)' }}>
-                      Checking for updates...
-                    </span>
-                  ) : (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                      <Check size={13} color="#22c55e" strokeWidth={2.5} />
-                      <span style={{ fontSize: '11.5px', fontWeight: 600, color: '#22c55e' }}>
-                        You're on the newest version
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
-                  {updateStatus === 'available' && latestReleaseInfo
-                    ? 'A newer version of AppDock is ready to install'
-                    : `AppDock v${appVersion} is currently up to date`}
-                </span>
-              </div>
-
-              {updateStatus === 'available' && latestReleaseInfo ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (typeof window !== 'undefined' && (window as any).appDock?.openExternalUrl && latestReleaseInfo.downloadUrl) {
-                      (window as any).appDock.openExternalUrl(latestReleaseInfo.downloadUrl);
-                    }
-                  }}
-                  className="btn-primary"
-                  style={{
-                    fontSize: '11px',
-                    padding: '6px 12px',
-                    borderRadius: '6px',
-                    fontWeight: 700,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '5px',
-                    cursor: 'pointer',
-                    background: '#2563eb',
-                    color: '#ffffff',
-                    border: 'none',
-                    boxShadow: '0 2px 8px rgba(37, 99, 235, 0.35)'
-                  }}
-                >
-                  <ArrowUpCircle size={13} />
-                  <span>Update</span>
-                </button>
+              <ArrowUpCircle size={14} />
+              <span>Update to v{latestReleaseInfo.version}</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleManualCheckUpdates}
+              disabled={updateStatus === 'checking'}
+              className="settings-opt-btn"
+              style={{
+                width: '100%',
+                padding: '9px 12px',
+                borderRadius: '8px',
+                fontSize: '11.5px',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '7px',
+                cursor: updateStatus === 'checking' ? 'wait' : 'pointer',
+                background: isAether ? '#5c3e23' : 'var(--bg-surface)',
+                color: isAether ? '#fff9e6' : 'var(--text-primary)',
+                border: isAether ? '1.5px solid #8c6038' : '1px solid var(--btn-border)',
+                boxShadow: 'var(--btn-shadow)',
+                transition: 'all 0.16s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = isAether ? '#ffdf59' : 'var(--btn-border-hover)';
+                e.currentTarget.style.background = isAether ? '#734e2c' : 'var(--bg-surface-hover)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = isAether ? '#8c6038' : 'var(--btn-border)';
+                e.currentTarget.style.background = isAether ? '#5c3e23' : 'var(--bg-surface)';
+              }}
+            >
+              {updateStatus === 'checking' ? (
+                <>
+                  <RefreshCw size={13} className="animate-spin" />
+                  <span>Checking for Updates...</span>
+                </>
+              ) : updateStatus === 'latest' ? (
+                <>
+                  <Check size={13} color="#22c55e" strokeWidth={2.5} />
+                  <span>Up to Date (v{appVersion})</span>
+                </>
               ) : (
-                <button
-                  type="button"
-                  onClick={handleManualCheckUpdates}
-                  disabled={updateStatus === 'checking'}
-                  className="btn-primary"
-                  style={{
-                    fontSize: '10.5px',
-                    padding: '5px 12px',
-                    borderRadius: '6px',
-                    fontWeight: 600,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    cursor: updateStatus === 'checking' ? 'wait' : 'pointer'
-                  }}
-                >
-                  <RefreshCw size={11} className={updateStatus === 'checking' ? 'animate-spin' : undefined} />
-                  <span>{updateStatus === 'checking' ? 'Checking...' : 'Check Updates'}</span>
-                </button>
+                <>
+                  <RefreshCw size={13} />
+                  <span>Check for Updates (v{appVersion})</span>
+                </>
               )}
-            </div>
-          </div>
+            </button>
+          )}
         </div>
       </div>
     </div>

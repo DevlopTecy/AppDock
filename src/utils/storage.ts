@@ -3,7 +3,7 @@ import { AppGroup, DockSettings } from '../types/dock';
 const STORAGE_KEY = 'appdock_data_v1';
 
 export const DEFAULT_SETTINGS: DockSettings = {
-  dockPosition: 'left',
+  dockPosition: 'right',
   drawerWidth: 280,
   drawerHeight: 540,
   autoCollapseOnLaunch: false,

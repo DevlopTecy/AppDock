@@ -3,7 +3,7 @@ import { getAssetUrl } from '../utils/assets';
 import { DockPosition, CompanionModuleType, DockTheme } from '../types/dock';
 import { EdgeToggle } from './EdgeToggle';
 import { ConnectorHub } from './connectors/ConnectorHub';
-import { Search, Settings, X, Minimize2 } from 'lucide-react';
+import { Search, Settings, X, Minimize2, Maximize2 } from 'lucide-react';
 
 interface DockFrameProps {
   isExpanded: boolean;
@@ -26,6 +26,8 @@ interface DockFrameProps {
   children: React.ReactNode;
   isCleanDock?: boolean;
   onExitCleanDock?: () => void;
+  isMaximized?: boolean;
+  onToggleMaximize?: () => void;
 }
 
 export const DockFrame: React.FC<DockFrameProps> = ({
@@ -38,6 +40,10 @@ export const DockFrame: React.FC<DockFrameProps> = ({
   theme,
   activeModule = null,
   onSelectModule = () => {},
+  isCleanDock = false,
+  onExitCleanDock,
+  isMaximized = false,
+  onToggleMaximize,
   companionContent,
   onToggle,
   onOpenSearch,
@@ -46,9 +52,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
   onResizeWidth,
   verticalPosition = 0.5,
   onUpdateVerticalPosition,
-  children,
-  isCleanDock = false,
-  onExitCleanDock
+  children
 }) => {
   const [isResizing, setIsResizing] = React.useState(false);
   const [renderedModule, setRenderedModule] = React.useState<CompanionModuleType>(activeModule);
@@ -385,16 +389,16 @@ export const DockFrame: React.FC<DockFrameProps> = ({
               overflow: 'hidden'
             }}
           >
-            {/* Main High-Res Wallpaper (Ryuk with Glowing Red Eyes & Apple) */}
+            {/* Main High-Res Wallpaper (Kira & L Side-by-Side with Chained Apple) */}
             <div
               style={{
                 position: 'absolute',
                 inset: 0,
-                backgroundImage: `url('${getAssetUrl('/deathnote/backgrounds/wallpaper_main_2.jpg')}')`,
+                backgroundImage: `url('${getAssetUrl('/deathnote/backgrounds/wallpaper_kira_l_hd.jpg')}')`,
                 backgroundSize: 'cover',
-                backgroundPosition: 'center 20%',
+                backgroundPosition: 'center 12%',
                 backgroundRepeat: 'no-repeat',
-                filter: 'brightness(1.12) contrast(1.15) saturate(1.12)'
+                filter: 'brightness(1.08) contrast(1.12) saturate(1.08)'
               }}
             />
             {/* Pattern Overlay 1: Dark Slate & Leather Grain */}
@@ -647,18 +651,16 @@ export const DockFrame: React.FC<DockFrameProps> = ({
               )}
             </button>
 
-            {/* Hide to System Tray button */}
+            {/* Maximize / Restore button */}
             <button
               onClick={() => {
-                if (typeof window !== 'undefined' && (window as any).appDock?.hideToTray) {
-                  (window as any).appDock.hideToTray();
-                } else {
-                  onToggle();
+                if (onToggleMaximize) {
+                  onToggleMaximize();
                 }
               }}
               className="btn-dock"
-              title="Hide from Taskbar (Stay in Tray & Screen Handle)"
-              aria-label="Hide from Taskbar"
+              title={isMaximized ? "Restore Dock Size" : "Maximize Dock (460px x Full Height)"}
+              aria-label={isMaximized ? "Restore Dock" : "Maximize Dock"}
               style={{
                 width: '28px',
                 height: '28px',
@@ -677,7 +679,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 color: theme === 'kawaii' ? '#2d1e4e' : theme === 'deathnote' ? '#eae6df' : undefined
               }}
             >
-              <Minimize2 size={13} />
+              {isMaximized ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
             </button>
 
             <button

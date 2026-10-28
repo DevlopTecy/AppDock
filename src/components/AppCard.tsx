@@ -52,7 +52,7 @@ export const AppCard: React.FC<AppCardProps> = ({
             height: iconDimension,
             objectFit: 'contain',
             borderRadius: iconSize > 40 ? '10px' : '6px',
-            imageRendering: '-webkit-optimize-contrast',
+            imageRendering: 'auto',
             filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.35))',
             transition: 'transform 0.18s ease'
           }}

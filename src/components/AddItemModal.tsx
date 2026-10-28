@@ -43,7 +43,15 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
 
   if (!isOpen) return null;
 
-  const existingTargetPaths = new Set(activeGroup.items.map((i) => i.target));
+  const existingTargetPaths = new Set([
+    ...activeGroup.items.map((i) => i.target),
+    ...activeGroup.items.map((i) => i.target.toLowerCase()),
+    ...activeGroup.items.map((i) => i.name.toLowerCase()),
+    ...activeGroup.items.map((i) => {
+      const parts = i.target.split(/[\/\\]/);
+      return parts[parts.length - 1].replace(/\.(exe|lnk|url)$/i, '').toLowerCase();
+    })
+  ]);
 
   const handleBrowseFile = async () => {
     try {

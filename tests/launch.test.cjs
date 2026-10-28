@@ -5,12 +5,15 @@ const electronPath = require('electron');
 console.log('[Launch Test] Starting Electron from:', electronPath);
 const appDir = path.resolve(__dirname, '..');
 
+const childEnv = {
+  ...process.env,
+  SERVE_DIST: '1',
+  NODE_ENV: 'production'
+};
+delete childEnv.ELECTRON_RUN_AS_NODE;
+
 const child = spawn(electronPath, [appDir], {
-  env: {
-    ...process.env,
-    SERVE_DIST: '1',
-    NODE_ENV: 'production'
-  },
+  env: childEnv,
   stdio: ['pipe', 'pipe', 'pipe']
 });
 

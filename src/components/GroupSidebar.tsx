@@ -53,7 +53,7 @@ interface GroupSidebarProps {
 export const GroupSidebar: React.FC<GroupSidebarProps> = ({
   groups,
   activeGroupId,
-  dockPosition = 'left',
+  dockPosition = 'right',
   onSelectGroup,
   onAddNewGroup,
   onDeleteGroup

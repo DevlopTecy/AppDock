@@ -54,11 +54,15 @@ export const App: React.FC = () => {
   const activeGroup =
     data.groups.find((g) => g.id === activeGroupId) || data.groups[0];
 
+  // Maximize dock state (460px width x full screen height)
+  const [isMaximized, setIsMaximized] = useState(false);
+
   // Clean Dock computed state
-  const isCleanDock = !!data.settings.cleanDockEnabled;
+  const isCleanDock = !isMaximized && !!data.settings.cleanDockEnabled;
   const cleanDockGroup = data.groups.find((g) => g.id === data.settings.cleanDockGroupId) || activeGroup || data.groups[0];
-  const effectiveWidth = isCleanDock ? (data.settings.cleanDockWidth || 220) : data.settings.drawerWidth;
-  const effectiveHeight = isCleanDock ? (data.settings.cleanDockHeight || 460) : (data.settings.drawerHeight || 540);
+  const screenMaxHeight = typeof window !== 'undefined' && window.screen ? (window.screen.availHeight || 1080) : 1080;
+  const effectiveWidth = isMaximized ? 460 : (isCleanDock ? (data.settings.cleanDockWidth || 220) : data.settings.drawerWidth);
+  const effectiveHeight = isMaximized ? screenMaxHeight : (isCleanDock ? (data.settings.cleanDockHeight || 460) : (data.settings.drawerHeight || 540));
 
   const [isExpanded, setIsExpanded] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -157,7 +161,7 @@ export const App: React.FC = () => {
     });
   }, []);
 
-  // Auto-repair missing icons, relative shortcut targets (e.g. Antigravity, CapCut, Gemini)
+  // Auto-repair missing icons, relative shortcut targets, and generic placeholder icons
   useEffect(() => {
     let cancelled = false;
     const repairItems = async () => {
@@ -167,10 +171,32 @@ export const App: React.FC = () => {
       const newGroups = await Promise.all(
         data.groups.map(async (grp) => {
           let grpChanged = false;
+          const seen = new Set<string>();
+          const dedupedItems: typeof grp.items = [];
+
+          // Deduplicate items in group by unique name + target
+          for (const item of grp.items) {
+            const normName = item.name.toLowerCase().trim();
+            const normTarget = item.target.toLowerCase().trim();
+            const key = `${normName}|${normTarget}`;
+            if (!seen.has(key) && !seen.has(normName)) {
+              seen.add(key);
+              seen.add(normName);
+              dedupedItems.push(item);
+            } else {
+              grpChanged = true;
+              changed = true;
+            }
+          }
+
           const newItems = await Promise.all(
-            grp.items.map(async (item) => {
+            dedupedItems.map(async (item) => {
               const isRelative = item.type === 'app' && !item.target.includes('\\') && !item.target.includes('/');
-              const needsFix = item.type === 'app' && (isRelative || !item.icon || item.name.toLowerCase().includes('gemini'));
+              // Check if icon is missing, empty, or generic Windows fallback icon (length <= 860)
+              const isGenericOrBroken =
+                !item.icon ||
+                (typeof item.icon === 'string' && (item.icon.length <= 860 || !item.icon.startsWith('data:image/')));
+              const needsFix = item.type === 'app' && (isRelative || isGenericOrBroken || item.name.toLowerCase().includes('gemini'));
 
               if (needsFix) {
                 try {
@@ -198,7 +224,7 @@ export const App: React.FC = () => {
       }
     };
 
-    const timer = setTimeout(repairItems, 1000);
+    const timer = setTimeout(repairItems, 800);
     return () => {
       cancelled = true;
       clearTimeout(timer);
@@ -243,6 +269,24 @@ export const App: React.FC = () => {
       }
     }
   }, [effectiveWidth, effectiveHeight, data.settings.hideFromTaskbar]);
+
+  // Toggle Maximize dock mode (460px width x max screen height)
+  const handleToggleMaximize = useCallback(() => {
+    setIsMaximized((prev) => {
+      const next = !prev;
+      if (typeof window !== 'undefined' && (window as any).appDock?.setDrawerDimensions) {
+        if (next) {
+          const maxH = window.screen?.availHeight || 1080;
+          (window as any).appDock.setDrawerDimensions({ width: 460, height: maxH });
+        } else {
+          const normW = isCleanDock ? (data.settings.cleanDockWidth || 220) : data.settings.drawerWidth;
+          const normH = isCleanDock ? (data.settings.cleanDockHeight || 460) : (data.settings.drawerHeight || 540);
+          (window as any).appDock.setDrawerDimensions({ width: normW, height: normH });
+        }
+      }
+      return next;
+    });
+  }, [isCleanDock, data.settings.cleanDockWidth, data.settings.drawerWidth, data.settings.cleanDockHeight, data.settings.drawerHeight]);
 
   // Handle expanding / collapsing dock window
   const handleToggle = useCallback(
@@ -533,6 +577,8 @@ export const App: React.FC = () => {
       onSelectModule={(mod) => setActiveModule(mod)}
       isCleanDock={isCleanDock}
       onExitCleanDock={() => updateSettings({ cleanDockEnabled: false })}
+      isMaximized={isMaximized}
+      onToggleMaximize={handleToggleMaximize}
       companionContent={
         !isCleanDock && (activeModule || cachedModule) && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>

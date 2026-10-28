@@ -34,7 +34,7 @@ if (!gotLock) {
 let mainWindow = null;
 let tray = null;
 let isQuitting = false;
-let currentPosition = 'left';
+let currentPosition = 'right';
 let isExpanded = false;
 let drawerWidth = 320;
 let drawerHeight = 580;
@@ -46,7 +46,7 @@ let isSkipTaskbar = false;
 function calculateBounds(position, expanded, workArea, vertRatio = verticalRatio) {
   const tabW = 22;
   const tabH = 64;
-  const h = Math.min(drawerHeight, workArea.height - 40);
+  const h = Math.min(drawerHeight, workArea.height);
   const safeRatio = Math.max(0.02, Math.min(0.98, typeof vertRatio === 'number' ? vertRatio : 0.5));
   const centerY = Math.round(workArea.y + (workArea.height - h) * safeRatio);
   const tabCenterY = Math.round(workArea.y + (workArea.height - tabH) * safeRatio);
@@ -311,10 +311,10 @@ ipcMain.handle('dock:set-position', (event, position) => {
 });
 
 ipcMain.handle('dock:set-dimensions', (event, { width, height }) => {
-  if (typeof width === 'number' && width >= 140 && width <= 600) {
+  if (typeof width === 'number' && width >= 140 && width <= 1000) {
     drawerWidth = Math.round(width);
   }
-  if (typeof height === 'number' && height >= 200 && height <= 1000) {
+  if (typeof height === 'number' && height >= 200 && height <= 3000) {
     drawerHeight = Math.round(height);
   }
   if (isExpanded) {
@@ -521,32 +521,14 @@ function extractTargetFromLnk(lnkPath) {
       }
     }
 
-    // 3. Scan UTF-16LE unicode sequences for Windows path
-    const unicodeMatches = [];
-    for (let i = 0; i < buf.length - 8; i += 2) {
-      if (
-        buf[i + 1] === 0 &&
-        /[A-Za-z]/.test(String.fromCharCode(buf[i])) &&
-        buf[i + 2] === 58 &&
-        buf[i + 3] === 0 &&
-        buf[i + 4] === 92 &&
-        buf[i + 5] === 0
-      ) {
-        let str = '';
-        for (let j = i; j < buf.length - 1; j += 2) {
-          if (buf[j + 1] !== 0 || buf[j] < 32 || buf[j] > 126) break;
-          str += String.fromCharCode(buf[j]);
-        }
-        if (str.length > 5) unicodeMatches.push(str);
-      }
-    }
-    for (const m of unicodeMatches) {
-      const candidates = [m, ...m.split(/[=;]/)];
-      for (const cand of candidates) {
-        const clean = cand.trim();
-        if (/\.(?:exe|ico|bat|cmd)$/i.test(clean) && fs.existsSync(clean)) {
-          return clean;
-        }
+    // 3. Scan UTF-16LE unicode sequences for Windows path at both even and odd byte offsets (MSI Advertised shortcuts)
+    for (let offset = 0; offset <= 1; offset++) {
+      const slice = offset === 0 ? buf : buf.subarray(1);
+      const utf16 = slice.toString('utf16le');
+      const matches = utf16.match(/[A-Za-z]:\\[^<>:"/|?*\x00-\x1f]+\.(?:exe|ico|bat|cmd)/gi) || [];
+      for (const m of matches) {
+        const clean = m.trim();
+        if (fs.existsSync(clean)) return clean;
       }
     }
 
@@ -572,18 +554,74 @@ function extractTargetFromLnk(lnkPath) {
   return null;
 }
 
+const iconHelperScript = path.join(__dirname, 'icon-helper.ps1');
+
+function isGenericOrBrokenIcon(dataUrl) {
+  if (!dataUrl || typeof dataUrl !== 'string') return true;
+  // Generic Windows shell document/shortcut icon is ~794 chars, generic IDI_APPLICATION window is ~854 chars
+  if (dataUrl.length <= 860) return true;
+  return false;
+}
+
+function extractIconWithPowerShell(filePath) {
+  return new Promise((resolve) => {
+    if (!fs.existsSync(iconHelperScript)) return resolve(null);
+    execFile(
+      'powershell.exe',
+      ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', iconHelperScript, '-Action', 'Single', '-Path', filePath],
+      { timeout: 3500, maxBuffer: 10 * 1024 * 1024 },
+      (err, stdout) => {
+        if (err || !stdout || !stdout.trim()) {
+          return resolve(null);
+        }
+        const trimmed = stdout.trim();
+        if (trimmed.startsWith('data:image/')) {
+          return resolve(trimmed);
+        }
+        resolve(null);
+      }
+    );
+  });
+}
+
+function extractIconsBatchWithPowerShell(filePaths) {
+  return new Promise((resolve) => {
+    if (!fs.existsSync(iconHelperScript) || !filePaths || filePaths.length === 0) return resolve({});
+    const pathsJoined = filePaths.join('|');
+    execFile(
+      'powershell.exe',
+      ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', iconHelperScript, '-Action', 'Batch', '-Paths', pathsJoined],
+      { timeout: 6000, maxBuffer: 25 * 1024 * 1024 },
+      (err, stdout) => {
+        if (err || !stdout || !stdout.trim()) {
+          return resolve({});
+        }
+        try {
+          const parsed = JSON.parse(stdout.trim());
+          resolve(parsed || {});
+        } catch {
+          resolve({});
+        }
+      }
+    );
+  });
+}
+
 async function extractNativeIcon(filePath) {
   if (!filePath) return null;
   const resolvedPath = resolveShortcutPath(filePath) || filePath;
   if (!fs.existsSync(resolvedPath)) return null;
 
   if (iconMemoryCache.has(resolvedPath)) {
-    return iconMemoryCache.get(resolvedPath);
+    const cached = iconMemoryCache.get(resolvedPath);
+    if (cached && !isGenericOrBrokenIcon(cached)) {
+      return cached;
+    }
   }
 
   const ext = path.extname(resolvedPath).toLowerCase();
 
-  // If the path itself is an image/icon file
+  // 1. If the path itself is an image/icon file
   if (['.ico', '.png', '.jpg', '.jpeg', '.svg', '.webp'].includes(ext)) {
     try {
       const mime = ext === '.ico' ? 'image/x-icon' : ext === '.svg' ? 'image/svg+xml' : ext === '.png' ? 'image/png' : 'image/jpeg';
@@ -595,7 +633,17 @@ async function extractNativeIcon(filePath) {
     } catch (e) {}
   }
 
-  // If it's a shortcut .lnk, try extracting the target executable or custom icon first
+  // 2. High-fidelity extraction via native PowerShell icon-helper
+  try {
+    const psIcon = await extractIconWithPowerShell(resolvedPath);
+    if (psIcon && !isGenericOrBrokenIcon(psIcon)) {
+      iconMemoryCache.set(resolvedPath, psIcon);
+      iconMemoryCache.set(filePath, psIcon);
+      return psIcon;
+    }
+  } catch (e) {}
+
+  // 3. Fallback: If it's a shortcut .lnk, try extracting the target executable or custom icon first
   if (ext === '.lnk') {
     const targetExe = extractTargetFromLnk(resolvedPath);
     if (targetExe && fs.existsSync(targetExe)) {
@@ -615,29 +663,33 @@ async function extractNativeIcon(filePath) {
           const exeIcon = await app.getFileIcon(targetExe, { size: 'large' });
           if (exeIcon && !exeIcon.isEmpty()) {
             const dataUrl = exeIcon.toDataURL();
-            iconMemoryCache.set(resolvedPath, dataUrl);
-            iconMemoryCache.set(filePath, dataUrl);
-            return dataUrl;
+            if (!isGenericOrBrokenIcon(dataUrl)) {
+              iconMemoryCache.set(resolvedPath, dataUrl);
+              iconMemoryCache.set(filePath, dataUrl);
+              return dataUrl;
+            }
           }
         }
       } catch (e) {}
     }
   }
 
-  // Direct native getFileIcon on resolved path
+  // 4. Fallback: Direct native getFileIcon on resolved path
   try {
     if (app && typeof app.getFileIcon === 'function') {
       const nativeIcon = await app.getFileIcon(resolvedPath, { size: 'large' });
       if (nativeIcon && !nativeIcon.isEmpty()) {
         const dataUrl = nativeIcon.toDataURL();
-        iconMemoryCache.set(resolvedPath, dataUrl);
-        iconMemoryCache.set(filePath, dataUrl);
-        return dataUrl;
+        if (!isGenericOrBrokenIcon(dataUrl)) {
+          iconMemoryCache.set(resolvedPath, dataUrl);
+          iconMemoryCache.set(filePath, dataUrl);
+          return dataUrl;
+        }
       }
     }
   } catch (e) {}
 
-  // Handle .url with IconFile
+  // 5. Handle .url with IconFile
   if (ext === '.url') {
     try {
       const content = fs.readFileSync(resolvedPath, 'utf8');
@@ -713,23 +765,23 @@ ipcMain.handle('app:scan-system', async () => {
       }
     }
 
-    // Extract icons safely in small batches of 4
-    const withIcons = [];
-    const chunkSize = 4;
-    for (let i = 0; i < results.length; i += chunkSize) {
-      const chunk = results.slice(i, i + chunkSize);
-      const chunkRes = await Promise.all(
-        chunk.map(async (item) => {
+    // High-performance batch icon extraction via PowerShell helper
+    const allPaths = results.map((item) => item.path);
+    const batchIcons = await extractIconsBatchWithPowerShell(allPaths);
+
+    const withIcons = await Promise.all(
+      results.map(async (item) => {
+        let icon = batchIcons[item.path] || null;
+        if (!icon || isGenericOrBrokenIcon(icon)) {
           try {
-            const icon = await extractNativeIcon(item.path);
-            return { ...item, icon };
+            icon = await extractNativeIcon(item.path);
           } catch (e) {
-            return { ...item, icon: null };
+            icon = null;
           }
-        })
-      );
-      withIcons.push(...chunkRes);
-    }
+        }
+        return { ...item, icon };
+      })
+    );
 
     return withIcons;
   } catch (err) {
