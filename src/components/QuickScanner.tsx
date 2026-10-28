@@ -54,36 +54,40 @@ export const QuickScanner: React.FC<QuickScannerProps> = ({
   }, []);
 
   const handleAdd = async (app: SystemApp) => {
-    let target = app.path;
-    let icon = app.icon;
+    try {
+      let target = app.path;
+      let icon = app.icon;
 
-    if (typeof window !== 'undefined' && (window as any).appDock?.resolveItem) {
-      try {
-        const res = await (window as any).appDock.resolveItem({ name: app.name, target: app.path });
-        if (res) {
-          if (res.target) target = res.target;
-          if (res.icon) icon = res.icon;
-        }
-      } catch {}
+      if (typeof window !== 'undefined' && (window as any).appDock?.resolveItem) {
+        try {
+          const res = await (window as any).appDock.resolveItem({ name: app.name, target: app.path });
+          if (res) {
+            if (res.target) target = res.target;
+            if (res.icon) icon = res.icon;
+          }
+        } catch {}
+      }
+
+      if (!icon && typeof window !== 'undefined' && (window as any).appDock?.extractIcon) {
+        try {
+          icon = await (window as any).appDock.extractIcon(target);
+        } catch {}
+      }
+
+      const newItem: AppItem = {
+        id: `app-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        name: app.name,
+        type: 'app',
+        target,
+        icon: icon || undefined,
+        launchCount: 0
+      };
+
+      setAddedPaths((prev) => new Set(prev).add(app.path));
+      onAddScannedItem(newItem);
+    } catch (err) {
+      console.error('Error adding scanned item:', err);
     }
-
-    if (!icon && typeof window !== 'undefined' && (window as any).appDock?.extractIcon) {
-      try {
-        icon = await (window as any).appDock.extractIcon(target);
-      } catch {}
-    }
-
-    const newItem: AppItem = {
-      id: `app-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-      name: app.name,
-      type: 'app',
-      target,
-      icon: icon || undefined,
-      launchCount: 0
-    };
-
-    setAddedPaths((prev) => new Set(prev).add(app.path));
-    onAddScannedItem(newItem);
   };
 
   const filteredApps = apps.filter((app) =>
@@ -108,7 +112,7 @@ export const QuickScanner: React.FC<QuickScannerProps> = ({
         <Search size={13} color="var(--text-muted)" />
         <input
           type="text"
-          placeholder="Filter..."
+          placeholder="Filter desktop apps..."
           value={filterText}
           onChange={(e) => setFilterText(e.target.value)}
           style={{
@@ -147,7 +151,7 @@ export const QuickScanner: React.FC<QuickScannerProps> = ({
               color: 'var(--text-muted)'
             }}
           >
-            <UiverseLoader scale={0.75} label="Scanning system shortcuts..." />
+            <UiverseLoader scale={0.75} label="Scanning desktop shortcuts..." />
           </div>
         ) : filteredApps.length === 0 ? (
           <div
@@ -159,7 +163,7 @@ export const QuickScanner: React.FC<QuickScannerProps> = ({
               fontSize: '11.5px'
             }}
           >
-            No matches
+            No desktop apps found
           </div>
         ) : (
           filteredApps.map((app) => {
