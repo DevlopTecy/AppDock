@@ -942,7 +942,7 @@ function checkGitHubReleases(repoSlug = 'DevlopTecy/AppDock') {
           const currentVersion = app.getVersion();
           if (res.statusCode === 200) {
             const release = JSON.parse(data);
-            const latestVersion = (release.tag_name || '').replace(/^v/, '');
+            const latestVersion = (release.tag_name || '').replace(/^[^\d]*/, '').replace(/[^\d.]*$/, '');
             const isNewer = compareSemver(latestVersion, currentVersion) > 0;
             if (isNewer) {
               const info = {
