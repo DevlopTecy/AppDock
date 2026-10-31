@@ -126,10 +126,17 @@ Project 5_AppDock/
 <img width="1917" height="1078" alt="Screenshot 2026-11-01 014408" src="https://github.com/user-attachments/assets/cfa87f9c-ad48-410f-aeec-e2af48bec9d9" />
 
 ---
+## Utility :
+<img width="992" height="1077" alt="Screenshot 2026-11-01 014634" src="https://github.com/user-attachments/assets/fd70d818-6aa0-4ad1-8f07-a5fb383ed98b" />
+<img width="988" height="1078" alt="Screenshot 2026-11-01 014646" src="https://github.com/user-attachments/assets/98042844-b78c-4776-8ecd-58215186a2ec" />
+<img width="987" height="1078" alt="Screenshot 2026-11-01 014653" src="https://github.com/user-attachments/assets/b8d04a8f-66e9-4a41-a6c9-19cfc2a2fd78" />
+
+---
 ## Custom Theme : 
 <img width="1917" height="1075" alt="Screenshot 2026-11-01 014433" src="https://github.com/user-attachments/assets/95ecdb4f-909c-4bd6-97ad-6aadbd5cb3e0" />
 <img width="1917" height="1078" alt="Screenshot 2026-11-01 014449" src="https://github.com/user-attachments/assets/b7df0943-5909-4d7c-ad12-68864242ec7b" /><img width="1917" height="1075" alt="Screenshot 2026-11-01 014457" src="https://github.com/user-attachments/assets/920cbdbb-e073-4dc5-9272-edb596943d91" />
 <img width="1917" height="1078" alt="Screenshot 2026-11-01 014504" src="https://github.com/user-attachments/assets/506171af-8015-4261-b8ff-f0a5537fe03e" /><img width="1917" height="1078" alt="Screenshot 2026-11-01 014512" src="https://github.com/user-attachments/assets/8097146f-4031-4ca6-b70c-83c607fe53bd" />
+
 ### Note : Download Latest Version only
 
 
