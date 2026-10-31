@@ -120,8 +120,12 @@ Project 5_AppDock/
 ## Various Sizes : 
 <img width="1917" height="1078" alt="Screenshot 2026-11-01 014351" src="https://github.com/user-attachments/assets/f16e9b8f-ea7a-439d-9651-51f408d33b84" />
 <img width="1917" height="1078" alt="Screenshot 2026-11-01 014357" src="https://github.com/user-attachments/assets/428134b6-500b-48c9-b772-01cea1f96587" />
+
+---
 ## Flexible Icon Sizes :
 <img width="1917" height="1078" alt="Screenshot 2026-11-01 014408" src="https://github.com/user-attachments/assets/cfa87f9c-ad48-410f-aeec-e2af48bec9d9" />
+
+---
 ## Custom Theme : 
 <img width="1917" height="1075" alt="Screenshot 2026-11-01 014433" src="https://github.com/user-attachments/assets/95ecdb4f-909c-4bd6-97ad-6aadbd5cb3e0" />
 <img width="1917" height="1078" alt="Screenshot 2026-11-01 014449" src="https://github.com/user-attachments/assets/b7df0943-5909-4d7c-ad12-68864242ec7b" /><img width="1917" height="1075" alt="Screenshot 2026-11-01 014457" src="https://github.com/user-attachments/assets/920cbdbb-e073-4dc5-9272-edb596943d91" />
