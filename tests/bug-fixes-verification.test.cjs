@@ -100,3 +100,37 @@ test('BUG-13 & BUG-14: Modal dialogs include custom backdrops for fantasy/anime 
   }
 });
 
+test('BUG-15: Internal card dragging never triggers file drop overlay or creates dummy download files', () => {
+  const gridContent = fs.readFileSync(path.join(projectRoot, 'src', 'components', 'AppGrid.tsx'), 'utf-8');
+  assert.ok(
+    gridContent.includes('application/x-appdock-item'),
+    'AppGrid.tsx must tag internal card drags with application/x-appdock-item'
+  );
+  assert.ok(
+    gridContent.includes('!draggedItemId && types.includes(\'Files\')'),
+    'AppGrid.tsx must only activate file drop overlay if draggedItemId is null and files are dragged'
+  );
+
+  const cardContent = fs.readFileSync(path.join(projectRoot, 'src', 'components', 'AppCard.tsx'), 'utf-8');
+  assert.ok(
+    cardContent.includes('draggable={false}'),
+    'AppCard.tsx icon img must have draggable={false} to prevent Chromium creating dummy download files'
+  );
+});
+
+test('BUG-16: Main handle EdgeToggle remains pinned to screen edge and handleToggle synchronizes Electron bounds before React state switch', () => {
+  const dockFrameContent = fs.readFileSync(path.join(projectRoot, 'src', 'components', 'DockFrame.tsx'), 'utf-8');
+  assert.ok(
+    dockFrameContent.includes('isRight ? 0 : undefined') || dockFrameContent.includes('justifyContent: isRight ? \'flex-end\''),
+    'DockFrame.tsx collapsed state must pin EdgeToggle flush to screen edge'
+  );
+
+  const appContent = fs.readFileSync(path.join(projectRoot, 'src', 'App.tsx'), 'utf-8');
+  assert.ok(
+    appContent.includes('await (window as any).appDock.setState(true)') &&
+    appContent.indexOf('await (window as any).appDock.setState(true)') < appContent.lastIndexOf('setIsExpanded(true)'),
+    'App.tsx handleToggle must await Electron window resize before calling setIsExpanded(true)'
+  );
+});
+
+

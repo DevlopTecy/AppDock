@@ -67,6 +67,7 @@ export const AppCard: React.FC<AppCardProps> = ({
         <img
           src={item.icon}
           alt=""
+          draggable={false}
           onError={() => setImgError(true)}
           style={{
             width: iconDimension,

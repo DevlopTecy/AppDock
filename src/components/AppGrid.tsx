@@ -67,6 +67,7 @@ export const AppGrid: React.FC<AppGridProps> = ({
   }, [contextMenu]);
 
   const handleCardDragStart = (e: React.DragEvent, itemId: string) => {
+    e.dataTransfer.setData('application/x-appdock-item', itemId);
     e.dataTransfer.setData('text/plain', itemId);
     e.dataTransfer.effectAllowed = 'move';
     setDraggedItemId(itemId);
@@ -74,6 +75,7 @@ export const AppGrid: React.FC<AppGridProps> = ({
 
   const handleCardDragOver = (e: React.DragEvent, targetId: string) => {
     e.preventDefault();
+    e.stopPropagation();
     e.dataTransfer.dropEffect = 'move';
     if (draggedItemId && draggedItemId !== targetId && dragOverItemId !== targetId) {
       setDragOverItemId(targetId);
@@ -82,26 +84,29 @@ export const AppGrid: React.FC<AppGridProps> = ({
 
   const handleCardDrop = (e: React.DragEvent, targetId: string) => {
     e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
     setDragOverItemId(null);
 
-    // If external files dropped directly on an AppCard, forward to file drop handler
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0 && onDropFiles) {
-      onDropFiles(e.dataTransfer.files);
+    // If an existing card is being reordered, perform reorder and never treat as file drop
+    if (draggedItemId) {
+      if (draggedItemId !== targetId && group && onReorderItems) {
+        const fromIndex = group.items.findIndex((it) => it.id === draggedItemId);
+        const toIndex = group.items.findIndex((it) => it.id === targetId);
+        if (fromIndex !== -1 && toIndex !== -1) {
+          const nextItems = [...group.items];
+          const [moved] = nextItems.splice(fromIndex, 1);
+          nextItems.splice(toIndex, 0, moved);
+          onReorderItems(group.id, nextItems);
+        }
+      }
       setDraggedItemId(null);
       return;
     }
 
-    if (!draggedItemId || !group || draggedItemId === targetId) {
-      setDraggedItemId(null);
-      return;
-    }
-    const fromIndex = group.items.findIndex((it) => it.id === draggedItemId);
-    const toIndex = group.items.findIndex((it) => it.id === targetId);
-    if (fromIndex !== -1 && toIndex !== -1 && onReorderItems) {
-      const nextItems = [...group.items];
-      const [moved] = nextItems.splice(fromIndex, 1);
-      nextItems.splice(toIndex, 0, moved);
-      onReorderItems(group.id, nextItems);
+    // Only process external files when not dragging an internal card
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0 && onDropFiles) {
+      onDropFiles(e.dataTransfer.files);
     }
     setDraggedItemId(null);
   };
@@ -109,7 +114,12 @@ export const AppGrid: React.FC<AppGridProps> = ({
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsDragOver(true);
+    // Only show "Drop files here" if external files are being dragged, NEVER for internal card reordering!
+    const types = Array.from(e.dataTransfer.types || []);
+    const isExternalFile = !draggedItemId && types.includes('Files') && !types.includes('application/x-appdock-item');
+    if (isExternalFile) {
+      setIsDragOver(true);
+    }
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
@@ -123,11 +133,12 @@ export const AppGrid: React.FC<AppGridProps> = ({
     e.stopPropagation();
     setIsDragOver(false);
 
-    // Clear active card drag state when dropped anywhere in grid
+    const wasDraggingCard = !!draggedItemId;
     setDraggedItemId(null);
     setDragOverItemId(null);
 
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0 && onDropFiles) {
+    // Only accept file drops if the drag was not an internal card drag
+    if (!wasDraggingCard && e.dataTransfer.files && e.dataTransfer.files.length > 0 && onDropFiles) {
       onDropFiles(e.dataTransfer.files);
     }
   };

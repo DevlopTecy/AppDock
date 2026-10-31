@@ -314,30 +314,38 @@ export const App: React.FC = () => {
     });
   }, [isCleanDock, data.settings.cleanDockWidth, data.settings.drawerWidth, data.settings.cleanDockHeight, data.settings.drawerHeight]);
 
-  // Handle expanding / collapsing dock window
+  // Handle expanding / collapsing dock window with smooth, flicker-free bounds synchronization
   const handleToggle = useCallback(
     async (forceState?: boolean) => {
       const nextState = typeof forceState === 'boolean' ? forceState : !isExpanded;
-      setIsExpanded(nextState);
 
-      // User requirement: when main module closes, small ones all close too!
       if (!nextState) {
+        // Collapsing: close modules and notify Electron bounds first to prevent handle jumping
         setActiveModule(null);
         if (typeof window !== 'undefined' && (window as any).appDock?.setModuleWidth) {
           (window as any).appDock.setModuleWidth(0);
         }
+        if (typeof window !== 'undefined' && (window as any).appDock?.setState) {
+          try {
+            await (window as any).appDock.setState(false);
+          } catch (err) {
+            console.error('Failed to notify Electron of dock state:', err);
+          }
+        }
+        setIsExpanded(false);
       } else {
+        // Expanding: prepare window dimensions first so handle is positioned stably
         if (typeof window !== 'undefined' && (window as any).appDock?.setModuleWidth) {
           (window as any).appDock.setModuleWidth(isCleanDock ? -1 : 340);
         }
-      }
-
-      if (typeof window !== 'undefined' && (window as any).appDock?.setState) {
-        try {
-          await (window as any).appDock.setState(nextState);
-        } catch (err) {
-          console.error('Failed to notify Electron of dock state:', err);
+        if (typeof window !== 'undefined' && (window as any).appDock?.setState) {
+          try {
+            await (window as any).appDock.setState(true);
+          } catch (err) {
+            console.error('Failed to notify Electron of dock state:', err);
+          }
         }
+        setIsExpanded(true);
       }
     },
     [isExpanded, isCleanDock]

@@ -184,7 +184,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
     window.addEventListener('mouseup', handleMouseUp);
   };
 
-  // If not expanded, render ONLY the edge handle
+  // If not expanded, render ONLY the edge handle flush against the screen edge
   if (!isExpanded) {
     return (
       <div
@@ -193,17 +193,31 @@ export const DockFrame: React.FC<DockFrameProps> = ({
           height: '100%',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: isRight ? 'flex-end' : isLeft ? 'flex-start' : 'center',
+          position: 'relative'
         }}
       >
-        <EdgeToggle
-          isExpanded={false}
-          dockPosition={dockPosition}
-          opacity={toggleOpacity}
-          verticalPosition={verticalPosition}
-          onToggle={onToggle}
-          onUpdateVerticalPosition={onUpdateVerticalPosition}
-        />
+        <div
+          style={{
+            position: 'absolute',
+            right: isRight ? 0 : undefined,
+            left: isLeft ? 0 : undefined,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <EdgeToggle
+            isExpanded={false}
+            dockPosition={dockPosition}
+            opacity={toggleOpacity}
+            verticalPosition={verticalPosition}
+            onToggle={onToggle}
+            onUpdateVerticalPosition={onUpdateVerticalPosition}
+          />
+        </div>
       </div>
     );
   }
