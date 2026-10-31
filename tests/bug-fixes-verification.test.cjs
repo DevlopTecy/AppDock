@@ -29,15 +29,11 @@ test('BUG-03: AppGrid.tsx handleCardDrop checks for external files dropped onto 
   );
 });
 
-test('BUG-04: App.tsx handleToggle passes uniform 340 module width on expansion', () => {
+test('BUG-04: App.tsx and DockFrame use dynamic companion width (54px idle / 340px active) to prevent ghost hitbox', () => {
   const content = fs.readFileSync(path.join(projectRoot, 'src', 'App.tsx'), 'utf-8');
   assert.ok(
-    content.includes('setModuleWidth(isCleanDock ? -1 : 340)'),
-    'App.tsx handleToggle must pass uniform 340px companion width when expanded'
-  );
-  assert.ok(
-    !content.includes('activeModule ? 340 : 54'),
-    'App.tsx must not contain obsolete 54px module width branch'
+    content.includes('activeModule ? 340 : 54'),
+    'App.tsx must pass dynamic companion width (54px idle / 340px active) to prevent ghost hitbox'
   );
 });
 

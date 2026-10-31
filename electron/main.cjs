@@ -51,10 +51,9 @@ function calculateBounds(position, expanded, workArea, vertRatio = verticalRatio
   const centerY = Math.round(workArea.y + (workArea.height - h) * safeRatio);
   const tabCenterY = Math.round(workArea.y + (workArea.height - tabH) * safeRatio);
 
-  // Companion width: always 340px when expanded (non-clean-dock) so the window NEVER resizes during module toggles.
-  // Clean Dock mode (moduleWidth < 0) = no companion area at all.
-  // This prevents the Electron-vs-CSS timing mismatch that caused the Main Drawer to jitter.
-  const companionW = expanded ? (moduleWidth < 0 ? 0 : 340) : 0;
+  // Dynamic companion width: 340px when companion module is active, 54px when idle (ConnectorHub handles), 0 in Clean Dock mode (moduleWidth < 0)
+  // Prevents oversized ghost hitbox from blocking background apps/clicks when no module is open.
+  const companionW = expanded ? (moduleWidth < 0 ? 0 : (moduleWidth > 54 ? 340 : 54)) : 0;
   const totalExpandedWidth = drawerWidth + companionW;
 
   if (position === 'left') {
@@ -70,7 +69,7 @@ function calculateBounds(position, expanded, workArea, vertRatio = verticalRatio
   } else if (position === 'top') {
     const topTabW = 64;
     const topTabH = 22;
-    const companionH = 220;
+    const companionH = (moduleWidth > 54) ? 220 : 0;
     const totalH = Math.min(workArea.height - 40, h + topTabH + companionH);
     const totalW = Math.max(drawerWidth, 360);
     const centerX = Math.round(workArea.x + (workArea.width - totalW) / 2);

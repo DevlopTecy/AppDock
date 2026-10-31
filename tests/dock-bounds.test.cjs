@@ -1,6 +1,6 @@
 const assert = require('assert');
 
-function calculateBounds(position, isExpanded, workArea, drawerWidth = 320, drawerHeight = 580, moduleWidth = 340, verticalRatio = 0.5) {
+function calculateBounds(position, isExpanded, workArea, drawerWidth = 320, drawerHeight = 580, moduleWidth = 54, verticalRatio = 0.5) {
   const tabW = 22;
   const tabH = 64;
   const h = Math.min(drawerHeight, workArea.height - 40);
@@ -8,9 +8,9 @@ function calculateBounds(position, isExpanded, workArea, drawerWidth = 320, draw
   const centerY = Math.round(workArea.y + (workArea.height - h) * safeRatio);
   const tabCenterY = Math.round(workArea.y + (workArea.height - tabH) * safeRatio);
 
-  // Fixed companion width: always 340px when expanded (not clean dock), 0 in clean dock (moduleWidth < 0)
-  // This eliminates Electron window resizing during module toggles — only CSS changes inside a fixed window.
-  const companionW = isExpanded ? (moduleWidth < 0 ? 0 : 340) : 0;
+  // Dynamic companion width: 340px when module active, 54px when idle Hub button, 0px in Clean Dock mode (moduleWidth < 0)
+  // Eliminates ghost hitbox while keeping module expansion functional.
+  const companionW = isExpanded ? (moduleWidth < 0 ? 0 : (moduleWidth > 54 ? 340 : 54)) : 0;
   const totalExpandedWidth = drawerWidth + companionW;
 
   if (position === 'left') {
@@ -34,12 +34,12 @@ const leftCollapsed = calculateBounds('left', false, workArea);
 assert.strictEqual(leftCollapsed.width, 22);
 assert.strictEqual(leftCollapsed.x, 0);
 
-// Left expanded — always 340px companion area (hub button or active module both use same window size)
-const leftExpanded = calculateBounds('left', true, workArea, 320, 580, 340);
-assert.strictEqual(leftExpanded.width, 320 + 340);
+// Left expanded (idle with 54px Hub button — no ghost hitbox!)
+const leftExpanded = calculateBounds('left', true, workArea, 320, 580, 54);
+assert.strictEqual(leftExpanded.width, 320 + 54);
 assert.strictEqual(leftExpanded.x, 0);
 
-// Left expanded with module active — same window size (no change!)
+// Left expanded with active module (340px)
 const leftExpandedActive = calculateBounds('left', true, workArea, 320, 580, 340);
 assert.strictEqual(leftExpandedActive.width, 320 + 340);
 assert.strictEqual(leftExpandedActive.x, 0);
@@ -49,22 +49,22 @@ const rightCollapsed = calculateBounds('right', false, workArea);
 assert.strictEqual(rightCollapsed.x, 1920 - 22);
 assert.strictEqual(rightCollapsed.width, 22);
 
-// Right expanded — always 340px companion area
-const rightExpanded = calculateBounds('right', true, workArea, 320, 580, 340);
-assert.strictEqual(rightExpanded.x, 1920 - (320 + 340));
-assert.strictEqual(rightExpanded.width, 320 + 340);
+// Right expanded (idle with 54px Hub button — no ghost hitbox!)
+const rightExpanded = calculateBounds('right', true, workArea, 320, 580, 54);
+assert.strictEqual(rightExpanded.x, 1920 - (320 + 54));
+assert.strictEqual(rightExpanded.width, 320 + 54);
 
-// Right expanded with active module — same window size (no change!)
+// Right expanded with active module (340px)
 const rightExpandedActive = calculateBounds('right', true, workArea, 320, 580, 340);
 assert.strictEqual(rightExpandedActive.x, 1920 - (320 + 340));
 assert.strictEqual(rightExpandedActive.width, 320 + 340);
 
 // Left custom vertical position (near top ratio 0.2)
-const leftTopRatio = calculateBounds('left', false, workArea, 320, 580, 340, 0.2);
+const leftTopRatio = calculateBounds('left', false, workArea, 320, 580, 54, 0.2);
 assert.strictEqual(leftTopRatio.y, Math.round((1040 - 64) * 0.2));
 
 // Right custom vertical position (near bottom ratio 0.8)
-const rightBottomRatio = calculateBounds('right', false, workArea, 320, 580, 340, 0.8);
+const rightBottomRatio = calculateBounds('right', false, workArea, 320, 580, 54, 0.8);
 // Clean Dock mode (moduleWidth = -1: no companion hub or module width added)
 const rightCleanDock = calculateBounds('right', true, workArea, 220, 460, -1);
 assert.strictEqual(rightCleanDock.width, 220);

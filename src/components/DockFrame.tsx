@@ -109,6 +109,9 @@ export const DockFrame: React.FC<DockFrameProps> = ({
       }
       setRenderedModule(activeModule);
       setIsExiting(false);
+      if (typeof window !== 'undefined' && (window as any).appDock?.setModuleWidth) {
+        (window as any).appDock.setModuleWidth(340);
+      }
     } else if (renderedModule) {
       setIsExiting(true);
     }
@@ -123,7 +126,9 @@ export const DockFrame: React.FC<DockFrameProps> = ({
         setRenderedModule(null);
         setIsExiting(false);
         exitTimerRef.current = null;
-        // No setModuleWidth call needed — Electron window is always drawerWidth+340 while expanded
+        if (typeof window !== 'undefined' && (window as any).appDock?.setModuleWidth) {
+          (window as any).appDock.setModuleWidth(isCleanDock ? -1 : 54);
+        }
       }, 190);
     }
     return () => {
@@ -131,7 +136,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
         window.clearTimeout(exitTimerRef.current);
       }
     };
-  }, [isExiting]);
+  }, [isExiting, isCleanDock]);
 
   const isLeft = dockPosition === 'left';
   const isRight = dockPosition === 'right';
@@ -222,7 +227,8 @@ export const DockFrame: React.FC<DockFrameProps> = ({
     );
   }
 
-  const companionW = isCleanDock ? 0 : 340;
+  const isModuleActive = Boolean(renderedModule || isExiting);
+  const companionW = isCleanDock ? 0 : (isModuleActive ? 340 : 54);
   const _totalExpandedWidth = drawerWidth + companionW;
 
   return (
@@ -240,7 +246,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
         margin: 0
       }}
     >
-      {/* Right dock layout: Companion Area — fixed 340px wide, always present when not CleanDock */}
+      {/* Right dock layout: Companion Area */}
       {isRight && !isCleanDock && (
         <div
           style={{
@@ -249,7 +255,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
             alignItems: 'flex-start',
             justifyContent: 'flex-end',
             height: '100%',
-            width: '340px',
+            width: `${companionW}px`,
             flexShrink: 0,
             overflow: 'hidden',
             position: 'relative'
@@ -1336,7 +1342,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
             alignItems: 'flex-start',
             justifyContent: 'flex-start',
             height: '100%',
-            width: '340px',
+            width: `${companionW}px`,
             flexShrink: 0,
             overflow: 'hidden',
             position: 'relative'

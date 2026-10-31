@@ -15,7 +15,9 @@ import {
   X,
   AlertTriangle,
   Edit3,
-  Trash2
+  Trash2,
+  ArrowUp,
+  ArrowDown
 } from 'lucide-react';
 
 export const getGroupIcon = (iconName: string, size = 15) => {
@@ -52,6 +54,7 @@ interface GroupSidebarProps {
   onAddNewGroup: () => void;
   onDeleteGroup: (groupId: string) => void;
   onEditGroup?: (group: AppGroup) => void;
+  onMoveGroup?: (groupId: string, direction: 'up' | 'down') => void;
   theme?: DockTheme;
 }
 
@@ -63,6 +66,7 @@ export const GroupSidebar: React.FC<GroupSidebarProps> = ({
   onAddNewGroup,
   onDeleteGroup,
   onEditGroup,
+  onMoveGroup,
   theme
 }) => {
   const [hoveredGroupId, setHoveredGroupId] = useState<string | null>(null);
@@ -546,84 +550,141 @@ export const GroupSidebar: React.FC<GroupSidebarProps> = ({
 
       {/* Right-click Context Menu on Group Icon */}
       {contextMenu &&
-        createPortal(
-          <div
-            className="group-context-menu"
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              position: 'fixed',
-              top: `${Math.min(contextMenu.y, window.innerHeight - 80)}px`,
-              left: isRightDock
-                ? `${Math.max(10, contextMenu.x - 155)}px`
-                : `${Math.min(contextMenu.x + 10, window.innerWidth - 165)}px`,
-              zIndex: 99999,
-              background: 'var(--modal-bg)',
-              border: '1px solid var(--border-hover)',
-              borderRadius: '8px',
-              padding: '5px',
-              boxShadow: 'var(--shadow-dock), 0 10px 28px rgba(0, 0, 0, 0.5)',
-              minWidth: '150px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '3px',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)'
-            }}
-          >
+        (() => {
+          const groupIndex = groups.findIndex((g) => g.id === contextMenu.group.id);
+          const canMoveUp = groupIndex > 0;
+          const canMoveDown = groupIndex >= 0 && groupIndex < groups.length - 1;
+
+          return createPortal(
             <div
+              className="group-context-menu"
+              onClick={(e) => e.stopPropagation()}
               style={{
-                padding: '4px 8px 3px 8px',
-                fontSize: '10px',
-                fontWeight: 600,
-                color: 'var(--text-muted)',
-                borderBottom: '1px solid var(--border-subtle)',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis'
-              }}
-            >
-              {contextMenu.group.name}
-            </div>
-
-            <button
-              onClick={() => {
-                const grp = contextMenu.group;
-                setContextMenu(null);
-                if (onEditGroup) onEditGroup(grp);
-              }}
-              className="context-menu-item"
-              style={{
+                position: 'fixed',
+                top: `${Math.max(10, Math.min(contextMenu.y, window.innerHeight - 180))}px`,
+                left: isRightDock
+                  ? `${Math.max(10, contextMenu.x - 155)}px`
+                  : `${Math.min(contextMenu.x + 10, window.innerWidth - 165)}px`,
+                zIndex: 99999,
+                background: 'var(--modal-bg)',
+                border: '1px solid var(--border-hover)',
+                borderRadius: '8px',
+                padding: '5px',
+                boxShadow: 'var(--shadow-dock), 0 10px 28px rgba(0, 0, 0, 0.5)',
+                minWidth: '150px',
                 display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '6px 8px',
-                borderRadius: '5px',
-                background: 'transparent',
-                border: 'none',
-                color: 'var(--text-primary)',
-                fontSize: '11.5px',
-                cursor: 'pointer',
-                textAlign: 'left',
-                width: '100%',
-                transition: 'all 0.12s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'var(--bg-surface-hover)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'transparent';
+                flexDirection: 'column',
+                gap: '3px',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)'
               }}
             >
-              <Edit3 size={13} color="var(--text-secondary)" />
-              <span>Edit Group</span>
-            </button>
+              <div
+                style={{
+                  padding: '4px 8px 3px 8px',
+                  fontSize: '10px',
+                  fontWeight: 600,
+                  color: 'var(--text-muted)',
+                  borderBottom: '1px solid var(--border-subtle)',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}
+              >
+                {contextMenu.group.name}
+              </div>
 
-            {groups.length > 1 && (
+              {/* Move Up */}
+              <button
+                disabled={!canMoveUp}
+                onClick={() => {
+                  if (!canMoveUp || !onMoveGroup) return;
+                  const grpId = contextMenu.group.id;
+                  setContextMenu(null);
+                  onMoveGroup(grpId, 'up');
+                }}
+                className="context-menu-item"
+                title={canMoveUp ? 'Move group up' : 'Already at the top'}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '6px 8px',
+                  borderRadius: '5px',
+                  background: 'transparent',
+                  border: 'none',
+                  color: canMoveUp ? 'var(--text-primary)' : 'var(--text-muted)',
+                  opacity: canMoveUp ? 1 : 0.4,
+                  fontSize: '11.5px',
+                  cursor: canMoveUp ? 'pointer' : 'not-allowed',
+                  textAlign: 'left',
+                  width: '100%',
+                  transition: 'all 0.12s ease'
+                }}
+                onMouseEnter={(e) => {
+                  if (canMoveUp) e.currentTarget.style.background = 'var(--bg-surface-hover)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent';
+                }}
+              >
+                <ArrowUp size={13} color={canMoveUp ? 'var(--text-secondary)' : 'var(--text-muted)'} />
+                <span>Move Up</span>
+              </button>
+
+              {/* Move Down */}
+              <button
+                disabled={!canMoveDown}
+                onClick={() => {
+                  if (!canMoveDown || !onMoveGroup) return;
+                  const grpId = contextMenu.group.id;
+                  setContextMenu(null);
+                  onMoveGroup(grpId, 'down');
+                }}
+                className="context-menu-item"
+                title={canMoveDown ? 'Move group down' : 'Already at the bottom'}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '6px 8px',
+                  borderRadius: '5px',
+                  background: 'transparent',
+                  border: 'none',
+                  color: canMoveDown ? 'var(--text-primary)' : 'var(--text-muted)',
+                  opacity: canMoveDown ? 1 : 0.4,
+                  fontSize: '11.5px',
+                  cursor: canMoveDown ? 'pointer' : 'not-allowed',
+                  textAlign: 'left',
+                  width: '100%',
+                  transition: 'all 0.12s ease'
+                }}
+                onMouseEnter={(e) => {
+                  if (canMoveDown) e.currentTarget.style.background = 'var(--bg-surface-hover)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent';
+                }}
+              >
+                <ArrowDown size={13} color={canMoveDown ? 'var(--text-secondary)' : 'var(--text-muted)'} />
+                <span>Move Down</span>
+              </button>
+
+              {/* Subtle Divider */}
+              <div
+                style={{
+                  height: '1px',
+                  background: 'var(--border-subtle)',
+                  margin: '2px 0'
+                }}
+              />
+
+              {/* Edit Group */}
               <button
                 onClick={() => {
                   const grp = contextMenu.group;
                   setContextMenu(null);
-                  setConfirmDeleteGroup(grp);
+                  if (onEditGroup) onEditGroup(grp);
                 }}
                 className="context-menu-item"
                 style={{
@@ -634,7 +695,7 @@ export const GroupSidebar: React.FC<GroupSidebarProps> = ({
                   borderRadius: '5px',
                   background: 'transparent',
                   border: 'none',
-                  color: '#ef4444',
+                  color: 'var(--text-primary)',
                   fontSize: '11.5px',
                   cursor: 'pointer',
                   textAlign: 'left',
@@ -642,19 +703,55 @@ export const GroupSidebar: React.FC<GroupSidebarProps> = ({
                   transition: 'all 0.12s ease'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(239, 68, 68, 0.12)';
+                  e.currentTarget.style.background = 'var(--bg-surface-hover)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.background = 'transparent';
                 }}
               >
-                <Trash2 size={13} color="#ef4444" />
-                <span>Delete Group</span>
+                <Edit3 size={13} color="var(--text-secondary)" />
+                <span>Edit Group</span>
               </button>
-            )}
-          </div>,
-          document.body
-        )}
+
+              {/* Delete Group */}
+              {groups.length > 1 && (
+                <button
+                  onClick={() => {
+                    const grp = contextMenu.group;
+                    setContextMenu(null);
+                    setConfirmDeleteGroup(grp);
+                  }}
+                  className="context-menu-item"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '6px 8px',
+                    borderRadius: '5px',
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#ef4444',
+                    fontSize: '11.5px',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    width: '100%',
+                    transition: 'all 0.12s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(239, 68, 68, 0.12)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent';
+                  }}
+                >
+                  <Trash2 size={13} color="#ef4444" />
+                  <span>Delete Group</span>
+                </button>
+              )}
+            </div>,
+            document.body
+          );
+        })()}
     </aside>
   );
 };

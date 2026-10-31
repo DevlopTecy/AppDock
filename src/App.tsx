@@ -148,16 +148,14 @@ export const App: React.FC = () => {
           // Clean dock: no companion area at all
           (window as any).appDock.setModuleWidth(-1);
         } else {
-          // Always allocate the full 340px companion area when expanded.
-          // The CSS inside handles whether it shows the hub button or a full module.
-          // This prevents Electron from resizing the window on every module toggle (which caused the jitter).
-          (window as any).appDock.setModuleWidth(340);
+          // Dynamic companion width: 340px when module active, 54px when idle to prevent ghost hitbox
+          (window as any).appDock.setModuleWidth(activeModule ? 340 : 54);
         }
       } else {
         (window as any).appDock.setModuleWidth(0);
       }
     }
-  }, [isExpanded, isCleanDock]);
+  }, [isExpanded, isCleanDock, activeModule]);
 
   // Sync state changes with persistence
   const updateGroups = useCallback((newGroups: AppGroup[]) => {
@@ -336,7 +334,7 @@ export const App: React.FC = () => {
       } else {
         // Expanding: prepare window dimensions first so handle is positioned stably
         if (typeof window !== 'undefined' && (window as any).appDock?.setModuleWidth) {
-          (window as any).appDock.setModuleWidth(isCleanDock ? -1 : 340);
+          (window as any).appDock.setModuleWidth(isCleanDock ? -1 : (activeModule ? 340 : 54));
         }
         if (typeof window !== 'undefined' && (window as any).appDock?.setState) {
           try {
@@ -348,7 +346,7 @@ export const App: React.FC = () => {
         setIsExpanded(true);
       }
     },
-    [isExpanded, isCleanDock]
+    [isExpanded, isCleanDock, activeModule]
   );
 
   // Listen for collapse and expand commands from Electron (e.g. system tray, taskbar toggle)
@@ -555,6 +553,24 @@ export const App: React.FC = () => {
     updateGroups(updatedGroups);
   };
 
+  // Move Group Up / Down handler (reorder groups in vertical sidebar)
+  const handleMoveGroup = useCallback(
+    (groupId: string, direction: 'up' | 'down') => {
+      const index = data.groups.findIndex((g) => g.id === groupId);
+      if (index === -1) return;
+      if (direction === 'up' && index === 0) return;
+      if (direction === 'down' && index === data.groups.length - 1) return;
+
+      const targetIndex = direction === 'up' ? index - 1 : index + 1;
+      const newGroups = [...data.groups];
+      const [movedGroup] = newGroups.splice(index, 1);
+      newGroups.splice(targetIndex, 0, movedGroup);
+
+      updateGroups(newGroups);
+    },
+    [data.groups, updateGroups]
+  );
+
   // Drop Files handler
   const handleDropFiles = async (files: FileList) => {
     if (!activeGroup) return;
@@ -687,6 +703,7 @@ export const App: React.FC = () => {
               setEditingGroup(grp);
               setIsEditGroupModalOpen(true);
             }}
+            onMoveGroup={handleMoveGroup}
             theme={data.settings.theme}
           />
         )}
