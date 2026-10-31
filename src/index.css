@@ -1,5 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600;700&display=swap');
 
+@font-face {
+  font-family: 'OnePieceFont';
+  src: url('/onepiece/fonts/one_piece_font.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root,
 [data-theme="dark"] {
   --bg-dock: #000000;
@@ -21,7 +29,7 @@
   --accent: #ffffff;
   --accent-subtle: rgba(255, 255, 255, 0.12);
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --shadow-dock: 0 18px 48px rgba(0, 0, 0, 0.92), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --shadow-dock: 0 18px 48px rgba(0, 0, 0, 0.92);
   --toggle-bg: rgba(12, 12, 12, 0.96);
   --modal-bg: #050505;
 }
@@ -45,9 +53,97 @@
   --text-muted: #94a3b8;
   --accent: #0f172a;
   --accent-subtle: rgba(15, 23, 42, 0.08);
-  --shadow-dock: 0 16px 40px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.08);
+  --shadow-dock: 0 16px 40px rgba(0, 0, 0, 0.15);
   --toggle-bg: #ffffff;
   --modal-bg: #ffffff;
+}
+
+[data-theme="translucent"] {
+  --bg-dock: rgba(16, 20, 28, 0.45);
+  --bg-header: rgba(10, 14, 22, 0.38);
+  --bg-footer: rgba(10, 14, 22, 0.38);
+  --bg-surface: rgba(255, 255, 255, 0.08);
+  --bg-surface-hover: rgba(255, 255, 255, 0.15);
+  --bg-surface-active: rgba(255, 255, 255, 0.22);
+  --border-subtle: rgba(255, 255, 255, 0.10);
+  --border-hover: rgba(255, 255, 255, 0.25);
+  --btn-border: rgba(255, 255, 255, 0.12);
+  --btn-border-hover: rgba(255, 255, 255, 0.32);
+  --btn-shadow: 0 4px 14px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  --btn-shadow-hover: 0 6px 20px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  --btn-shadow-active: 0 2px 4px rgba(0, 0, 0, 0.4), inset 0 1px 3px rgba(0, 0, 0, 0.3);
+  --text-primary: #ffffff;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --accent: #38bdf8;
+  --accent-subtle: rgba(56, 189, 248, 0.15);
+  --shadow-dock: 0 20px 50px rgba(0, 0, 0, 0.5);
+  --toggle-bg: rgba(16, 20, 28, 0.65);
+  --modal-bg: rgba(14, 18, 28, 0.88);
+}
+
+[data-theme="translucent"] .glass-surface,
+[data-theme="translucent"] .drawer-main {
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+}
+
+[data-theme="glassy"] {
+  --bg-dock: rgba(15, 23, 42, 0.55);
+  --bg-header: rgba(11, 17, 32, 0.48);
+  --bg-footer: rgba(11, 17, 32, 0.48);
+  --bg-surface: rgba(255, 255, 255, 0.11);
+  --bg-surface-hover: rgba(255, 255, 255, 0.19);
+  --bg-surface-active: rgba(255, 255, 255, 0.28);
+  --border-subtle: rgba(255, 255, 255, 0.18);
+  --border-hover: rgba(255, 255, 255, 0.42);
+  --btn-border: rgba(255, 255, 255, 0.22);
+  --btn-border-hover: rgba(255, 255, 255, 0.52);
+  --btn-shadow: 0 8px 24px rgba(0, 0, 0, 0.32), inset 0 1.5px 0.5px rgba(255, 255, 255, 0.6), inset 0 -1px 1px rgba(0, 0, 0, 0.2);
+  --btn-shadow-hover: 0 12px 30px rgba(0, 0, 0, 0.42), inset 0 2px 1px rgba(255, 255, 255, 0.82), inset 0 -1px 1px rgba(0, 0, 0, 0.2);
+  --btn-shadow-active: 0 2px 6px rgba(0, 0, 0, 0.5), inset 0 2px 4px rgba(0, 0, 0, 0.35);
+  --text-primary: #ffffff;
+  --text-secondary: #e2e8f0;
+  --text-muted: #94a3b8;
+  --accent: #60a5fa;
+  --accent-subtle: rgba(96, 165, 250, 0.2);
+  --shadow-dock: 0 24px 60px rgba(0, 0, 0, 0.6);
+  --toggle-bg: rgba(15, 23, 42, 0.72);
+  --modal-bg: rgba(12, 18, 34, 0.90);
+}
+
+[data-theme="glassy"] .glass-surface,
+[data-theme="glassy"] .drawer-main {
+  backdrop-filter: blur(34px) saturate(210%);
+  -webkit-backdrop-filter: blur(34px) saturate(210%);
+}
+
+[data-theme="glassy"] .glass-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.04) 100%);
+}
+
+[data-theme="minimal"] {
+  --bg-dock: #000000;
+  --bg-header: #000000;
+  --bg-footer: #000000;
+  --bg-surface: #0a0a0a;
+  --bg-surface-hover: #141414;
+  --bg-surface-active: #1f1f1f;
+  --border-subtle: rgba(255, 255, 255, 0.10);
+  --border-hover: rgba(255, 255, 255, 0.25);
+  --btn-border: rgba(255, 255, 255, 0.12);
+  --btn-border-hover: rgba(255, 255, 255, 0.30);
+  --btn-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  --btn-shadow-hover: 0 2px 6px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --btn-shadow-active: 0 1px 1px rgba(0, 0, 0, 0.95);
+  --text-primary: #ffffff;
+  --text-secondary: #a3a3a3;
+  --text-muted: #525252;
+  --accent: #ffffff;
+  --accent-subtle: rgba(255, 255, 255, 0.14);
+  --shadow-dock: 0 16px 40px rgba(0, 0, 0, 0.95);
+  --toggle-bg: #000000;
+  --modal-bg: #050505;
 }
 
 [data-theme="cyberpunk"] {
@@ -69,7 +165,7 @@
   --text-muted: #818cf8;
   --accent: #00f2fe;
   --accent-subtle: rgba(0, 242, 254, 0.15);
-  --shadow-dock: 0 18px 48px rgba(7, 1, 20, 0.95), 0 0 0 1px rgba(168, 85, 247, 0.28);
+  --shadow-dock: 0 18px 48px rgba(7, 1, 20, 0.95);
   --toggle-bg: #12072b;
   --modal-bg: #0b031c;
 }
@@ -93,7 +189,7 @@
   --text-muted: #0284c7;
   --accent: #38bdf8;
   --accent-subtle: rgba(56, 189, 248, 0.12);
-  --shadow-dock: 0 18px 48px rgba(4, 8, 20, 0.95), 0 0 0 1px rgba(56, 189, 248, 0.22);
+  --shadow-dock: 0 18px 48px rgba(4, 8, 20, 0.95);
   --toggle-bg: #0c1836;
   --modal-bg: #070d1e;
 }
@@ -117,7 +213,7 @@
   --text-muted: #059669;
   --accent: #10b981;
   --accent-subtle: rgba(16, 185, 129, 0.15);
-  --shadow-dock: 0 18px 48px rgba(2, 13, 8, 0.95), 0 0 0 1px rgba(16, 185, 129, 0.24);
+  --shadow-dock: 0 18px 48px rgba(2, 13, 8, 0.95);
   --toggle-bg: #0a2417;
   --modal-bg: #04140d;
 }
@@ -141,7 +237,7 @@
   --text-muted: #8b76a6;
   --accent: #ff85a2;
   --accent-subtle: rgba(255, 133, 162, 0.2);
-  --shadow-dock: 0 16px 48px rgba(150, 120, 195, 0.3), 0 0 0 2px rgba(255, 204, 213, 0.9);
+  --shadow-dock: 0 16px 48px rgba(150, 120, 195, 0.3);
   --toggle-bg: #ffccd5;
   --modal-bg: #f8f4ff;
 }
@@ -182,13 +278,10 @@
   100% { transform: rotate(360deg); }
 }
 
-/* Kawaii Space Theme Custom Styling */
+/* Kawaii Theme Custom Styling */
 [data-theme="kawaii"] .glass-surface {
-  background: var(--bg-dock);
-  background-image: 
-    radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.8) 0%, transparent 25%),
-    radial-gradient(circle at 85% 75%, rgba(255, 204, 213, 0.45) 0%, transparent 35%),
-    radial-gradient(circle at 40% 90%, rgba(203, 243, 240, 0.4) 0%, transparent 30%);
+  background: transparent !important;
+  position: relative;
 }
 
 [data-theme="kawaii"] .app-card-wrapper:nth-child(4n+1) {
@@ -279,7 +372,7 @@
   --text-muted: #9dd4fd;
   --accent: #ffdf59;
   --accent-subtle: rgba(255, 223, 89, 0.2);
-  --shadow-dock: 0 16px 48px rgba(40, 90, 140, 0.35), 0 0 0 2px #388ac4;
+  --shadow-dock: 0 16px 48px rgba(40, 90, 140, 0.35);
   --toggle-bg: #59bcf4;
   --modal-bg: #142334;
 }
@@ -681,7 +774,7 @@
   --text-muted: #6b6661;
   --accent: #a3262d;
   --accent-subtle: rgba(163, 38, 45, 0.22);
-  --shadow-dock: 0 20px 50px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(163, 38, 45, 0.35);
+  --shadow-dock: 0 20px 50px rgba(0, 0, 0, 0.95);
   --toggle-bg: #0d0d0d;
   --modal-bg: #0c0c0c;
   --font-gothic: 'Cinzel', 'Times New Roman', serif;
@@ -690,10 +783,7 @@
 
 /* Death Note Theme Component Styling */
 [data-theme="deathnote"] .glass-surface {
-  background: var(--bg-dock);
-  background-image: 
-    radial-gradient(circle at 50% 25%, rgba(8, 8, 8, 0.45) 0%, rgba(8, 8, 8, 0.88) 100%),
-    linear-gradient(180deg, rgba(8, 8, 8, 0.65) 0%, rgba(13, 13, 13, 0.25) 45%, rgba(8, 8, 8, 0.9) 100%);
+  background: transparent !important;
   position: relative;
 }
 
@@ -792,6 +882,235 @@
   background: rgba(8, 8, 8, 0.88) !important;
   border-top: 1px solid rgba(52, 48, 47, 0.65) !important;
   backdrop-filter: blur(8px);
+}
+
+/* ========================================================
+   ELDEN RING THEME: DARK FANTASY UI TRANSFORMATION
+   ======================================================== */
+[data-theme="eldenring"] {
+  --bg-dock: #080a09;
+  --bg-canvas: #080a09;
+  --bg-header: rgba(17, 19, 16, 0.88);
+  --bg-footer: rgba(17, 19, 16, 0.92);
+  --bg-surface: #111310;
+  --bg-surface-hover: #171813;
+  --bg-surface-active: #1f211a;
+  --bg-card: #171813;
+  --bg-sidebar: #0e100d;
+  --border-subtle: rgba(197, 161, 90, 0.35);
+  --border-hover: #eac477;
+  --border-strong: #c5a15a;
+  --border-focus: #eac477;
+  --btn-border: rgba(197, 161, 90, 0.35);
+  --btn-border-hover: #eac477;
+  --btn-shadow: 0 4px 12px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(234, 196, 119, 0.15);
+  --btn-shadow-hover: 0 6px 18px rgba(0, 0, 0, 0.9), 0 0 14px rgba(234, 196, 119, 0.4), inset 0 0 8px rgba(197, 161, 90, 0.25);
+  --btn-shadow-active: 0 2px 6px rgba(0, 0, 0, 0.95), inset 0 0 10px rgba(0, 0, 0, 0.8);
+  --text-primary: #e6dcc5;
+  --text-secondary: #969080;
+  --text-muted: #80653c;
+  --accent: #c5a15a;
+  --accent-primary: #c5a15a;
+  --accent-hover: #eac477;
+  --accent-muted: #80653c;
+  --accent-glow: rgba(234, 196, 119, 0.35);
+  --accent-subtle: rgba(197, 161, 90, 0.2);
+  --shadow-dock: 0 20px 50px rgba(0, 0, 0, 0.95), 0 0 30px rgba(197, 161, 90, 0.15);
+  --toggle-bg: #111310;
+  --modal-bg: #111310;
+  --font-fantasy: 'Cinzel', 'Cormorant Garamond', Georgia, serif;
+}
+
+[data-theme="eldenring"] .glass-surface {
+  background: transparent !important;
+  position: relative;
+}
+
+/* Elden Ring Game Cards */
+[data-theme="eldenring"] .glass-card {
+  border-radius: 6px !important;
+  background: linear-gradient(180deg, rgba(24, 26, 20, 0.90) 0%, rgba(14, 16, 12, 0.95) 100%), url('/eldenring/textures/elden_damask_pattern.png') repeat !important;
+  background-size: 160px auto !important;
+  border: 1px solid rgba(197, 161, 90, 0.45) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(234, 196, 119, 0.25) !important;
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* Subtle Engraved Corner Highlights */
+[data-theme="eldenring"] .glass-card::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  border: 1px solid rgba(197, 161, 90, 0.12);
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+[data-theme="eldenring"] .glass-card:hover {
+  transform: translateY(-2px) scale(1.03) !important;
+  background: linear-gradient(180deg, rgba(34, 36, 26, 0.92) 0%, rgba(20, 22, 16, 0.96) 100%), url('/eldenring/textures/elden_damask_pattern.png') repeat !important;
+  background-size: 160px auto !important;
+  border-color: #eac477 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.9), 0 0 16px rgba(234, 196, 119, 0.4), inset 0 0 12px rgba(197, 161, 90, 0.25) !important;
+}
+
+[data-theme="eldenring"] .glass-card [style*="color: var(--text-primary)"],
+[data-theme="eldenring"] .glass-card > div:last-child {
+  color: #e6dcc5 !important;
+  font-family: var(--font-fantasy);
+  font-weight: 600 !important;
+  letter-spacing: 0.4px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95);
+}
+
+/* Elden Ring Add Game Card */
+[data-theme="eldenring"] .btn-add-card {
+  border: 1px dashed rgba(197, 161, 90, 0.5) !important;
+  background: linear-gradient(180deg, rgba(22, 24, 18, 0.88) 0%, rgba(13, 15, 11, 0.94) 100%), url('/eldenring/textures/elden_damask_pattern.png') repeat !important;
+  background-size: 160px auto !important;
+  border-radius: 6px !important;
+  color: #c5a15a !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.7), inset 0 0 10px rgba(0, 0, 0, 0.8) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+[data-theme="eldenring"] .btn-add-card:hover {
+  background: linear-gradient(180deg, rgba(32, 35, 25, 0.92) 0%, rgba(20, 22, 16, 0.96) 100%), url('/eldenring/textures/elden_damask_pattern.png') repeat !important;
+  background-size: 160px auto !important;
+  border-color: #eac477 !important;
+  color: #eac477 !important;
+  box-shadow: 0 0 16px rgba(234, 196, 119, 0.45), inset 0 0 10px rgba(197, 161, 90, 0.3) !important;
+  transform: translateY(-2px) scale(1.02) !important;
+}
+
+/* Elden Ring Sidebar */
+[data-theme="eldenring"] aside {
+  background: linear-gradient(180deg, rgba(16, 18, 14, 0.96) 0%, rgba(10, 12, 9, 0.98) 100%), url('/eldenring/textures/elden_damask_pattern.png') repeat !important;
+  background-size: 160px auto !important;
+  border-color: rgba(197, 161, 90, 0.35) !important;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.85);
+}
+
+[data-theme="eldenring"] aside button {
+  border-radius: 8px !important;
+  border: 1px solid rgba(197, 161, 90, 0.35) !important;
+  background: #171813 !important;
+  color: #c5a15a !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(234, 196, 119, 0.15) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+[data-theme="eldenring"] aside button:hover {
+  border-color: #eac477 !important;
+  background: #23251c !important;
+  color: #eac477 !important;
+  box-shadow: 0 0 12px rgba(234, 196, 119, 0.45), inset 0 0 6px rgba(197, 161, 90, 0.25) !important;
+}
+
+[data-theme="eldenring"] aside button[style*="background: var(--text-primary)"],
+[data-theme="eldenring"] aside button.is-active {
+  background: linear-gradient(135deg, #2b2618 0%, #171813 100%) !important;
+  border: 1px solid #eac477 !important;
+  color: #eac477 !important;
+  box-shadow: 0 0 16px rgba(234, 196, 119, 0.5), inset 0 0 8px rgba(197, 161, 90, 0.35) !important;
+}
+
+/* Sidebar Active Indicator */
+[data-theme="eldenring"] aside div[style*="background: var(--text-primary)"] {
+  background: #eac477 !important;
+  box-shadow: 0 0 10px rgba(234, 196, 119, 0.85) !important;
+}
+
+/* Elden Ring Connector Hub Bar */
+[data-theme="eldenring"] .uiverse-vbar-container {
+  width: 48px !important;
+}
+
+[data-theme="eldenring"] .uiverse-vbar-article {
+  background: linear-gradient(180deg, rgba(18, 20, 15, 0.96) 0%, rgba(11, 13, 10, 0.98) 100%), url('/eldenring/textures/elden_damask_pattern.png') repeat !important;
+  background-size: 140px auto !important;
+  border: 1px solid rgba(197, 161, 90, 0.45) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.9), 0 0 12px rgba(197, 161, 90, 0.2) !important;
+  padding: 4px 3px !important;
+  gap: 4px !important;
+}
+
+[data-theme="eldenring"] .uiverse-vbar-item {
+  color: #969080 !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-theme="eldenring"] .uiverse-vbar-item:hover svg,
+[data-theme="eldenring"] .uiverse-vbar-item.is-active svg {
+  color: #eac477 !important;
+  fill: #eac477 !important;
+  filter: drop-shadow(0 0 8px rgba(234, 196, 119, 0.8)) !important;
+}
+
+
+/* Header & Footer */
+[data-theme="eldenring"] header {
+  background: rgba(17, 19, 16, 0.9) !important;
+  border-bottom: 1px solid rgba(197, 161, 90, 0.35) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(8px);
+}
+
+[data-theme="eldenring"] header [style*="color: var(--text-primary)"] {
+  color: #eac477 !important;
+  font-family: var(--font-fantasy);
+  letter-spacing: 0.8px;
+  text-shadow: 0 0 10px rgba(197, 161, 90, 0.45);
+}
+
+[data-theme="eldenring"] footer {
+  background: rgba(17, 19, 16, 0.94) !important;
+  border-top: 1px solid rgba(197, 161, 90, 0.35) !important;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(8px);
+}
+
+/* Settings View Modal */
+[data-theme="eldenring"] .settings-modal-view {
+  background: linear-gradient(180deg, rgba(16, 18, 14, 0.75) 0%, rgba(10, 12, 9, 0.88) 100%), url('/eldenring/backgrounds/elden_great_rune_stone_slab.png') center / cover no-repeat !important;
+  border: 1px solid rgba(197, 161, 90, 0.55) !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95), 0 0 28px rgba(197, 161, 90, 0.35) !important;
+  color: #e6dcc5 !important;
+}
+
+[data-theme="eldenring"] .settings-modal-view h2,
+[data-theme="eldenring"] .settings-modal-view h3 {
+  font-family: var(--font-fantasy);
+  color: #eac477 !important;
+  letter-spacing: 0.5px;
+}
+
+/* Context Menus */
+[data-theme="eldenring"] .glass-card-context-menu,
+[data-theme="eldenring"] .group-context-menu {
+  background: rgba(17, 19, 16, 0.96) !important;
+  border: 1px solid rgba(197, 161, 90, 0.45) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.9), 0 0 12px rgba(197, 161, 90, 0.25) !important;
+  border-radius: 6px !important;
+}
+
+[data-theme="eldenring"] .glass-card-context-menu button,
+[data-theme="eldenring"] .group-context-menu button {
+  color: #e6dcc5 !important;
+  font-family: var(--font-fantasy);
+  font-size: 11.5px;
+  letter-spacing: 0.3px;
+  transition: all 0.15s ease;
+}
+
+[data-theme="eldenring"] .glass-card-context-menu button:hover,
+[data-theme="eldenring"] .group-context-menu button:hover {
+  background: rgba(197, 161, 90, 0.16) !important;
+  color: #eac477 !important;
 }
 
 
@@ -1010,72 +1329,64 @@ input {
 @keyframes hubModuleEnterRight {
   0% {
     opacity: 0;
-    transform: translateX(24px) scale(0.95);
-  }
-  60% {
-    opacity: 1;
-    transform: translateX(-3px) scale(1.01);
+    transform: translateX(18px);
   }
   100% {
     opacity: 1;
-    transform: translateX(0) scale(1);
+    transform: translateX(0);
   }
 }
 
 @keyframes hubModuleEnterLeft {
   0% {
     opacity: 0;
-    transform: translateX(-24px) scale(0.95);
-  }
-  60% {
-    opacity: 1;
-    transform: translateX(3px) scale(1.01);
+    transform: translateX(-18px);
   }
   100% {
     opacity: 1;
-    transform: translateX(0) scale(1);
+    transform: translateX(0);
   }
 }
 
 @keyframes hubModuleExitRight {
   0% {
     opacity: 1;
-    transform: translateX(0) scale(1);
+    transform: translateX(0);
   }
   100% {
     opacity: 0;
-    transform: translateX(20px) scale(0.94);
+    transform: translateX(16px);
   }
 }
 
 @keyframes hubModuleExitLeft {
   0% {
     opacity: 1;
-    transform: translateX(0) scale(1);
+    transform: translateX(0);
   }
   100% {
     opacity: 0;
-    transform: translateX(-20px) scale(0.94);
+    transform: translateX(-16px);
   }
 }
 
 .hub-module-enter-right {
-  animation: hubModuleEnterRight 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: hubModuleEnterRight 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   will-change: transform, opacity;
 }
 
 .hub-module-enter-left {
-  animation: hubModuleEnterLeft 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: hubModuleEnterLeft 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   will-change: transform, opacity;
 }
 
 .hub-module-exit-right {
-  animation: hubModuleExitRight 0.20s cubic-bezier(0.4, 0, 1, 1) forwards;
+  animation: hubModuleExitRight 0.18s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   will-change: transform, opacity;
 }
 
 .hub-module-exit-left {
-  animation: hubModuleExitLeft 0.20s cubic-bezier(0.4, 0, 1, 1) forwards;
+  animation: hubModuleExitLeft 0.18s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   will-change: transform, opacity;
 }
 
@@ -1098,7 +1409,7 @@ input {
   inset: 0;
   border-radius: 12px;
   background-color: #0b0b0e;
-  background-image: url('../deathnote/textures/texture_dark_3.jpg');
+  background-image: url('/deathnote/textures/texture_dark_3.jpg');
   background-size: cover;
   background-position: center;
   border: 1.5px solid #3c1e22;
@@ -1314,8 +1625,9 @@ input {
   --txt-sec: #96908a !important;
   --border-col: #a3262d !important;
   --txt-status: #ffffff !important;
-  background-image: url('../deathnote/textures/texture_dark_1.jpg') !important;
+  background-image: linear-gradient(180deg, rgba(12, 12, 15, 0.82) 0%, rgba(10, 10, 12, 0.94) 100%), url('/deathnote/backgrounds/wallpaper_main_2.jpg') !important;
   background-size: cover !important;
+  background-position: center !important;
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(163, 38, 45, 0.45) !important;
 }
 
@@ -1336,8 +1648,9 @@ input {
 }
 
 [data-theme="deathnote"] .uiverse-weather-wrap .card {
-  background: #0f0f12 url('../deathnote/textures/texture_dark_2.jpg') !important;
+  background: linear-gradient(180deg, rgba(12, 12, 15, 0.78) 0%, rgba(8, 8, 10, 0.92) 100%), url('/deathnote/backgrounds/wallpaper_main_3.jpg') !important;
   background-size: cover !important;
+  background-position: center !important;
   color: #eae6df !important;
   border: 1px solid rgba(163, 38, 45, 0.45) !important;
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.95), inset 0 0 16px rgba(0, 0, 0, 0.8) !important;
@@ -1375,8 +1688,9 @@ input {
 }
 
 [data-theme="deathnote"] .uiverse-music-container .player-card {
-  background: #0f0f12 url('../deathnote/textures/texture_dark_1.jpg') !important;
+  background: linear-gradient(180deg, rgba(14, 12, 14, 0.8) 0%, rgba(8, 8, 10, 0.94) 100%), url('/deathnote/backgrounds/wallpaper_main_1.jpg') !important;
   background-size: cover !important;
+  background-position: center 25% !important;
   border: 1.5px solid rgba(163, 38, 45, 0.45) !important;
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.95), inset 0 0 16px rgba(0, 0, 0, 0.8) !important;
 }
@@ -1399,5 +1713,904 @@ input {
   border-color: #a3262d !important;
   box-shadow: 0 4px 16px rgba(163, 38, 45, 0.45) !important;
 }
+
+/* Elden Ring Thematic Styling for Companion Modules */
+[data-theme="eldenring"] .dexter-calendar-card {
+  --bg: #111310 !important;
+  --txt: #e6dcc5 !important;
+  --txt-sec: #969080 !important;
+  --border-col: #c5a15a !important;
+  --txt-status: #eac477 !important;
+  background-image: linear-gradient(180deg, rgba(17, 19, 16, 0.85) 0%, rgba(8, 10, 9, 0.95) 100%), url('/eldenring/backgrounds/vertical_moon_ruins_wallpaper.png') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  border: 1px solid rgba(197, 161, 90, 0.45) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.95), 0 0 16px rgba(197, 161, 90, 0.2) !important;
+}
+
+[data-theme="eldenring"] .dexter-calendar-card .day-header {
+  color: #eac477 !important;
+  font-family: var(--font-fantasy);
+}
+
+[data-theme="eldenring"] .dexter-calendar-card .date-cell {
+  color: #e6dcc5 !important;
+}
+
+[data-theme="eldenring"] .dexter-calendar-card .date-cell.today {
+  background-color: #c5a15a !important;
+  color: #080a09 !important;
+  font-weight: 800 !important;
+  box-shadow: 0 0 12px rgba(234, 196, 119, 0.85) !important;
+}
+
+[data-theme="eldenring"] .uiverse-weather-wrap .card {
+  background: linear-gradient(180deg, rgba(17, 19, 16, 0.82) 0%, rgba(8, 10, 9, 0.95) 100%), url('/eldenring/backgrounds/vertical_golden_tree_wallpaper.png') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  color: #e6dcc5 !important;
+  border: 1px solid rgba(197, 161, 90, 0.45) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.95), inset 0 0 16px rgba(0, 0, 0, 0.8) !important;
+}
+
+[data-theme="eldenring"] .uiverse-weather-wrap .main-temp {
+  color: #eac477 !important;
+  font-family: var(--font-fantasy);
+}
+
+[data-theme="eldenring"] .uiverse-weather-wrap .main-sub,
+[data-theme="eldenring"] .uiverse-weather-wrap .weather-date-badge {
+  color: #c5a15a !important;
+}
+
+[data-theme="eldenring"] .uiverse-weather-wrap .card2 {
+  background: rgba(17, 19, 16, 0.95) !important;
+  border-color: rgba(197, 161, 90, 0.35) !important;
+}
+
+[data-theme="eldenring"] .uiverse-weather-wrap .humiditytext,
+[data-theme="eldenring"] .uiverse-weather-wrap .airtext,
+[data-theme="eldenring"] .uiverse-weather-wrap .aqi,
+[data-theme="eldenring"] .uiverse-weather-wrap .realfeel {
+  color: #969080 !important;
+}
+
+[data-theme="eldenring"] .uiverse-weather-wrap .forecast-day,
+[data-theme="eldenring"] .uiverse-weather-wrap .forecast-temp {
+  color: #e6dcc5 !important;
+}
+
+[data-theme="eldenring"] .uiverse-weather-wrap .forecast-date {
+  color: #969080 !important;
+}
+
+[data-theme="eldenring"] .uiverse-music-container .player-card {
+  background: linear-gradient(180deg, rgba(17, 19, 16, 0.84) 0%, rgba(8, 10, 9, 0.96) 100%), url('/eldenring/backgrounds/vertical_erdtree_wallpaper.png') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  border: 1.5px solid rgba(197, 161, 90, 0.45) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.95), inset 0 0 16px rgba(0, 0, 0, 0.8) !important;
+}
+
+[data-theme="eldenring"] .uiverse-music-container .track-title {
+  color: #eac477 !important;
+  font-family: var(--font-fantasy);
+  letter-spacing: 0.5px;
+}
+
+[data-theme="eldenring"] .uiverse-music-container .track-artist {
+  color: #c5a15a !important;
+}
+
+[data-theme="eldenring"] .uiverse-music-container .time-label {
+  color: #969080 !important;
+}
+
+[data-theme="eldenring"] .uiverse-music-container .top-disc-svg {
+  border-color: #c5a15a !important;
+  box-shadow: 0 4px 16px rgba(234, 196, 119, 0.45) !important;
+}
+
+[data-theme="eldenring"] .uiverse-music-container .ctrl-btn-play,
+[data-theme="eldenring"] .uiverse-music-container button[style*="background: rgb(139, 92, 246)"],
+[data-theme="eldenring"] .uiverse-music-container button[style*="background: #8b5cf6"] {
+  background: linear-gradient(135deg, #eac477 0%, #c5a15a 100%) !important;
+  color: #080a09 !important;
+  box-shadow: 0 0 16px rgba(234, 196, 119, 0.7) !important;
+}
+
+[data-theme="eldenring"] .uiverse-music-container .ctrl-btn-play svg {
+  fill: #080a09 !important;
+  color: #080a09 !important;
+}
+
+[data-theme="eldenring"] .uiverse-weather-wrap .card3,
+[data-theme="eldenring"] .uiverse-weather-wrap button[style*="background: rgb(34, 197, 94)"],
+[data-theme="eldenring"] .uiverse-weather-wrap button[style*="background: #22c55e"],
+[data-theme="eldenring"] .uiverse-weather-wrap button:last-child {
+  background: linear-gradient(135deg, #2b2618 0%, #171813 100%) !important;
+  border: 1px solid #c5a15a !important;
+  color: #eac477 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(234, 196, 119, 0.3) !important;
+  font-family: var(--font-fantasy) !important;
+  letter-spacing: 0.5px !important;
+}
+
+[data-theme="eldenring"] .uiverse-weather-wrap .city-pill {
+  background: #171813 !important;
+  border: 1px solid rgba(197, 161, 90, 0.45) !important;
+  color: #e6dcc5 !important;
+  font-family: var(--font-fantasy) !important;
+}
+
+[data-theme="eldenring"] .uiverse-weather-wrap .city-pill.active,
+[data-theme="eldenring"] .uiverse-weather-wrap .city-pill[style*="background: #ffffff"],
+[data-theme="eldenring"] .uiverse-weather-wrap .city-pill[style*="background: rgb(255, 255, 255)"] {
+  background: linear-gradient(135deg, #2c2719 0%, #171813 100%) !important;
+  border-color: #eac477 !important;
+  color: #eac477 !important;
+  box-shadow: 0 0 10px rgba(234, 196, 119, 0.5) !important;
+}
+
+[data-theme="eldenring"] .dexter-calendar-card [style*="background-color: rgb(239, 68, 68)"],
+[data-theme="eldenring"] .dexter-calendar-card [style*="background: #ef4444"] {
+  background: linear-gradient(135deg, #eac477 0%, #c5a15a 100%) !important;
+  color: #080a09 !important;
+  font-weight: 800 !important;
+  box-shadow: 0 0 12px rgba(234, 196, 119, 0.85) !important;
+}
+
+[data-theme="eldenring"] .settings-modal-view [style*="background: var(--text-primary)"],
+[data-theme="eldenring"] .settings-modal-view [style*="background: rgb(248, 250, 252)"],
+[data-theme="eldenring"] .settings-modal-view [style*="background: #f8fafc"] {
+  background: linear-gradient(135deg, #2c2719 0%, #171813 100%) !important;
+  border: 1px solid #eac477 !important;
+  color: #eac477 !important;
+  box-shadow: 0 0 12px rgba(234, 196, 119, 0.45), inset 0 0 6px rgba(197, 161, 90, 0.3) !important;
+}
+
+[data-theme="eldenring"] .settings-modal-view input[type="range"]::-webkit-slider-thumb {
+  background: #eac477 !important;
+  box-shadow: 0 0 10px rgba(234, 196, 119, 0.85) !important;
+}
+
+/* Atmospheric Embers Floating Drift Animation */
+@keyframes eldenEmbersDrift {
+  0% {
+    background-position: 0 0;
+    opacity: 0.22;
+  }
+  50% {
+    background-position: 30px -40px;
+    opacity: 0.32;
+  }
+  100% {
+    background-position: 60px -80px;
+    opacity: 0.22;
+  }
+}
+
+.eldenring-embers-drift {
+  animation: eldenEmbersDrift 14s ease-in-out infinite alternate;
+}
+
+/* ========================================================
+   ONE PIECE THEME: GRAND LINE PIRATE ADVENTURE TRANSFORMATION
+   ======================================================== */
+[data-theme="onepiece"] {
+  --bg-dock: #0e1620;
+  --bg-canvas: #0e1620;
+  --bg-header: rgba(20, 28, 38, 0.92);
+  --bg-footer: rgba(20, 28, 38, 0.95);
+  --bg-surface: #182230;
+  --bg-surface-hover: #223145;
+  --bg-surface-active: #2c3e56;
+  --bg-card: #192330;
+  --bg-sidebar: #121a24;
+  --border-subtle: rgba(245, 158, 11, 0.35);
+  --border-hover: #fbbf24;
+  --border-strong: #f59e0b;
+  --border-focus: #f59e0b;
+  --btn-border: rgba(245, 158, 11, 0.35);
+  --btn-border-hover: #fbbf24;
+  --btn-shadow: 0 4px 12px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(245, 158, 11, 0.2);
+  --btn-shadow-hover: 0 6px 18px rgba(0, 0, 0, 0.9), 0 0 14px rgba(245, 158, 11, 0.45);
+  --btn-shadow-active: 0 2px 6px rgba(0, 0, 0, 0.95), inset 0 0 10px rgba(0, 0, 0, 0.8);
+  --text-primary: #fef3c7;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --accent: #f59e0b;
+  --accent-primary: #f59e0b;
+  --accent-hover: #fbbf24;
+  --accent-muted: #b45309;
+  --accent-glow: rgba(245, 158, 11, 0.4);
+  --accent-subtle: rgba(245, 158, 11, 0.2);
+  --shadow-dock: 0 20px 50px rgba(0, 0, 0, 0.95), 0 0 30px rgba(245, 158, 11, 0.15);
+  --toggle-bg: #182230;
+  --modal-bg: #141d28;
+  --font-onepiece: 'OnePieceFont', 'Cinzel', 'Impact', sans-serif;
+}
+
+[data-theme="onepiece"] .glass-surface {
+  background: transparent !important;
+  position: relative;
+}
+
+/* One Piece Game Cards */
+[data-theme="onepiece"] .glass-card {
+  border-radius: 6px !important;
+  background: #182330 linear-gradient(180deg, rgba(24, 35, 48, 0.85) 0%, rgba(16, 24, 34, 0.95) 100%) !important;
+  border: 1px solid rgba(245, 158, 11, 0.38) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(245, 158, 11, 0.2) !important;
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+[data-theme="onepiece"] .glass-card::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  border: 1px solid rgba(245, 158, 11, 0.14);
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+[data-theme="onepiece"] .glass-card:hover {
+  transform: translateY(-2px) scale(1.03) !important;
+  border-color: #fbbf24 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.9), 0 0 16px rgba(245, 158, 11, 0.5), inset 0 0 10px rgba(245, 158, 11, 0.2) !important;
+}
+
+[data-theme="onepiece"] .glass-card [style*="color: var(--text-primary)"],
+[data-theme="onepiece"] .glass-card > div:last-child {
+  color: #fef3c7 !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.3px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95);
+}
+
+/* One Piece Add Game Card */
+[data-theme="onepiece"] .btn-add-card {
+  border: 1px dashed rgba(245, 158, 11, 0.5) !important;
+  background: #182330 linear-gradient(180deg, rgba(24, 35, 48, 0.8) 0%, rgba(16, 24, 34, 0.9) 100%) !important;
+  border-radius: 6px !important;
+  color: #f59e0b !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.7), inset 0 0 10px rgba(0, 0, 0, 0.8) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+[data-theme="onepiece"] .btn-add-card:hover {
+  background: #202e40 !important;
+  border-color: #fbbf24 !important;
+  color: #fbbf24 !important;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.55), inset 0 0 10px rgba(245, 158, 11, 0.3) !important;
+  transform: translateY(-2px) scale(1.02) !important;
+}
+
+/* One Piece Sidebar */
+[data-theme="onepiece"] aside {
+  background: #141d28 linear-gradient(180deg, rgba(20, 28, 38, 0.96) 0%, rgba(10, 15, 22, 0.98) 100%) !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.85);
+}
+
+[data-theme="onepiece"] aside button {
+  border-radius: 8px !important;
+  border: 1px solid rgba(245, 158, 11, 0.35) !important;
+  background: #1a2432 !important;
+  color: #f59e0b !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(245, 158, 11, 0.2) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+[data-theme="onepiece"] aside button:hover {
+  border-color: #fbbf24 !important;
+  background: #243346 !important;
+  color: #fbbf24 !important;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.45), inset 0 0 6px rgba(245, 158, 11, 0.25) !important;
+}
+
+[data-theme="onepiece"] aside button[style*="background: var(--text-primary)"],
+[data-theme="onepiece"] aside button.is-active {
+  background: linear-gradient(135deg, #3d2b15 0%, #1f1a14 100%) !important;
+  border: 1px solid #f59e0b !important;
+  color: #fde047 !important;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.55), inset 0 0 8px rgba(245, 158, 11, 0.35) !important;
+}
+
+/* Sidebar Active Indicator: Straw Hat Crimson Red */
+[data-theme="onepiece"] aside div[style*="background: var(--text-primary)"] {
+  background: #dc2626 !important;
+  box-shadow: 0 0 10px rgba(220, 38, 38, 0.85) !important;
+}
+
+/* One Piece Connector Hub Bar */
+[data-theme="onepiece"] .uiverse-vbar-article {
+  background: #141d28 linear-gradient(180deg, rgba(20, 28, 38, 0.95) 0%, rgba(10, 15, 22, 0.98) 100%) !important;
+  border: 1px solid rgba(245, 158, 11, 0.45) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.9), 0 0 12px rgba(245, 158, 11, 0.25) !important;
+}
+
+[data-theme="onepiece"] .uiverse-vbar-item {
+  color: #94a3b8 !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-theme="onepiece"] .uiverse-vbar-item:hover svg,
+[data-theme="onepiece"] .uiverse-vbar-item.is-active svg {
+  color: #f59e0b !important;
+  fill: #f59e0b !important;
+  filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.8)) !important;
+}
+
+[data-theme="onepiece"] .onepiece-hub-hat {
+  display: block !important;
+}
+
+/* Header & Footer */
+[data-theme="onepiece"] header {
+  background: rgba(20, 28, 38, 0.92) !important;
+  border-bottom: 1px solid rgba(245, 158, 11, 0.35) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(8px);
+}
+
+[data-theme="onepiece"] header [style*="color: var(--text-primary)"],
+[data-theme="onepiece"] header span {
+  font-family: var(--font-onepiece) !important;
+  font-size: 20px !important;
+  color: #f59e0b !important;
+  letter-spacing: 1.5px !important;
+  text-shadow: 0 0 10px rgba(245, 158, 11, 0.55);
+}
+
+[data-theme="onepiece"] header .btn-dock {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+[data-theme="onepiece"] header .btn-dock:hover {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  transform: translateY(-1px) scale(1.08) !important;
+  filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.7)) !important;
+}
+
+[data-theme="onepiece"] footer {
+  background: rgba(20, 28, 38, 0.95) !important;
+  border-top: 1px solid rgba(245, 158, 11, 0.35) !important;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(8px);
+}
+
+/* Settings View Modal */
+[data-theme="onepiece"] .settings-modal-view {
+  background: #141d28 linear-gradient(180deg, rgba(20, 28, 38, 0.98) 0%, rgba(10, 15, 22, 0.98) 100%) !important;
+  border: 1px solid rgba(245, 158, 11, 0.45) !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95), 0 0 24px rgba(245, 158, 11, 0.25) !important;
+  color: #fef3c7 !important;
+}
+
+[data-theme="onepiece"] .settings-modal-view h2,
+[data-theme="onepiece"] .settings-modal-view h3 {
+  color: #f59e0b !important;
+  letter-spacing: 0.5px;
+}
+
+/* Context Menus */
+[data-theme="onepiece"] .glass-card-context-menu,
+[data-theme="onepiece"] .group-context-menu {
+  background: rgba(20, 28, 38, 0.96) !important;
+  border: 1px solid rgba(245, 158, 11, 0.45) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.9), 0 0 12px rgba(245, 158, 11, 0.25) !important;
+  border-radius: 6px !important;
+}
+
+[data-theme="onepiece"] .glass-card-context-menu button,
+[data-theme="onepiece"] .group-context-menu button {
+  color: #fef3c7 !important;
+  font-size: 11.5px;
+  letter-spacing: 0.3px;
+  transition: all 0.15s ease;
+}
+
+[data-theme="onepiece"] .glass-card-context-menu button:hover,
+[data-theme="onepiece"] .group-context-menu button:hover {
+  background: rgba(245, 158, 11, 0.18) !important;
+  color: #fbbf24 !important;
+}
+
+/* Weather Card */
+[data-theme="onepiece"] .uiverse-weather-wrap .card {
+  background: linear-gradient(180deg, rgba(20, 32, 48, 0.85) 0%, rgba(14, 22, 33, 0.96) 100%), url('/onepiece/backgrounds/upper_sky_ocean_background.png') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.45) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.95), inset 0 0 16px rgba(0, 0, 0, 0.8) !important;
+}
+
+[data-theme="onepiece"] .uiverse-weather-wrap .main-temp {
+  color: #fde047 !important;
+}
+
+[data-theme="onepiece"] .uiverse-weather-wrap .main-sub,
+[data-theme="onepiece"] .uiverse-weather-wrap .weather-date-badge {
+  color: #f59e0b !important;
+}
+
+[data-theme="onepiece"] .uiverse-weather-wrap .card2 {
+  background: rgba(20, 28, 38, 0.95) !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+}
+
+[data-theme="onepiece"] .uiverse-weather-wrap .humiditytext,
+[data-theme="onepiece"] .uiverse-weather-wrap .airtext,
+[data-theme="onepiece"] .uiverse-weather-wrap .aqi,
+[data-theme="onepiece"] .uiverse-weather-wrap .realfeel {
+  color: #cbd5e1 !important;
+}
+
+[data-theme="onepiece"] .uiverse-weather-wrap .forecast-day,
+[data-theme="onepiece"] .uiverse-weather-wrap .forecast-temp {
+  color: #fef3c7 !important;
+}
+
+[data-theme="onepiece"] .uiverse-weather-wrap .forecast-date {
+  color: #94a3b8 !important;
+}
+
+[data-theme="onepiece"] .uiverse-weather-wrap .card3,
+[data-theme="onepiece"] .uiverse-weather-wrap button[style*="background: rgb(34, 197, 94)"],
+[data-theme="onepiece"] .uiverse-weather-wrap button[style*="background: #22c55e"],
+[data-theme="onepiece"] .uiverse-weather-wrap button:last-child {
+  background: linear-gradient(135deg, #3d2b15 0%, #1f1a14 100%) !important;
+  border: 1px solid #f59e0b !important;
+  color: #fde047 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(245, 158, 11, 0.3) !important;
+  letter-spacing: 0.5px !important;
+}
+
+[data-theme="onepiece"] .uiverse-weather-wrap .city-pill {
+  background: #182230 !important;
+  border: 1px solid rgba(245, 158, 11, 0.45) !important;
+  color: #fef3c7 !important;
+}
+
+[data-theme="onepiece"] .uiverse-weather-wrap .city-pill.active,
+[data-theme="onepiece"] .uiverse-weather-wrap .city-pill[style*="background: #ffffff"],
+[data-theme="onepiece"] .uiverse-weather-wrap .city-pill[style*="background: rgb(255, 255, 255)"] {
+  background: linear-gradient(135deg, #3d2b15 0%, #1f1a14 100%) !important;
+  border-color: #f59e0b !important;
+  color: #fde047 !important;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.5) !important;
+}
+
+/* Music Companion */
+[data-theme="onepiece"] .uiverse-music-container .player-card {
+  background: linear-gradient(180deg, rgba(20, 28, 38, 0.84) 0%, rgba(10, 15, 22, 0.96) 100%), url('/onepiece/backgrounds/hero_sea_ship_background.png') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.45) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.95), inset 0 0 16px rgba(0, 0, 0, 0.8) !important;
+}
+
+[data-theme="onepiece"] .uiverse-music-container .track-title {
+  color: #fde047 !important;
+  letter-spacing: 0.5px;
+}
+
+[data-theme="onepiece"] .uiverse-music-container .track-artist {
+  color: #f59e0b !important;
+}
+
+[data-theme="onepiece"] .uiverse-music-container .time-label {
+  color: #94a3b8 !important;
+}
+
+[data-theme="onepiece"] .uiverse-music-container .top-disc-svg {
+  border-color: #f59e0b !important;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.45) !important;
+}
+
+[data-theme="onepiece"] .uiverse-music-container .ctrl-btn-play,
+[data-theme="onepiece"] .uiverse-music-container button[style*="background: rgb(139, 92, 246)"],
+[data-theme="onepiece"] .uiverse-music-container button[style*="background: #8b5cf6"] {
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 16px rgba(220, 38, 38, 0.7) !important;
+}
+
+[data-theme="onepiece"] .uiverse-music-container .ctrl-btn-play svg {
+  fill: #ffffff !important;
+  color: #ffffff !important;
+}
+
+/* Calendar Companion */
+[data-theme="onepiece"] .dexter-calendar-card {
+  background: linear-gradient(180deg, rgba(20, 28, 38, 0.85) 0%, rgba(12, 18, 26, 0.96) 100%), url('/onepiece/backgrounds/straw_hat_crew_over_skull_island.png') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.45) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.95), inset 0 0 16px rgba(0, 0, 0, 0.8) !important;
+}
+
+[data-theme="onepiece"] .dexter-calendar-card [style*="background-color: rgb(239, 68, 68)"],
+[data-theme="onepiece"] .dexter-calendar-card [style*="background: #ef4444"] {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  box-shadow: 0 0 12px rgba(220, 38, 38, 0.85) !important;
+}
+
+[data-theme="onepiece"] .settings-modal-view [style*="background: var(--text-primary)"],
+[data-theme="onepiece"] .settings-modal-view [style*="background: rgb(248, 250, 252)"],
+[data-theme="onepiece"] .settings-modal-view [style*="background: #f8fafc"] {
+  background: linear-gradient(135deg, #3d2b15 0%, #1f1a14 100%) !important;
+  border: 1px solid #f59e0b !important;
+  color: #fde047 !important;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.45), inset 0 0 6px rgba(245, 158, 11, 0.3) !important;
+}
+
+[data-theme="onepiece"] .settings-modal-view input[type="range"]::-webkit-slider-thumb {
+  background: #f59e0b !important;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.85) !important;
+}
+
+/* ========================================================
+   CANDY THEME: MAGICAL SUGAR FAIRY TALE TRANSFORMATION
+   ======================================================== */
+[data-theme="candy"] {
+  --bg-dock: #fff0f5;
+  --bg-canvas: #fff0f5;
+  --bg-header: rgba(255, 240, 245, 0.94);
+  --bg-footer: rgba(255, 240, 245, 0.96);
+  --bg-surface: #ffe4ed;
+  --bg-surface-hover: #fed7e2;
+  --bg-surface-active: #fbb6ce;
+  --bg-card: #fff5f8;
+  --bg-sidebar: #ffe8f0;
+  --border-subtle: rgba(244, 114, 182, 0.45);
+  --border-hover: #f43f5e;
+  --border-strong: #ec4899;
+  --border-focus: #f43f5e;
+  --btn-border: rgba(244, 114, 182, 0.45);
+  --btn-border-hover: #f43f5e;
+  --btn-shadow: 0 4px 12px rgba(244, 114, 182, 0.25), inset 0 1px 0 #ffffff;
+  --btn-shadow-hover: 0 6px 18px rgba(244, 63, 94, 0.35), 0 0 12px rgba(244, 114, 182, 0.45);
+  --btn-shadow-active: 0 2px 6px rgba(190, 24, 93, 0.4), inset 0 1px 4px rgba(0, 0, 0, 0.1);
+  --text-primary: #831843;
+  --text-secondary: #9d174d;
+  --text-muted: #be185d;
+  --accent: #ec4899;
+  --accent-primary: #ec4899;
+  --accent-hover: #f43f5e;
+  --accent-muted: #db2777;
+  --accent-glow: rgba(244, 114, 182, 0.45);
+  --accent-subtle: rgba(244, 114, 182, 0.2);
+  --shadow-dock: 0 20px 50px rgba(244, 114, 182, 0.3), 0 0 30px rgba(251, 207, 232, 0.5);
+  --toggle-bg: #ffe4ed;
+  --modal-bg: #fff0f5;
+}
+
+[data-theme="candy"] .glass-surface {
+  background: transparent !important;
+  position: relative;
+}
+
+/* Candy Game Cards */
+[data-theme="candy"] .glass-card {
+  border-radius: 12px !important;
+  background: #fff5f8 linear-gradient(180deg, #ffffff 0%, #fff0f5 100%) !important;
+  border: 2px solid #fbcfe8 !important;
+  box-shadow: 0 4px 14px rgba(244, 114, 182, 0.2), inset 0 1px 0 #ffffff !important;
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+[data-theme="candy"] .glass-card::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  border: 1px dashed rgba(244, 114, 182, 0.4);
+  border-radius: 9px;
+  pointer-events: none;
+}
+
+[data-theme="candy"] .glass-card:hover {
+  transform: translateY(-2px) scale(1.03) !important;
+  border-color: #f472b6 !important;
+  box-shadow: 0 8px 24px rgba(244, 114, 182, 0.35), 0 0 14px rgba(244, 114, 182, 0.4), inset 0 0 8px rgba(251, 207, 232, 0.5) !important;
+}
+
+[data-theme="candy"] .glass-card [style*="color: var(--text-primary)"],
+[data-theme="candy"] .glass-card > div:last-child {
+  color: #831843 !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.2px;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9);
+}
+
+/* Candy Add Game Card */
+[data-theme="candy"] .btn-add-card {
+  border: 2px dashed #f472b6 !important;
+  background: #fff0f5 linear-gradient(180deg, #ffffff 0%, #ffe4ed 100%) !important;
+  border-radius: 12px !important;
+  color: #db2777 !important;
+  box-shadow: 0 4px 14px rgba(244, 114, 182, 0.2), inset 0 1px 0 #ffffff !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+[data-theme="candy"] .btn-add-card:hover {
+  background: #ffe4ed !important;
+  border-color: #ec4899 !important;
+  color: #be185d !important;
+  box-shadow: 0 0 16px rgba(244, 114, 182, 0.4), inset 0 0 10px rgba(251, 207, 232, 0.4) !important;
+  transform: translateY(-2px) scale(1.02) !important;
+}
+
+/* Candy Sidebar */
+[data-theme="candy"] aside {
+  background: #fff0f5 linear-gradient(180deg, rgba(255, 240, 245, 0.95) 0%, rgba(255, 228, 237, 0.98) 100%) !important;
+  border-color: rgba(244, 114, 182, 0.4) !important;
+  box-shadow: inset 0 0 20px rgba(251, 207, 232, 0.5);
+}
+
+[data-theme="candy"] aside button {
+  border-radius: 12px !important;
+  border: 1.5px solid #fbcfe8 !important;
+  background: #fff5f8 !important;
+  color: #be185d !important;
+  box-shadow: 0 2px 8px rgba(244, 114, 182, 0.2), inset 0 1px 0 #ffffff !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+[data-theme="candy"] aside button:hover {
+  border-color: #f472b6 !important;
+  background: #ffe4ed !important;
+  color: #9d174d !important;
+  box-shadow: 0 0 12px rgba(244, 114, 182, 0.35) !important;
+}
+
+[data-theme="candy"] aside button[style*="background: var(--text-primary)"],
+[data-theme="candy"] aside button.is-active {
+  background: linear-gradient(135deg, #f43f5e 0%, #ec4899 100%) !important;
+  border: 1.5px solid #f43f5e !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 16px rgba(244, 63, 94, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Sidebar Active Indicator: Strawberry Charm Red */
+[data-theme="candy"] aside div[style*="background: var(--text-primary)"] {
+  background: #f43f5e !important;
+  box-shadow: 0 0 10px rgba(244, 63, 94, 0.85) !important;
+}
+
+/* Candy Connector Hub Bar */
+[data-theme="candy"] .uiverse-vbar-article {
+  background: #fff0f5 linear-gradient(180deg, rgba(255, 240, 245, 0.95) 0%, rgba(255, 228, 237, 0.98) 100%) !important;
+  border: 1.5px solid #fbcfe8 !important;
+  box-shadow: 0 8px 24px rgba(244, 114, 182, 0.3), 0 0 12px rgba(251, 207, 232, 0.4) !important;
+}
+
+[data-theme="candy"] .uiverse-vbar-item {
+  color: #be185d !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-theme="candy"] .uiverse-vbar-item:hover svg,
+[data-theme="candy"] .uiverse-vbar-item.is-active svg {
+  color: #f43f5e !important;
+  fill: #f43f5e !important;
+  filter: drop-shadow(0 0 8px rgba(244, 63, 94, 0.7)) !important;
+}
+
+[data-theme="candy"] .candy-hub-lollipop {
+  display: block !important;
+}
+
+/* Header & Footer */
+[data-theme="candy"] header {
+  background: rgba(255, 240, 245, 0.94) !important;
+  border-bottom: 1.5px solid rgba(244, 114, 182, 0.4) !important;
+  box-shadow: 0 4px 16px rgba(244, 114, 182, 0.2) !important;
+  backdrop-filter: blur(8px);
+}
+
+[data-theme="candy"] header [style*="color: var(--text-primary)"] {
+  color: #db2777 !important;
+  letter-spacing: 0.3px;
+  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.9), 0 0 10px rgba(244, 114, 182, 0.5);
+}
+
+[data-theme="candy"] footer {
+  background: rgba(255, 240, 245, 0.96) !important;
+  border-top: 1.5px solid rgba(244, 114, 182, 0.4) !important;
+  box-shadow: 0 -4px 16px rgba(244, 114, 182, 0.2) !important;
+  backdrop-filter: blur(8px);
+}
+
+/* Settings View Modal */
+[data-theme="candy"] .settings-modal-view {
+  background: #fff0f5 linear-gradient(180deg, rgba(255, 240, 245, 0.98) 0%, rgba(255, 228, 237, 0.98) 100%) !important;
+  border: 1.5px solid rgba(244, 114, 182, 0.45) !important;
+  box-shadow: 0 20px 60px rgba(244, 114, 182, 0.35), 0 0 24px rgba(251, 207, 232, 0.5) !important;
+  color: #831843 !important;
+}
+
+[data-theme="candy"] .settings-modal-view h2,
+[data-theme="candy"] .settings-modal-view h3 {
+  color: #db2777 !important;
+}
+
+[data-theme="candy"] .settings-modal-view [style*="color: var(--text-primary)"],
+[data-theme="candy"] .settings-modal-view span {
+  color: #831843 !important;
+}
+
+[data-theme="candy"] .glass-card-context-menu,
+[data-theme="candy"] .group-context-menu {
+  background: rgba(255, 240, 245, 0.98) !important;
+  border: 1.5px solid #f472b6 !important;
+  box-shadow: 0 12px 32px rgba(244, 114, 182, 0.35), 0 0 12px rgba(251, 207, 232, 0.5) !important;
+  border-radius: 10px !important;
+}
+
+[data-theme="candy"] .glass-card-context-menu button,
+[data-theme="candy"] .group-context-menu button {
+  color: #831843 !important;
+  font-size: 11.5px;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+[data-theme="candy"] .glass-card-context-menu button:hover,
+[data-theme="candy"] .group-context-menu button:hover {
+  background: rgba(244, 114, 182, 0.2) !important;
+  color: #db2777 !important;
+}
+
+[data-theme="candy"] .settings-modal-view [style*="background: var(--text-primary)"],
+[data-theme="candy"] .settings-modal-view [style*="background: rgb(248, 250, 252)"],
+[data-theme="candy"] .settings-modal-view [style*="background: #f8fafc"] {
+  background: linear-gradient(135deg, #f43f5e 0%, #ec4899 100%) !important;
+  border: 1px solid #f43f5e !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 12px rgba(244, 63, 94, 0.45) !important;
+}
+
+[data-theme="candy"] .settings-modal-view input[type="range"]::-webkit-slider-thumb {
+  background: #f43f5e !important;
+  box-shadow: 0 0 10px rgba(244, 63, 94, 0.85) !important;
+}
+
+/* Weather Card */
+[data-theme="candy"] .uiverse-weather-wrap .card {
+  background: linear-gradient(180deg, rgba(255, 240, 245, 0.85) 0%, rgba(255, 228, 237, 0.95) 100%), url('/candy/backgrounds/candy_castle_sky.png') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  border: 1.5px solid rgba(244, 114, 182, 0.45) !important;
+  box-shadow: 0 12px 36px rgba(244, 114, 182, 0.35), inset 0 0 16px rgba(255, 255, 255, 0.6) !important;
+}
+
+[data-theme="candy"] .uiverse-weather-wrap .main-temp {
+  color: #db2777 !important;
+}
+
+[data-theme="candy"] .uiverse-weather-wrap .main-sub,
+[data-theme="candy"] .uiverse-weather-wrap .weather-date-badge {
+  color: #ec4899 !important;
+}
+
+[data-theme="candy"] .uiverse-weather-wrap .card2 {
+  background: rgba(255, 240, 245, 0.95) !important;
+  border-color: rgba(244, 114, 182, 0.35) !important;
+}
+
+[data-theme="candy"] .uiverse-weather-wrap .humiditytext,
+[data-theme="candy"] .uiverse-weather-wrap .airtext,
+[data-theme="candy"] .uiverse-weather-wrap .aqi,
+[data-theme="candy"] .uiverse-weather-wrap .realfeel {
+  color: #9d174d !important;
+}
+
+[data-theme="candy"] .uiverse-weather-wrap .forecast-day,
+[data-theme="candy"] .uiverse-weather-wrap .forecast-temp {
+  color: #831843 !important;
+}
+
+[data-theme="candy"] .uiverse-weather-wrap .forecast-date {
+  color: #be185d !important;
+}
+
+[data-theme="candy"] .uiverse-weather-wrap .card3,
+[data-theme="candy"] .uiverse-weather-wrap button[style*="background: rgb(34, 197, 94)"],
+[data-theme="candy"] .uiverse-weather-wrap button[style*="background: #22c55e"],
+[data-theme="candy"] .uiverse-weather-wrap button:last-child {
+  background: linear-gradient(135deg, #f43f5e 0%, #ec4899 100%) !important;
+  border: 1px solid #f43f5e !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(244, 63, 94, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+}
+
+[data-theme="candy"] .uiverse-weather-wrap .city-pill {
+  background: #fff5f8 !important;
+  border: 1px solid rgba(244, 114, 182, 0.45) !important;
+  color: #831843 !important;
+}
+
+[data-theme="candy"] .uiverse-weather-wrap .city-pill.active,
+[data-theme="candy"] .uiverse-weather-wrap .city-pill[style*="background: #ffffff"],
+[data-theme="candy"] .uiverse-weather-wrap .city-pill[style*="background: rgb(255, 255, 255)"] {
+  background: linear-gradient(135deg, #f43f5e 0%, #ec4899 100%) !important;
+  border-color: #f43f5e !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 10px rgba(244, 63, 94, 0.4) !important;
+}
+
+/* Music Companion */
+[data-theme="candy"] .uiverse-music-container .player-card {
+  background: linear-gradient(180deg, rgba(255, 240, 245, 0.85) 0%, rgba(255, 228, 237, 0.95) 100%), url('/candy/backgrounds/candy_river_village.png') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  border: 1.5px solid rgba(244, 114, 182, 0.45) !important;
+  box-shadow: 0 12px 36px rgba(244, 114, 182, 0.35), inset 0 0 16px rgba(255, 255, 255, 0.6) !important;
+}
+
+[data-theme="candy"] .uiverse-music-container .track-title {
+  color: #db2777 !important;
+}
+
+[data-theme="candy"] .uiverse-music-container .track-artist {
+  color: #ec4899 !important;
+}
+
+[data-theme="candy"] .uiverse-music-container .time-label {
+  color: #9d174d !important;
+}
+
+[data-theme="candy"] .uiverse-music-container .top-disc-svg {
+  border-color: #f472b6 !important;
+  box-shadow: 0 4px 16px rgba(244, 114, 182, 0.45) !important;
+}
+
+[data-theme="candy"] .uiverse-music-container .ctrl-btn-play,
+[data-theme="candy"] .uiverse-music-container button[style*="background: rgb(139, 92, 246)"],
+[data-theme="candy"] .uiverse-music-container button[style*="background: #8b5cf6"] {
+  background: linear-gradient(135deg, #f43f5e 0%, #ec4899 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 16px rgba(244, 63, 94, 0.6) !important;
+}
+
+[data-theme="candy"] .uiverse-music-container .ctrl-btn-play svg {
+  fill: #ffffff !important;
+  color: #ffffff !important;
+}
+
+/* Calendar Companion */
+[data-theme="candy"] .dexter-calendar-card {
+  background: linear-gradient(180deg, rgba(255, 240, 245, 0.85) 0%, rgba(255, 228, 237, 0.95) 100%), url('/candy/backgrounds/sweet_home_candy_cottage.png') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  border: 1.5px solid rgba(244, 114, 182, 0.45) !important;
+  box-shadow: 0 12px 36px rgba(244, 114, 182, 0.35), inset 0 0 16px rgba(255, 255, 255, 0.6) !important;
+}
+
+[data-theme="candy"] .dexter-calendar-card [style*="background-color: rgb(239, 68, 68)"],
+[data-theme="candy"] .dexter-calendar-card [style*="background: #ef4444"] {
+  background: linear-gradient(135deg, #f43f5e 0%, #ec4899 100%) !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  box-shadow: 0 0 12px rgba(244, 63, 94, 0.8) !important;
+}
+
 
 

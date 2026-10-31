@@ -12,6 +12,15 @@ export const CalendarModule: React.FC<CalendarModuleProps> = ({
   const [viewDate, setViewDate] = useState(() => new Date());
   const [selectedDay, setSelectedDay] = useState(() => new Date().getDate());
   const [holidays, setHolidays] = useState<Record<string, string>>({});
+  const [currentTime, setCurrentTime] = useState(() => new Date());
+
+  // Live ticking working clock updated every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const today = new Date();
   const year = viewDate.getFullYear();
@@ -190,7 +199,7 @@ export const CalendarModule: React.FC<CalendarModuleProps> = ({
         })}
       </div>
 
-      {/* Footer Event / Holiday Entry */}
+      {/* Footer Event / Live Working Time Entry */}
       <div className="footer">
         <div className="event-entry">
           <span
@@ -200,14 +209,23 @@ export const CalendarModule: React.FC<CalendarModuleProps> = ({
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
-              maxWidth: '180px'
+              maxWidth: '170px'
             }}
-            title={selectedHoliday ? `${selectedHoliday} (${countryName})` : `Day ${selectedDay}: Schedule Clear`}
+            title={selectedHoliday ? `${selectedHoliday} (${countryName})` : (isCurrentMonth && selectedDay === today.getDate()) ? "Today's Schedule" : `Day ${selectedDay}: Schedule Clear`}
           >
-            {selectedHoliday ? `🎉 ${selectedHoliday}` : `Day ${selectedDay}: Daily Standup`}
+            {selectedHoliday ? `🎉 ${selectedHoliday}` : (isCurrentMonth && selectedDay === today.getDate()) ? "Today's Schedule" : `Day ${selectedDay}: Schedule Clear`}
           </span>
-          <span style={{ color: '#f7414a', fontWeight: 700, fontSize: '10px', whiteSpace: 'nowrap' }}>
-            {selectedHoliday ? countryCode : '10:00 AM'}
+          <span
+            style={{
+              color: '#f7414a',
+              fontWeight: 700,
+              fontSize: '10.5px',
+              whiteSpace: 'nowrap',
+              fontVariantNumeric: 'tabular-nums'
+            }}
+            title="Live Working Time"
+          >
+            {currentTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
           </span>
         </div>
       </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AppItem, SystemApp } from '../types/dock';
 import { Search, Check, Plus, AppWindow } from 'lucide-react';
 import { UiverseLoader } from './common/UiverseLoader';
+import { isGenericOrBrokenIcon } from '../utils/assets';
 
 interface QuickScannerProps {
   onAddScannedItem: (item: AppItem) => void;
@@ -256,9 +257,9 @@ export const QuickScanner: React.FC<QuickScannerProps> = ({
                     flexShrink: 0
                   }}
                 >
-                  {app.icon ? (
+                  {!isGenericOrBrokenIcon(app.icon) ? (
                     <img
-                      src={app.icon}
+                      src={app.icon!}
                       alt=""
                       style={{
                         width: '22px',

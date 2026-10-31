@@ -51,8 +51,10 @@ function calculateBounds(position, expanded, workArea, vertRatio = verticalRatio
   const centerY = Math.round(workArea.y + (workArea.height - h) * safeRatio);
   const tabCenterY = Math.round(workArea.y + (workArea.height - tabH) * safeRatio);
 
-  // Dynamic companion width: 340px when companion module is active, 54px when only Hub button is displayed, 0 in Clean Dock mode (moduleWidth < 0)
-  const companionW = expanded ? (moduleWidth > 54 ? 340 : (moduleWidth < 0 ? 0 : 54)) : 0;
+  // Companion width: always 340px when expanded (non-clean-dock) so the window NEVER resizes during module toggles.
+  // Clean Dock mode (moduleWidth < 0) = no companion area at all.
+  // This prevents the Electron-vs-CSS timing mismatch that caused the Main Drawer to jitter.
+  const companionW = expanded ? (moduleWidth < 0 ? 0 : 340) : 0;
   const totalExpandedWidth = drawerWidth + companionW;
 
   if (position === 'left') {
@@ -225,6 +227,32 @@ function toggleDockVisibility() {
   }
 }
 
+function getAutoLaunchSetting() {
+  try {
+    const settings = app.getLoginItemSettings();
+    return !!settings.openAtLogin;
+  } catch (err) {
+    console.warn('[AutoLaunch] getLoginItemSettings error:', err.message);
+    return false;
+  }
+}
+
+function setAutoLaunchSetting(enable) {
+  try {
+    const openAtLogin = !!enable;
+    app.setLoginItemSettings({
+      openAtLogin,
+      path: process.execPath,
+      args: process.env.NODE_ENV === 'development' ? [path.resolve(__dirname, '..')] : []
+    });
+    updateTrayMenu();
+    return { success: true, openAtLogin };
+  } catch (err) {
+    console.warn('[AutoLaunch] setLoginItemSettings error:', err.message);
+    return { success: false, error: err.message };
+  }
+}
+
 function updateTrayMenu() {
   if (!tray || tray.isDestroyed()) return;
   const contextMenu = Menu.buildFromTemplate([
@@ -246,6 +274,14 @@ function updateTrayMenu() {
         if (mainWindow && !mainWindow.isDestroyed()) {
           mainWindow.setSkipTaskbar(isSkipTaskbar);
         }
+      }
+    },
+    {
+      label: 'Start with Windows',
+      type: 'checkbox',
+      checked: getAutoLaunchSetting(),
+      click: (menuItem) => {
+        setAutoLaunchSetting(menuItem.checked);
       }
     },
     { type: 'separator' },
@@ -370,6 +406,14 @@ ipcMain.handle('dock:get-skip-taskbar', () => {
   return isSkipTaskbar;
 });
 
+ipcMain.handle('dock:get-auto-launch', () => {
+  return getAutoLaunchSetting();
+});
+
+ipcMain.handle('dock:set-auto-launch', (event, enable) => {
+  return setAutoLaunchSetting(enable);
+});
+
 ipcMain.handle('app:launch-path', async (event, targetPath) => {
   try {
     if (!targetPath || typeof targetPath !== 'string') {
@@ -427,6 +471,30 @@ ipcMain.handle('app:browse-file', async () => {
   const filePath = result.filePaths[0];
   const name = path.basename(filePath, path.extname(filePath));
   return { path: filePath, name };
+});
+
+ipcMain.handle('app:show-item-in-folder', async (event, targetPath) => {
+  try {
+    if (!targetPath || typeof targetPath !== 'string') return false;
+    let resolved = resolveShortcutPath(targetPath) || targetPath.trim();
+    if (fs.existsSync(resolved)) {
+      shell.showItemInFolder(resolved);
+      return true;
+    }
+    if (fs.existsSync(targetPath)) {
+      shell.showItemInFolder(targetPath);
+      return true;
+    }
+    const dir = path.dirname(resolved);
+    if (fs.existsSync(dir)) {
+      await shell.openPath(dir);
+      return true;
+    }
+    return false;
+  } catch (err) {
+    console.error('[app:show-item-in-folder] Error:', err);
+    return false;
+  }
 });
 
 const iconMemoryCache = new Map();
@@ -554,21 +622,62 @@ function extractTargetFromLnk(lnkPath) {
   return null;
 }
 
-const iconHelperScript = path.join(__dirname, 'icon-helper.ps1');
+function getHelperScriptPath(scriptName) {
+  const directPath = path.join(__dirname, scriptName);
+  // 1. If running in development (unpacked), direct path is directly on disk
+  if (!directPath.includes('app.asar') && fs.existsSync(directPath)) {
+    return directPath;
+  }
+
+  // 2. Check unpacked directory created by electron-builder (asarUnpack)
+  const unpackedPath = directPath.replace(/app\.asar([/\\]|$)/, 'app.asar.unpacked$1');
+  if (fs.existsSync(unpackedPath)) {
+    return unpackedPath;
+  }
+
+  const resUnpacked = path.join(process.resourcesPath || '', 'app.asar.unpacked', 'electron', scriptName);
+  if (fs.existsSync(resUnpacked)) {
+    return resUnpacked;
+  }
+
+  // 3. Ironclad runtime fallback: Extract bundled script from within app.asar to app userData directory
+  // Node's fs inside Electron can read seamlessly from app.asar!
+  try {
+    const userData = app.getPath('userData');
+    const targetDiskPath = path.join(userData, scriptName);
+    if (fs.existsSync(directPath)) {
+      const content = fs.readFileSync(directPath);
+      if (!fs.existsSync(targetDiskPath) || fs.statSync(targetDiskPath).size !== content.length) {
+        fs.writeFileSync(targetDiskPath, content);
+      }
+      return targetDiskPath;
+    }
+  } catch (err) {
+    console.error(`[AppDock] Failed to extract ${scriptName} from asar:`, err);
+  }
+
+  return directPath;
+}
 
 function isGenericOrBrokenIcon(dataUrl) {
   if (!dataUrl || typeof dataUrl !== 'string') return true;
-  // Generic Windows shell document/shortcut icon is ~794 chars, generic IDI_APPLICATION window is ~854 chars
+  if (!dataUrl.startsWith('data:image/')) return true;
+  // Generic IDI_APPLICATION window is 850-854 chars, blank images <= 860 chars
   if (dataUrl.length <= 860) return true;
+  // Generic Windows shell shortcut overlay document icon (40x40 thumbnail, ~1006 chars)
+  if (dataUrl.length >= 950 && dataUrl.length <= 1050 && dataUrl.includes('iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM')) {
+    return true;
+  }
   return false;
 }
 
 function extractIconWithPowerShell(filePath) {
   return new Promise((resolve) => {
-    if (!fs.existsSync(iconHelperScript)) return resolve(null);
+    const scriptPath = getHelperScriptPath('icon-helper.ps1');
+    if (!fs.existsSync(scriptPath)) return resolve(null);
     execFile(
       'powershell.exe',
-      ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', iconHelperScript, '-Action', 'Single', '-Path', filePath],
+      ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', scriptPath, '-Action', 'Single', '-Path', filePath],
       { timeout: 3500, maxBuffer: 10 * 1024 * 1024 },
       (err, stdout) => {
         if (err || !stdout || !stdout.trim()) {
@@ -586,12 +695,13 @@ function extractIconWithPowerShell(filePath) {
 
 function extractIconsBatchWithPowerShell(filePaths) {
   return new Promise((resolve) => {
-    if (!fs.existsSync(iconHelperScript) || !filePaths || filePaths.length === 0) return resolve({});
+    const scriptPath = getHelperScriptPath('icon-helper.ps1');
+    if (!fs.existsSync(scriptPath) || !filePaths || filePaths.length === 0) return resolve({});
     const pathsJoined = filePaths.join('|');
     execFile(
       'powershell.exe',
-      ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', iconHelperScript, '-Action', 'Batch', '-Paths', pathsJoined],
-      { timeout: 6000, maxBuffer: 25 * 1024 * 1024 },
+      ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', scriptPath, '-Action', 'Batch', '-Paths', pathsJoined],
+      { timeout: 8000, maxBuffer: 25 * 1024 * 1024 },
       (err, stdout) => {
         if (err || !stdout || !stdout.trim()) {
           return resolve({});
@@ -674,20 +784,22 @@ async function extractNativeIcon(filePath) {
     }
   }
 
-  // 4. Fallback: Direct native getFileIcon on resolved path
-  try {
-    if (app && typeof app.getFileIcon === 'function') {
-      const nativeIcon = await app.getFileIcon(resolvedPath, { size: 'large' });
-      if (nativeIcon && !nativeIcon.isEmpty()) {
-        const dataUrl = nativeIcon.toDataURL();
-        if (!isGenericOrBrokenIcon(dataUrl)) {
-          iconMemoryCache.set(resolvedPath, dataUrl);
-          iconMemoryCache.set(filePath, dataUrl);
-          return dataUrl;
+  // 4. Fallback: Direct native getFileIcon on resolved path (never on .lnk shortcuts, as SHGetFileInfo returns the generic shell sheet)
+  if (ext !== '.lnk') {
+    try {
+      if (app && typeof app.getFileIcon === 'function') {
+        const nativeIcon = await app.getFileIcon(resolvedPath, { size: 'large' });
+        if (nativeIcon && !nativeIcon.isEmpty()) {
+          const dataUrl = nativeIcon.toDataURL();
+          if (!isGenericOrBrokenIcon(dataUrl)) {
+            iconMemoryCache.set(resolvedPath, dataUrl);
+            iconMemoryCache.set(filePath, dataUrl);
+            return dataUrl;
+          }
         }
       }
-    }
-  } catch (e) {}
+    } catch (e) {}
+  }
 
   // 5. Handle .url with IconFile
   if (ext === '.url') {
@@ -792,7 +904,6 @@ ipcMain.handle('app:scan-system', async () => {
 
 // ----------------- MEDIA IPC HANDLERS -----------------
 
-const mediaHelperScript = path.join(__dirname, 'media-helper.ps1');
 let isMediaCheckInFlight = false;
 let lastMediaCache = { hasMedia: false };
 let lastMediaCheckTime = 0;
@@ -810,7 +921,8 @@ ipcMain.handle('media:get-state', async () => {
 
   isMediaCheckInFlight = true;
   return new Promise((resolve) => {
-    if (!fs.existsSync(mediaHelperScript)) {
+    const mediaScript = getHelperScriptPath('media-helper.ps1');
+    if (!fs.existsSync(mediaScript)) {
       isMediaCheckInFlight = false;
       return resolve(lastMediaCache);
     }
@@ -824,7 +936,7 @@ ipcMain.handle('media:get-state', async () => {
     };
 
     proc = exec(
-      `powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "${mediaHelperScript}" -Action GetState`,
+      `powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "${mediaScript}" -Action GetState`,
       { timeout: 2500 },
       (err, stdout) => {
         if (finished) return;
@@ -861,12 +973,13 @@ ipcMain.handle('media:get-state', async () => {
 
 ipcMain.handle('media:control', async (event, action) => {
   return new Promise((resolve) => {
-    if (!fs.existsSync(mediaHelperScript)) {
+    const mediaScript = getHelperScriptPath('media-helper.ps1');
+    if (!fs.existsSync(mediaScript)) {
       return resolve({ success: false });
     }
     const cleanAction = ['Toggle', 'Next', 'Previous'].includes(action) ? action : 'Toggle';
     exec(
-      `powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "${mediaHelperScript}" -Action ${cleanAction}`,
+      `powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "${mediaScript}" -Action ${cleanAction}`,
       { timeout: 2500 },
       (err) => {
         if (err) return resolve({ success: false });
@@ -997,17 +1110,33 @@ function checkGitHubReleases(repoSlug = 'DevlopTecy/AppDock') {
             const release = JSON.parse(data);
             const latestVersion = (release.tag_name || '').replace(/^[^\d]*/, '').replace(/[^\d.]*$/, '');
             const isNewer = compareSemver(latestVersion, currentVersion) > 0;
+
+            // Extract direct Windows installer executable if present in release assets
+            let directExeUrl = release.html_url || '';
+            if (Array.isArray(release.assets)) {
+              const exeAsset = release.assets.find(
+                (a) => a.name && (a.name.endsWith('.exe') || a.name.endsWith('.zip'))
+              );
+              if (exeAsset && exeAsset.browser_download_url) {
+                directExeUrl = exeAsset.browser_download_url;
+              }
+            }
+
+            const info = {
+              success: true,
+              hasUpdate: isNewer,
+              version: latestVersion,
+              currentVersion,
+              releaseNotes: release.body || '',
+              releaseDate: release.published_at || '',
+              downloadUrl: directExeUrl,
+              htmlUrl: release.html_url || ''
+            };
+
             if (isNewer) {
-              const info = {
-                version: latestVersion,
-                releaseNotes: release.body || '',
-                releaseDate: release.published_at || '',
-                downloadUrl: release.html_url || ''
-              };
               if (mainWindow && !mainWindow.isDestroyed()) {
                 mainWindow.webContents.send('dock:update-available', info);
               }
-              resolve({ hasUpdate: true, ...info });
             } else {
               if (mainWindow && !mainWindow.isDestroyed()) {
                 mainWindow.webContents.send('dock:update-not-available', {
@@ -1015,32 +1144,34 @@ function checkGitHubReleases(repoSlug = 'DevlopTecy/AppDock') {
                   currentVersion
                 });
               }
-              resolve({ hasUpdate: false, currentVersion, latestVersion });
             }
+            resolve(info);
           } else if (res.statusCode === 404) {
-            // No releases published yet on this repository; app is currently at the latest/newest version
+            // No releases published yet on this repository; app is currently at latest
             if (mainWindow && !mainWindow.isDestroyed()) {
               mainWindow.webContents.send('dock:update-not-available', {
                 version: currentVersion,
                 currentVersion
               });
             }
-            resolve({ hasUpdate: false, currentVersion, latestVersion: currentVersion });
+            resolve({ success: true, hasUpdate: false, currentVersion, latestVersion: currentVersion });
+          } else if (res.statusCode === 403) {
+            resolve({ success: false, hasUpdate: false, currentVersion, error: 'GitHub API rate limit exceeded' });
           } else {
-            resolve({ hasUpdate: false, error: `GitHub API returned ${res.statusCode}` });
+            resolve({ success: false, hasUpdate: false, currentVersion, error: `GitHub returned status ${res.statusCode}` });
           }
         } catch (e) {
-          resolve({ hasUpdate: false, error: e.message });
+          resolve({ success: false, hasUpdate: false, error: e.message });
         }
       });
     });
 
     req.on('error', (err) => {
-      resolve({ hasUpdate: false, error: err.message });
+      resolve({ success: false, hasUpdate: false, error: err.message });
     });
     req.on('timeout', () => {
       req.destroy();
-      resolve({ hasUpdate: false, error: 'Connection timed out' });
+      resolve({ success: false, hasUpdate: false, error: 'Connection timed out' });
     });
   });
 }
@@ -1050,15 +1181,23 @@ ipcMain.handle('dock:get-app-version', () => {
 });
 
 ipcMain.handle('dock:check-for-updates', async (event, customRepo) => {
+  const ghResult = await checkGitHubReleases(customRepo);
   if (autoUpdater && app.isPackaged) {
     try {
-      const res = await autoUpdater.checkForUpdates();
-      return { success: true, result: res };
+      const nativeRes = await autoUpdater.checkForUpdates();
+      if (nativeRes && nativeRes.updateInfo) {
+        const nativeVer = (nativeRes.updateInfo.version || '').replace(/^[^\d]*/, '').replace(/[^\d.]*$/, '');
+        if (compareSemver(nativeVer, app.getVersion()) > 0) {
+          ghResult.hasUpdate = true;
+          ghResult.version = nativeVer;
+          ghResult.canAutoInstall = true;
+        }
+      }
     } catch (err) {
       console.warn('[AutoUpdater] checking via native updater failed:', err.message);
     }
   }
-  return checkGitHubReleases(customRepo);
+  return ghResult;
 });
 
 ipcMain.handle('dock:download-update', async () => {
@@ -1095,6 +1234,18 @@ app.whenReady().then(() => {
   createTray();
   createWindow();
   setupAutoUpdater();
+
+  // Auto-setup: Ensure AppDock launches automatically when Windows starts if on Windows
+  if (process.platform === 'win32' && app.isPackaged) {
+    try {
+      const current = app.getLoginItemSettings();
+      if (!current.openAtLogin) {
+        setAutoLaunchSetting(true);
+      }
+    } catch (e) {
+      console.warn('[AutoLaunch] Initial Windows setup check:', e.message);
+    }
+  }
 
   // Gentle auto-check after app starts up
   setTimeout(() => {

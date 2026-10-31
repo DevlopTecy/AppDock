@@ -156,7 +156,11 @@ export const EdgeToggle: React.FC<EdgeToggleProps> = ({
         cursor: isDragging ? 'ns-resize' : 'pointer',
         boxShadow: isDragging
           ? '0 0 12px rgba(255, 255, 255, 0.25), var(--btn-shadow)'
-          : 'var(--btn-shadow)',
+          : dockPosition === 'right'
+            ? '-3px 0 10px rgba(0, 0, 0, 0.35)'
+            : dockPosition === 'left'
+              ? '3px 0 10px rgba(0, 0, 0, 0.35)'
+              : '0 3px 10px rgba(0, 0, 0, 0.35)',
         transition: isDragging ? 'none' : 'opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1), background 0.18s ease',
         zIndex: 9999,
         flexShrink: 0,

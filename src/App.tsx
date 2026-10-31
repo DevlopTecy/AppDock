@@ -6,48 +6,51 @@ import { GroupTabs } from './components/GroupTabs';
 import { AppGrid } from './components/AppGrid';
 import { AddItemModal } from './components/AddItemModal';
 import { NewGroupModal } from './components/NewGroupModal';
+import { EditGroupModal } from './components/EditGroupModal';
 import { SettingsView } from './components/SettingsView';
 import { SearchBar } from './components/SearchBar';
 import { MusicModule } from './components/modules/MusicModule';
 import { WeatherModule } from './components/modules/WeatherModule';
 import { CalendarModule } from './components/modules/CalendarModule';
 import { UpdateNotification } from './components/UpdateNotification';
+import { isGenericOrBrokenIcon } from './utils/assets';
+
+const initialDockData = (() => {
+  const init = loadDockData();
+  if (typeof window !== 'undefined') {
+    const params = new URLSearchParams(window.location.search);
+    const urlTheme = params.get('theme') as any;
+    if (['dark', 'light', 'cyberpunk', 'midnight', 'emerald', 'kawaii', 'aether', 'deathnote', 'eldenring', 'onepiece', 'candy', 'translucent', 'glassy', 'minimal'].includes(urlTheme)) {
+      init.settings.theme = urlTheme;
+    }
+    const urlWidth = params.get('width');
+    if (urlWidth && !isNaN(Number(urlWidth))) {
+      init.settings.drawerWidth = Number(urlWidth);
+    }
+    const urlDock = params.get('dock') as any;
+    if (['left', 'right', 'top'].includes(urlDock)) {
+      init.settings.dockPosition = urlDock;
+    }
+    const urlCleanDock = params.get('cleandock');
+    if (urlCleanDock === '1' || urlCleanDock === 'true') {
+      init.settings.cleanDockEnabled = true;
+    }
+    const urlCleanIconSize = params.get('cleaniconsize') as any;
+    if (['small', 'medium', 'large', 'xlarge'].includes(urlCleanIconSize)) {
+      init.settings.cleanDockIconSize = urlCleanIconSize;
+    }
+    const urlCleanGroup = params.get('cleangroup');
+    if (urlCleanGroup) {
+      init.settings.cleanDockGroupId = urlCleanGroup;
+    }
+  }
+  return init;
+})();
 
 export const App: React.FC = () => {
-  const [data, setData] = useState(() => {
-    const init = loadDockData();
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const urlTheme = params.get('theme') as any;
-      if (['dark', 'light', 'cyberpunk', 'midnight', 'emerald', 'kawaii', 'aether', 'deathnote'].includes(urlTheme)) {
-        init.settings.theme = urlTheme;
-      }
-      const urlWidth = params.get('width');
-      if (urlWidth && !isNaN(Number(urlWidth))) {
-        init.settings.drawerWidth = Number(urlWidth);
-      }
-      const urlDock = params.get('dock') as any;
-      if (['left', 'right', 'top'].includes(urlDock)) {
-        init.settings.dockPosition = urlDock;
-      }
-      const urlCleanDock = params.get('cleandock');
-      if (urlCleanDock === '1' || urlCleanDock === 'true') {
-        init.settings.cleanDockEnabled = true;
-      }
-      const urlCleanIconSize = params.get('cleaniconsize') as any;
-      if (['small', 'medium', 'large', 'xlarge'].includes(urlCleanIconSize)) {
-        init.settings.cleanDockIconSize = urlCleanIconSize;
-      }
-      const urlCleanGroup = params.get('cleangroup');
-      if (urlCleanGroup) {
-        init.settings.cleanDockGroupId = urlCleanGroup;
-      }
-    }
-    return init;
-  });
+  const [data, setData] = useState(() => initialDockData);
   const [activeGroupId, setActiveGroupId] = useState<string>(() => {
-    const init = loadDockData();
-    return init.groups[0]?.id || 'grp-games';
+    return initialDockData.groups[0]?.id || 'grp-games';
   });
 
   // Current active group
@@ -88,6 +91,9 @@ export const App: React.FC = () => {
     return false;
   });
 
+  const [editingGroup, setEditingGroup] = useState<AppGroup | null>(null);
+  const [isEditGroupModalOpen, setIsEditGroupModalOpen] = useState(false);
+
   const [isSettingsOpen, setIsSettingsOpen] = useState(() => {
     if (typeof window !== 'undefined') {
       return new URLSearchParams(window.location.search).get('modal') === 'settings';
@@ -120,6 +126,11 @@ export const App: React.FC = () => {
   useEffect(() => {
     if (activeModule) {
       setCachedModule(activeModule);
+    } else {
+      const timer = setTimeout(() => {
+        setCachedModule(null);
+      }, 300);
+      return () => clearTimeout(timer);
     }
   }, [activeModule]);
 
@@ -134,23 +145,19 @@ export const App: React.FC = () => {
     if (typeof window !== 'undefined' && (window as any).appDock?.setModuleWidth) {
       if (isExpanded) {
         if (isCleanDock) {
+          // Clean dock: no companion area at all
           (window as any).appDock.setModuleWidth(-1);
-        } else if (activeModule) {
-          (window as any).appDock.setModuleWidth(340);
         } else {
-          // Allow 200ms for graceful CSS exit transition before shrinking native window
-          const timer = setTimeout(() => {
-            if (typeof window !== 'undefined' && (window as any).appDock?.setModuleWidth) {
-              (window as any).appDock.setModuleWidth(54);
-            }
-          }, 200);
-          return () => clearTimeout(timer);
+          // Always allocate the full 340px companion area when expanded.
+          // The CSS inside handles whether it shows the hub button or a full module.
+          // This prevents Electron from resizing the window on every module toggle (which caused the jitter).
+          (window as any).appDock.setModuleWidth(340);
         }
       } else {
         (window as any).appDock.setModuleWidth(0);
       }
     }
-  }, [isExpanded, activeModule, isCleanDock]);
+  }, [isExpanded, isCleanDock]);
 
   // Sync state changes with persistence
   const updateGroups = useCallback((newGroups: AppGroup[]) => {
@@ -192,22 +199,38 @@ export const App: React.FC = () => {
           const newItems = await Promise.all(
             dedupedItems.map(async (item) => {
               const isRelative = item.type === 'app' && !item.target.includes('\\') && !item.target.includes('/');
-              // Check if icon is missing, empty, or generic Windows fallback icon (length <= 860)
-              const isGenericOrBroken =
-                !item.icon ||
-                (typeof item.icon === 'string' && (item.icon.length <= 860 || !item.icon.startsWith('data:image/')));
+              const isGenericOrBroken = item.type === 'app' && isGenericOrBrokenIcon(item.icon);
               const needsFix = item.type === 'app' && (isRelative || isGenericOrBroken || item.name.toLowerCase().includes('gemini'));
 
               if (needsFix) {
                 try {
-                  const res = await (window as any).appDock.resolveItem({ name: item.name, target: item.target });
-                  if (res && (res.target !== item.target || (res.icon && res.icon !== item.icon))) {
+                  let newTarget = item.target;
+                  let newIcon: string | null = null;
+
+                  if ((window as any).appDock?.resolveItem) {
+                    const res = await (window as any).appDock.resolveItem({ name: item.name, target: item.target });
+                    if (res) {
+                      if (res.target) newTarget = res.target;
+                      if (res.icon && !isGenericOrBrokenIcon(res.icon)) {
+                        newIcon = res.icon;
+                      }
+                    }
+                  }
+
+                  if (!newIcon && (window as any).appDock?.extractIcon) {
+                    const extIcon = await (window as any).appDock.extractIcon(newTarget);
+                    if (extIcon && !isGenericOrBrokenIcon(extIcon)) {
+                      newIcon = extIcon;
+                    }
+                  }
+
+                  if (newIcon && newIcon !== item.icon) {
                     grpChanged = true;
                     changed = true;
                     return {
                       ...item,
-                      target: res.target || item.target,
-                      icon: res.icon || item.icon
+                      target: newTarget,
+                      icon: newIcon
                     };
                   }
                 } catch {}
@@ -237,7 +260,7 @@ export const App: React.FC = () => {
       saveDockData(next.groups, next.settings);
       return next;
     });
-    if (partial.drawerWidth || partial.drawerHeight) {
+    if (typeof partial.drawerWidth === 'number' || typeof partial.drawerHeight === 'number') {
       if (typeof window !== 'undefined' && (window as any).appDock?.setDrawerDimensions) {
         (window as any).appDock.setDrawerDimensions({
           width: partial.drawerWidth,
@@ -267,8 +290,11 @@ export const App: React.FC = () => {
       if ((window as any).appDock.setSkipTaskbar && typeof data.settings.hideFromTaskbar === 'boolean') {
         (window as any).appDock.setSkipTaskbar(data.settings.hideFromTaskbar);
       }
+      if ((window as any).appDock.setAutoLaunch && typeof data.settings.autoStartWithWindows === 'boolean') {
+        (window as any).appDock.setAutoLaunch(data.settings.autoStartWithWindows);
+      }
     }
-  }, [effectiveWidth, effectiveHeight, data.settings.hideFromTaskbar]);
+  }, [effectiveWidth, effectiveHeight, data.settings.hideFromTaskbar, data.settings.autoStartWithWindows]);
 
   // Toggle Maximize dock mode (460px width x max screen height)
   const handleToggleMaximize = useCallback(() => {
@@ -302,7 +328,7 @@ export const App: React.FC = () => {
         }
       } else {
         if (typeof window !== 'undefined' && (window as any).appDock?.setModuleWidth) {
-          (window as any).appDock.setModuleWidth(isCleanDock ? -1 : (activeModule ? 340 : 54));
+          (window as any).appDock.setModuleWidth(isCleanDock ? -1 : 340);
         }
       }
 
@@ -314,7 +340,7 @@ export const App: React.FC = () => {
         }
       }
     },
-    [isExpanded, activeModule, isCleanDock]
+    [isExpanded, isCleanDock]
   );
 
   // Listen for collapse and expand commands from Electron (e.g. system tray, taskbar toggle)
@@ -391,6 +417,7 @@ export const App: React.FC = () => {
         if (activeModule) setActiveModule(null);
         else if (isAddModalOpen) setIsAddModalOpen(false);
         else if (isNewGroupModalOpen) setIsNewGroupModalOpen(false);
+        else if (isEditGroupModalOpen) setIsEditGroupModalOpen(false);
         else if (isSettingsOpen) setIsSettingsOpen(false);
         else if (isSearchOpen) setIsSearchOpen(false);
         else if (isExpanded) handleToggle(false);
@@ -402,7 +429,7 @@ export const App: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeModule, isAddModalOpen, isNewGroupModalOpen, isSettingsOpen, isSearchOpen, isExpanded, handleToggle]);
+  }, [activeModule, isAddModalOpen, isNewGroupModalOpen, isEditGroupModalOpen, isSettingsOpen, isSearchOpen, isExpanded, handleToggle]);
 
   // Delete Group handler (Allows removing ANY group including defaults!)
   const handleDeleteGroup = (groupId: string) => {
@@ -489,6 +516,31 @@ export const App: React.FC = () => {
           ...grp,
           density
         };
+      }
+      return grp;
+    });
+    updateGroups(updatedGroups);
+  };
+
+  // Reorder Items handler (Drag and Drop in AppGrid)
+  const handleReorderItems = (groupId: string, newItems: AppItem[]) => {
+    const updatedGroups = data.groups.map((grp) => {
+      if (grp.id === groupId) {
+        return {
+          ...grp,
+          items: newItems
+        };
+      }
+      return grp;
+    });
+    updateGroups(updatedGroups);
+  };
+
+  // Update Group handler (Full Edit: Name, Logo, Color, Density, Items)
+  const handleUpdateGroup = (updatedGroup: AppGroup) => {
+    const updatedGroups = data.groups.map((grp) => {
+      if (grp.id === updatedGroup.id) {
+        return updatedGroup;
       }
       return grp;
     });
@@ -623,6 +675,11 @@ export const App: React.FC = () => {
             onSelectGroup={(id) => setActiveGroupId(id)}
             onAddNewGroup={() => setIsNewGroupModalOpen(true)}
             onDeleteGroup={handleDeleteGroup}
+            onEditGroup={(grp) => {
+              setEditingGroup(grp);
+              setIsEditGroupModalOpen(true);
+            }}
+            theme={data.settings.theme}
           />
         )}
 
@@ -638,6 +695,7 @@ export const App: React.FC = () => {
               const targetGrp = isCleanDock ? cleanDockGroup : activeGroup;
               if (targetGrp) handleDeleteItem(targetGrp.id, id);
             }}
+            onReorderItems={handleReorderItems}
             onOpenAddModal={() => setIsAddModalOpen(true)}
             onAddNewGroup={() => setIsNewGroupModalOpen(true)}
             onDropFiles={handleDropFiles}
@@ -665,6 +723,20 @@ export const App: React.FC = () => {
             updateGroups([...data.groups, newGrp]);
             setActiveGroupId(newGrp.id);
           }}
+          theme={data.settings.theme}
+        />
+      )}
+
+      {!isCleanDock && (
+        <EditGroupModal
+          isOpen={isEditGroupModalOpen}
+          group={editingGroup}
+          onClose={() => {
+            setIsEditGroupModalOpen(false);
+            setEditingGroup(null);
+          }}
+          onSaveGroup={handleUpdateGroup}
+          onDeleteGroup={handleDeleteGroup}
           theme={data.settings.theme}
         />
       )}

@@ -30,6 +30,22 @@ interface DockFrameProps {
   onToggleMaximize?: () => void;
 }
 
+const ELDEN_RING_BACKGROUNDS = [
+  '/eldenring/backgrounds/weary_knight_beneath_the_golden_tree.png',
+  '/eldenring/backgrounds/vertical_golden_tree_wallpaper.png',
+  '/eldenring/backgrounds/vertical_erdtree_wallpaper.png'
+];
+
+const ONE_PIECE_BACKGROUNDS = [
+  '/onepiece/backgrounds/straw_hat_crew_over_skull_island.png',
+  '/onepiece/backgrounds/portrait_ship_background.png'
+];
+
+const CANDY_BACKGROUNDS = [
+  '/candy/backgrounds/sweet_home_candy_cottage.png',
+  '/candy/backgrounds/candy_cafe_dock.png'
+];
+
 export const DockFrame: React.FC<DockFrameProps> = ({
   isExpanded,
   dockPosition,
@@ -57,33 +73,65 @@ export const DockFrame: React.FC<DockFrameProps> = ({
   const [isResizing, setIsResizing] = React.useState(false);
   const [renderedModule, setRenderedModule] = React.useState<CompanionModuleType>(activeModule);
   const [isExiting, setIsExiting] = React.useState(false);
+  const [prevActive, setPrevActive] = React.useState(activeModule);
+  const [eldenBgIndex, setEldenBgIndex] = React.useState(0);
+  const [onePieceBgIndex, setOnePieceBgIndex] = React.useState(0);
+  const [candyBgIndex, setCandyBgIndex] = React.useState(0);
   const exitTimerRef = React.useRef<number | null>(null);
 
+  // 30-second rotating background timer for atmospheric themes
   React.useEffect(() => {
+    if (theme === 'eldenring') {
+      const timer = window.setInterval(() => {
+        setEldenBgIndex((prev) => (prev + 1) % ELDEN_RING_BACKGROUNDS.length);
+      }, 30000);
+      return () => window.clearInterval(timer);
+    } else if (theme === 'onepiece') {
+      const timer = window.setInterval(() => {
+        setOnePieceBgIndex((prev) => (prev + 1) % ONE_PIECE_BACKGROUNDS.length);
+      }, 30000);
+      return () => window.clearInterval(timer);
+    } else if (theme === 'candy') {
+      const timer = window.setInterval(() => {
+        setCandyBgIndex((prev) => (prev + 1) % CANDY_BACKGROUNDS.length);
+      }, 30000);
+      return () => window.clearInterval(timer);
+    }
+  }, [theme]);
+
+  // Synchronize enter/exit transitions immediately without 1-frame width dip / stutter
+  if (activeModule !== prevActive) {
+    setPrevActive(activeModule);
     if (activeModule) {
       if (exitTimerRef.current) {
-        clearTimeout(exitTimerRef.current);
+        window.clearTimeout(exitTimerRef.current);
         exitTimerRef.current = null;
       }
       setRenderedModule(activeModule);
       setIsExiting(false);
     } else if (renderedModule) {
       setIsExiting(true);
+    }
+  }
+
+  React.useEffect(() => {
+    if (isExiting) {
+      if (exitTimerRef.current) {
+        window.clearTimeout(exitTimerRef.current);
+      }
       exitTimerRef.current = window.setTimeout(() => {
         setRenderedModule(null);
         setIsExiting(false);
         exitTimerRef.current = null;
-        if (typeof window !== 'undefined' && (window as any).appDock?.setModuleWidth) {
-          (window as any).appDock.setModuleWidth(54);
-        }
-      }, 200);
+        // No setModuleWidth call needed — Electron window is always drawerWidth+340 while expanded
+      }, 190);
     }
     return () => {
       if (exitTimerRef.current) {
-        clearTimeout(exitTimerRef.current);
+        window.clearTimeout(exitTimerRef.current);
       }
     };
-  }, [activeModule]);
+  }, [isExiting]);
 
   const isLeft = dockPosition === 'left';
   const isRight = dockPosition === 'right';
@@ -160,8 +208,8 @@ export const DockFrame: React.FC<DockFrameProps> = ({
     );
   }
 
-  const companionW = isCleanDock ? 0 : ((activeModule || isExiting) ? 340 : 54);
-  const totalExpandedWidth = drawerWidth + companionW;
+  const companionW = isCleanDock ? 0 : 340;
+  const _totalExpandedWidth = drawerWidth + companionW;
 
   return (
     <div
@@ -171,18 +219,14 @@ export const DockFrame: React.FC<DockFrameProps> = ({
         alignItems: 'flex-start',
         justifyContent: isRight ? 'flex-end' : isLeft ? 'flex-start' : 'center',
         width: '100%',
-        minWidth: isTop ? undefined : `${totalExpandedWidth}px`,
-        maxWidth: isTop ? `${drawerWidth + 340}px` : `${totalExpandedWidth}px`,
+        maxWidth: isTop ? `${drawerWidth + 340}px` : undefined,
         height: '100%',
         position: 'relative',
-        overflow: 'visible',
-        marginLeft: 0,
-        marginRight: 0,
-        marginBottom: isTop ? 'auto' : 0,
-        marginTop: 0
+        overflow: 'hidden',
+        margin: 0
       }}
     >
-      {/* Right dock layout: Companion Area sticking directly to Main Drawer (Hidden in Clean Dock mode) */}
+      {/* Right dock layout: Companion Area — fixed 340px wide, always present when not CleanDock */}
       {isRight && !isCleanDock && (
         <div
           style={{
@@ -190,69 +234,39 @@ export const DockFrame: React.FC<DockFrameProps> = ({
             flexDirection: 'row',
             alignItems: 'flex-start',
             justifyContent: 'flex-end',
-            gap: '8px',
             height: '100%',
-            width: (activeModule || isExiting) ? '340px' : '54px',
+            width: '340px',
             flexShrink: 0,
-            overflow: 'visible',
+            overflow: 'hidden',
             position: 'relative'
           }}
         >
-          {/* Active Companion Module (Music / Weather / Calendar) */}
+          {/* Active Companion Module (Music / Weather / Calendar) — animates in/out within the fixed 340px space */}
           {renderedModule && companionContent && (
             <div
-              className={
-                theme === 'deathnote'
-                  ? `deathnote-book-wrapper ${isExiting ? 'is-exiting' : 'is-entering'}`
-                  : (isExiting ? 'hub-module-exit-right' : 'hub-module-enter-right')
-              }
+              key={renderedModule}
+              className={isExiting ? 'hub-module-exit-right' : 'hub-module-enter-right'}
               style={{
-                width: '280px',
-                height: '100%',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: '52px',
+                bottom: 0,
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
                 alignItems: 'center',
                 overflow: 'visible',
-                perspective: '1200px',
-                position: 'relative'
+                zIndex: 1
               }}
             >
-              {theme === 'deathnote' && (
-                <div
-                  className={`deathnote-book-cover ${isExiting ? 'cover-close-right' : 'cover-open-right'}`}
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    zIndex: 30,
-                    pointerEvents: 'none'
-                  }}
-                >
-                  <div className="deathnote-cover-spine spine-right" />
-                  <div className="deathnote-cover-inner">
-                    <img
-                      src={getAssetUrl('/deathnote/icons/logo_deathnote_white.png')}
-                      alt="Death Note"
-                      className="deathnote-cover-logo"
-                    />
-                    <div className="deathnote-cover-shinigami">
-                      <span style={{ fontFamily: 'var(--font-gothic)', fontSize: '24px', color: '#c41e24', textShadow: '0 0 10px rgba(196, 30, 36, 0.8)' }}>
-                        †
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              )}
-              <div
-                className={theme === 'deathnote' ? `deathnote-book-pages ${isExiting ? 'pages-exit' : 'pages-enter'}` : undefined}
-                style={{ width: '100%', display: 'flex', justifyContent: 'center' }}
-              >
+              <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
                 {companionContent}
               </div>
             </div>
           )}
 
-          {/* Anchor Column sticking directly flush against Main Drawer */}
+          {/* Anchor Column — always flush against Main Drawer at right edge of companion area */}
           <div
             style={{
               width: '48px',
@@ -263,7 +277,9 @@ export const DockFrame: React.FC<DockFrameProps> = ({
               justifyContent: 'flex-start',
               paddingTop: '8px',
               position: 'relative',
-              flexShrink: 0
+              flexShrink: 0,
+              zIndex: 2,
+              marginLeft: 'auto'
             }}
           >
             {/* Small Handles Hub Box sticking directly to the main UI at the top */}
@@ -272,6 +288,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
               isExpanded={isExpanded}
               activeModule={activeModule}
               onSelectModule={onSelectModule}
+              theme={theme}
             />
 
             {/* Main Handle (EdgeToggle) stays visible when opened, sticking to Drawer at vertical center */}
@@ -343,11 +360,15 @@ export const DockFrame: React.FC<DockFrameProps> = ({
           borderLeft: isLeft ? 'none' : '1px solid var(--border-subtle)',
           borderRight: isRight ? 'none' : '1px solid var(--border-subtle)',
           borderTop: isTop ? 'none' : '1px solid var(--border-subtle)',
-          boxShadow: 'var(--shadow-dock)',
+          borderBottom: isTop ? 'none' : '1px solid var(--border-subtle)',
+          boxShadow: isRight
+            ? '-8px 0 28px rgba(0, 0, 0, 0.45)'
+            : isLeft
+              ? '8px 0 28px rgba(0, 0, 0, 0.45)'
+              : '0 8px 28px rgba(0, 0, 0, 0.45)',
           overflow: 'hidden',
           position: 'relative',
           background: 'var(--bg-dock)',
-          transition: isResizing ? 'none' : 'width 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
           flexShrink: 0
         }}
       >
@@ -389,103 +410,62 @@ export const DockFrame: React.FC<DockFrameProps> = ({
               overflow: 'hidden'
             }}
           >
-            {/* Main High-Res Wallpaper (Kira & L Side-by-Side with Chained Apple) */}
+            {/* Main High-Res Wallpaper (Kira & L Divided with Chained Apple) */}
             <div
               style={{
                 position: 'absolute',
                 inset: 0,
-                backgroundImage: `url('${getAssetUrl('/deathnote/backgrounds/wallpaper_kira_l_hd.jpg')}')`,
+                backgroundImage: `url('${getAssetUrl('/deathnote/backgrounds/wallpaper_kira_l_divided.png')}')`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center 12%',
                 backgroundRepeat: 'no-repeat',
-                filter: 'brightness(1.08) contrast(1.12) saturate(1.08)'
+                filter: 'brightness(1.02) contrast(1.08)'
               }}
             />
-            {/* Pattern Overlay 1: Dark Slate & Leather Grain */}
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                backgroundImage: `url('${getAssetUrl('/deathnote/textures/texture_dark_1.jpg')}')`,
-                backgroundRepeat: 'repeat',
-                opacity: 0.16,
-                mixBlendMode: 'overlay',
-                pointerEvents: 'none'
-              }}
-            />
-            {/* Pattern Overlay 2: Ink Grunge Wash */}
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                backgroundImage: `url('${getAssetUrl('/deathnote/textures/texture_ink.jpg')}')`,
-                backgroundSize: 'cover',
-                opacity: 0.12,
-                mixBlendMode: 'color-dodge',
-                pointerEvents: 'none'
-              }}
-            />
-            {/* Atmospheric Manga Ink & Parchment Vignette */}
+            {/* Subtle atmospheric dark gradient for icon & footer legibility */}
             <div
               style={{
                 position: 'absolute',
                 inset: 0,
                 background:
-                  'radial-gradient(circle at 50% 25%, rgba(8, 8, 8, 0.12) 0%, rgba(8, 8, 8, 0.58) 100%), linear-gradient(180deg, rgba(8, 8, 8, 0.42) 0%, rgba(13, 13, 13, 0.05) 35%, rgba(8, 8, 8, 0.65) 100%)',
+                  'radial-gradient(circle at 50% 25%, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.45) 100%), linear-gradient(180deg, rgba(8, 8, 8, 0.3) 0%, transparent 35%, rgba(8, 8, 8, 0.55) 100%)',
                 pointerEvents: 'none'
               }}
             />
-            {/* Decorative Element 1: Dark Crimson Blood Splatter in Top Corner */}
-            <img
-              src={getAssetUrl('/deathnote/decorations/blood_splatter.png')}
-              alt="Blood Splatter"
-              style={{
-                position: 'absolute',
-                top: '-5px',
-                right: '-5px',
-                width: '135px',
-                opacity: 0.55,
-                pointerEvents: 'none',
-                mixBlendMode: 'screen'
-              }}
-            />
-            {/* Decorative Element 2: Ryuk Shinigami Feather in Bottom Left */}
-            <img
-              src={getAssetUrl('/deathnote/decorations/feather.png')}
-              alt="Ryuk Feather"
-              style={{
-                position: 'absolute',
-                bottom: '48px',
-                left: '12px',
-                width: '44px',
-                opacity: 0.85,
-                pointerEvents: 'none',
-                filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.85))'
-              }}
-            />
-            {/* Decorative Element 3: Ryuk Winged Silhouette */}
-            <img
-              src={getAssetUrl('/deathnote/decorations/ryuk_silhouette.png')}
-              alt="Ryuk Silhouette"
-              style={{
-                position: 'absolute',
-                bottom: '16px',
-                right: '16px',
-                width: '85px',
-                opacity: 0.35,
-                pointerEvents: 'none',
-                filter: 'drop-shadow(0 0 10px rgba(163, 38, 45, 0.4))'
-              }}
-            />
-            {/* Subtle bottom crimson ambient lighting */}
+          </div>
+        )}
+
+        {/* Full-Window Kawaii Pastel Cat Gamer Nook Background Layer */}
+        {theme === 'kawaii' && (
+          <div
+            className="kawaii-bg-layer"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              zIndex: 0,
+              pointerEvents: 'none',
+              overflow: 'hidden'
+            }}
+          >
+            {/* Main High-Res Pastel Cat Gamer Nook Wallpaper */}
             <div
               style={{
                 position: 'absolute',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                height: '90px',
-                background: 'linear-gradient(to top, rgba(163, 38, 45, 0.18) 0%, transparent 100%)',
+                inset: 0,
+                backgroundImage: `url('${getAssetUrl('/kawaii/wallpaper_kawaii_nook.png')}')`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center 20%',
+                backgroundRepeat: 'no-repeat',
+                filter: 'contrast(1.02) saturate(1.04)'
+              }}
+            />
+            {/* Soft dreamy vignette to preserve pastel tones while aiding text contrast */}
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                background:
+                  'linear-gradient(180deg, rgba(255, 235, 245, 0.22) 0%, rgba(255, 255, 255, 0.06) 40%, rgba(255, 225, 240, 0.32) 100%)',
                 pointerEvents: 'none'
               }}
             />
@@ -513,8 +493,8 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 backgroundSize: 'cover',
                 backgroundPosition: 'center top',
                 backgroundRepeat: 'no-repeat',
-                opacity: 0.96,
-                filter: 'contrast(1.04) saturate(1.08)'
+                opacity: 0.98,
+                filter: 'contrast(1.02) saturate(1.05)'
               }}
             />
             {/* Luminous Heavenly Sky Ambient Gradient */}
@@ -523,24 +503,226 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 position: 'absolute',
                 inset: 0,
                 background:
-                  'linear-gradient(180deg, rgba(89, 188, 244, 0.22) 0%, rgba(220, 240, 252, 0.08) 45%, rgba(240, 248, 255, 0.35) 85%, rgba(255, 255, 255, 0.6) 100%)',
+                  'linear-gradient(180deg, rgba(89, 188, 244, 0.12) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(220, 240, 255, 0.25) 100%)',
                 pointerEvents: 'none'
               }}
             />
-            {/* Bottom Fluffy Cloud Bank */}
+          </div>
+        )}
+
+        {/* Full-Window Cinematic Elden Ring Atmospheric Background Layer (Rotating 4 Wallpapers every 30s) */}
+        {theme === 'eldenring' && (
+          <div
+            className="eldenring-bg-layer"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              zIndex: 0,
+              pointerEvents: 'none',
+              overflow: 'hidden'
+            }}
+          >
+            {/* 4 Background Artworks rotating every 30 seconds with smooth cross-fade */}
+            {ELDEN_RING_BACKGROUNDS.map((bgUrl, idx) => (
+              <div
+                key={bgUrl}
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  backgroundImage: `url('${getAssetUrl(bgUrl)}')`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                  filter: 'contrast(1.04) brightness(0.97) saturate(1.08)',
+                  imageRendering: '-webkit-optimize-contrast',
+                  opacity: eldenBgIndex === idx ? 1 : 0,
+                  transition: 'opacity 1.5s ease-in-out',
+                  zIndex: 0
+                }}
+              />
+            ))}
+            {/* Atmospheric Mist Texture */}
             <div
               style={{
                 position: 'absolute',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                height: '145px',
-                backgroundImage: `url('${getAssetUrl('/aether/clouds_bottom_bank.png')}')`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center bottom',
-                backgroundRepeat: 'no-repeat',
-                opacity: 0.96,
-                pointerEvents: 'none'
+                inset: 0,
+                backgroundImage: `url('${getAssetUrl('/eldenring/textures/cloud_mist_texture.png')}')`,
+                backgroundSize: '280px',
+                backgroundRepeat: 'repeat',
+                opacity: 0.03,
+                mixBlendMode: 'screen',
+                zIndex: 1
+              }}
+            />
+            {/* Subtle Drifting Golden Embers */}
+            <div
+              className="eldenring-embers-drift"
+              style={{
+                position: 'absolute',
+                inset: 0,
+                backgroundImage: `url('${getAssetUrl('/eldenring/textures/embers_texture.png')}')`,
+                backgroundSize: '240px',
+                opacity: 0.10,
+                mixBlendMode: 'screen',
+                pointerEvents: 'none',
+                zIndex: 2
+              }}
+            />
+            {/* Subtle Translucent Overlay for High Contrast & Text Readability without Clouding Background */}
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                background:
+                  'linear-gradient(180deg, rgba(8, 10, 9, 0.22) 0%, rgba(12, 14, 11, 0.14) 45%, rgba(8, 10, 9, 0.38) 100%)',
+                pointerEvents: 'none',
+                zIndex: 3
+              }}
+            />
+            {/* Soft Edge Vignette */}
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                boxShadow: 'inset 0 0 35px rgba(0, 0, 0, 0.50)',
+                pointerEvents: 'none',
+                zIndex: 4
+              }}
+            />
+          </div>
+        )}
+
+        {/* Full-Window Grand Line One Piece Cinematic Atmospheric Background Layer (Rotating Wallpapers every 30s) */}
+        {theme === 'onepiece' && (
+          <div
+            className="onepiece-bg-layer"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              zIndex: 0,
+              pointerEvents: 'none',
+              overflow: 'hidden'
+            }}
+          >
+            {/* Grand Line Pirate Ships & Ocean Wallpapers rotating every 30 seconds */}
+            {ONE_PIECE_BACKGROUNDS.map((bgUrl, idx) => (
+              <div
+                key={bgUrl}
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  backgroundImage: `url('${getAssetUrl(bgUrl)}')`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                  filter: 'contrast(1.02) brightness(0.98) saturate(1.06)',
+                  opacity: onePieceBgIndex === idx ? 1 : 0,
+                  transition: 'opacity 1.5s ease-in-out',
+                  zIndex: 0
+                }}
+              />
+            ))}
+            {/* Cinematic Anime Film Grain Noise Overlay */}
+            <div
+              className="onepiece-noise-layer"
+              style={{
+                position: 'absolute',
+                inset: 0,
+                backgroundImage: `url('${getAssetUrl('/onepiece/textures/noise_texture.png')}')`,
+                backgroundSize: '180px',
+                backgroundRepeat: 'repeat',
+                opacity: 0.14,
+                mixBlendMode: 'overlay',
+                pointerEvents: 'none',
+                zIndex: 1
+              }}
+            />
+            {/* Subtle Nautical Translucent Overlay for Crisp Legibility without Dulling the Artwork */}
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                background:
+                  'linear-gradient(180deg, rgba(14, 20, 27, 0.16) 0%, rgba(20, 28, 38, 0.08) 45%, rgba(14, 20, 27, 0.26) 100%)',
+                pointerEvents: 'none',
+                zIndex: 2
+              }}
+            />
+            {/* Soft Edge Vignette */}
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                boxShadow: 'inset 0 0 35px rgba(0, 0, 0, 0.45)',
+                pointerEvents: 'none',
+                zIndex: 3
+              }}
+            />
+          </div>
+        )}
+
+        {/* Full-Window Fairy Tale Candy Land Atmospheric Background Layer (Rotating 4 Wallpapers every 30s) */}
+        {theme === 'candy' && (
+          <div
+            className="candy-bg-layer"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              zIndex: 0,
+              pointerEvents: 'none',
+              overflow: 'hidden'
+            }}
+          >
+            {/* 4 Whimsical Candy Land Sugar Kingdom Wallpapers rotating every 30 seconds */}
+            {CANDY_BACKGROUNDS.map((bgUrl, idx) => (
+              <div
+                key={bgUrl}
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  backgroundImage: `url('${getAssetUrl(bgUrl)}')`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                  filter: 'contrast(1.05) brightness(0.98) saturate(1.15)',
+                  opacity: candyBgIndex === idx ? 1 : 0,
+                  transition: 'opacity 1.5s ease-in-out',
+                  zIndex: 0
+                }}
+              />
+            ))}
+            {/* Soft Pastel Sugar Glaze Texture Overlay */}
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                backgroundImage: `url('${getAssetUrl('/candy/textures/candy_sky_texture.png')}')`,
+                backgroundSize: '360px',
+                backgroundRepeat: 'repeat',
+                opacity: 0.06,
+                mixBlendMode: 'soft-light',
+                zIndex: 1
+              }}
+            />
+            {/* Translucent Strawberry Cream Contrast Overlay */}
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                background:
+                  'linear-gradient(180deg, rgba(255, 240, 245, 0.28) 0%, rgba(255, 228, 237, 0.18) 45%, rgba(255, 240, 245, 0.42) 100%)',
+                pointerEvents: 'none',
+                zIndex: 2
+              }}
+            />
+            {/* Soft Edge Vignette */}
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                boxShadow: 'inset 0 0 70px rgba(244, 114, 182, 0.35)',
+                pointerEvents: 'none',
+                zIndex: 3
               }}
             />
           </div>
@@ -561,62 +743,152 @@ export const DockFrame: React.FC<DockFrameProps> = ({
           }}
         >
           {/* Active Category Title */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0, flex: '1 1 auto', overflow: 'hidden' }}>
-            <span
+          {theme === 'eldenring' ? (
+            <div
               style={{
-                fontSize: '13px',
-                fontWeight: 600,
-                color: 'var(--text-primary)',
-                letterSpacing: theme === 'deathnote' ? '0.5px' : '-0.2px',
-                fontFamily: theme === 'deathnote' ? 'var(--font-gothic)' : undefined,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                maxWidth: '190px'
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                height: '34px',
+                minWidth: 0,
+                flex: '1 1 auto',
+                overflow: 'hidden'
               }}
             >
-              {activeGroupName}
-            </span>
-            {theme === 'kawaii' && (
-              <img
-                src={getAssetUrl('/stickers/rocket_ship.png')}
-                alt="Rocket"
-                style={{ width: '20px', height: '20px', objectFit: 'contain', animation: 'kawaiiStickerDrift 3s ease-in-out infinite' }}
-                title="Antigravity Rocket"
-              />
-            )}
-            {theme === 'aether' && (
-              <img
-                src={getAssetUrl('/aether/sword.png')}
-                alt="Sword"
-                style={{ width: '18px', height: '18px', objectFit: 'contain', imageRendering: 'pixelated', transform: 'rotate(15deg)' }}
-                title="Aether Sword"
-              />
-            )}
-            {theme === 'deathnote' && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  height: '30px',
+                  padding: '0 10px 0 6px',
+                  background: 'rgba(23, 24, 19, 0.85)',
+                  borderRadius: '4px',
+                  border: '1px solid rgba(197, 161, 90, 0.45)',
+                  boxShadow: '0 2px 6px rgba(0, 0, 0, 0.6)'
+                }}
+              >
                 <img
-                  src={getAssetUrl('/deathnote/icons/logo_deathnote_white.png')}
-                  alt="Death Note"
-                  style={{ height: '13px', objectFit: 'contain', opacity: 0.9 }}
-                />
-                <img
-                  src={getAssetUrl('/deathnote/decorations/apple.png')}
-                  alt="Shinigami Apple"
+                  src={getAssetUrl('/eldenring/misc/runestone_icon.png')}
+                  alt="Rune Stone"
                   style={{
-                    width: '20px',
-                    height: '20px',
+                    width: '18px',
+                    height: '18px',
                     objectFit: 'contain',
-                    filter: 'drop-shadow(0 0 8px rgba(220, 38, 38, 0.95))'
+                    filter: 'drop-shadow(0 0 6px rgba(234, 196, 119, 0.8))'
                   }}
-                  title="Shinigami Apple (Death Note)"
                 />
+                <span
+                  style={{
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    color: '#EAC477',
+                    letterSpacing: '1px',
+                    fontFamily: 'var(--font-fantasy)',
+                    textShadow: '0 0 10px rgba(197, 161, 90, 0.65)',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {activeGroupName}
+                </span>
               </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0, flex: '1 1 auto', overflow: 'hidden' }}>
+              {theme === 'candy' && (
+                <img
+                  src={getAssetUrl('/candy/decorations/cute_cat_header.png')}
+                  alt="Candy Cat"
+                  style={{
+                    width: '24px',
+                    height: '21px',
+                    objectFit: 'contain',
+                    flexShrink: 0,
+                    filter: 'drop-shadow(0 2px 4px rgba(244, 114, 182, 0.4))'
+                  }}
+                  title="Sweet Candy Cat"
+                />
+              )}
+              <span
+                style={{
+                  fontSize: theme === 'onepiece' ? '20px' : '13px',
+                  fontWeight: theme === 'onepiece' || theme === 'candy' ? 700 : 600,
+                  color: theme === 'onepiece' ? '#f59e0b' : theme === 'candy' ? '#db2777' : 'var(--text-primary)',
+                  letterSpacing: theme === 'deathnote' ? '0.5px' : theme === 'onepiece' ? '1.5px' : '-0.2px',
+                  fontFamily: theme === 'deathnote' ? 'var(--font-gothic)' : theme === 'onepiece' ? 'var(--font-onepiece)' : undefined,
+                  textShadow: theme === 'onepiece' ? '0 0 10px rgba(245, 158, 11, 0.55)' : theme === 'candy' ? '0 1px 3px rgba(255, 255, 255, 0.9), 0 0 10px rgba(244, 114, 182, 0.6)' : undefined,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  maxWidth: theme === 'deathnote' ? 'calc(50% - 85px)' : theme === 'onepiece' ? '220px' : '190px'
+                }}
+              >
+                {activeGroupName}
+              </span>
+              {theme === 'kawaii' && (
+                <img
+                  src={getAssetUrl('/stickers/rocket_ship.png')}
+                  alt="Rocket"
+                  style={{ width: '20px', height: '20px', objectFit: 'contain', animation: 'kawaiiStickerDrift 3s ease-in-out infinite' }}
+                  title="Antigravity Rocket"
+                />
+              )}
+              {theme === 'aether' && (
+                <img
+                  src={getAssetUrl('/aether/sword.png')}
+                  alt="Sword"
+                  style={{ width: '18px', height: '18px', objectFit: 'contain', imageRendering: 'pixelated', transform: 'rotate(15deg)' }}
+                  title="Aether Sword"
+                />
+              )}
+            </div>
+          )}
+
+          {/* Death Note Theme: Centered Death Note Title in Top Bar */}
+          {theme === 'deathnote' && (
+            <div
+              style={{
+                position: 'absolute',
+                left: '50%',
+                top: '50%',
+                transform: 'translate(-50%, -50%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                pointerEvents: 'none',
+                zIndex: 2
+              }}
+            >
+              <img
+                src={getAssetUrl('/deathnote/icons/title_deathnote_white.png')}
+                alt="Death Note"
+                style={{
+                  height: drawerWidth < 310 ? '24px' : '28px',
+                  objectFit: 'contain',
+                  filter: 'drop-shadow(0 0 10px rgba(163, 38, 45, 0.85)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.95))',
+                  userSelect: 'none'
+                }}
+              />
+            </div>
+          )}
 
           {/* Quick Header Actions: Search, Hide to Tray, Close */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+              ...(theme === 'eldenring' ? {
+                padding: '2px 4px',
+                borderRadius: '4px',
+                background: 'rgba(17, 19, 16, 0.75)',
+                border: '1px solid rgba(197, 161, 90, 0.35)',
+                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.5)'
+              } : {})
+            }}
+          >
             <button
               onClick={onOpenSearch}
               className="btn-dock"
@@ -629,15 +901,19 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                borderRadius: theme === 'kawaii' ? '10px' : theme === 'aether' ? '4px' : '6px',
-                background: theme === 'kawaii' ? '#cbf3f0' : theme === 'aether' ? '#f5cf47' : theme === 'deathnote' ? 'rgba(18, 18, 18, 0.9)' : undefined,
-                border: theme === 'aether' ? '1px solid #734e2c' : theme === 'deathnote' ? '1px solid rgba(163, 38, 45, 0.6)' : undefined,
-                boxShadow: theme === 'aether'
-                  ? 'inset -1px -1px 0 #947214, inset 1px 1px 0 #fff'
-                  : theme === 'deathnote'
-                    ? '0 0 8px rgba(163, 38, 45, 0.25)'
-                    : undefined,
-                color: theme === 'kawaii' ? '#2d1e4e' : theme === 'deathnote' ? '#eae6df' : undefined
+                borderRadius: theme === 'kawaii' || theme === 'candy' ? '10px' : theme === 'aether' || theme === 'eldenring' || theme === 'onepiece' ? '4px' : '6px',
+                background: theme === 'kawaii' ? '#cbf3f0' : theme === 'candy' ? '#fff0f5' : theme === 'aether' ? '#f5cf47' : theme === 'deathnote' ? 'rgba(18, 18, 18, 0.9)' : theme === 'eldenring' || theme === 'onepiece' ? 'transparent' : undefined,
+                border: theme === 'candy' ? '1.5px solid #fbcfe8' : theme === 'aether' ? '1px solid #734e2c' : theme === 'deathnote' ? '1px solid rgba(163, 38, 45, 0.6)' : theme === 'eldenring' || theme === 'onepiece' ? 'none' : undefined,
+                boxShadow: theme === 'candy'
+                  ? '0 2px 6px rgba(244, 114, 182, 0.35), inset 0 1px 0 #fff'
+                  : theme === 'aether'
+                    ? 'inset -1px -1px 0 #947214, inset 1px 1px 0 #fff'
+                    : theme === 'deathnote'
+                      ? '0 0 8px rgba(163, 38, 45, 0.25)'
+                      : theme === 'eldenring' || theme === 'onepiece'
+                        ? 'none'
+                        : undefined,
+                color: theme === 'kawaii' || theme === 'candy' ? '#db2777' : theme === 'deathnote' ? '#eae6df' : theme === 'eldenring' ? '#EAC477' : theme === 'onepiece' ? '#f59e0b' : undefined
               }}
             >
               {theme === 'aether' ? (
@@ -646,8 +922,20 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                   alt="Search"
                   style={{ width: '20px', height: '20px', objectFit: 'contain', imageRendering: 'pixelated' }}
                 />
+              ) : theme === 'eldenring' ? (
+                <img
+                  src={getAssetUrl('/eldenring/header/header_control_search.png')}
+                  alt="Search"
+                  style={{ width: '26px', height: '26px', objectFit: 'contain' }}
+                />
+              ) : theme === 'onepiece' ? (
+                <img
+                  src={getAssetUrl('/onepiece/icons/search.png')}
+                  alt="Search"
+                  style={{ width: '26px', height: '26px', objectFit: 'contain' }}
+                />
               ) : (
-                <Search size={14} />
+                <Search size={14} color={theme === 'candy' ? '#db2777' : undefined} />
               )}
             </button>
 
@@ -668,18 +956,38 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                borderRadius: theme === 'kawaii' ? '10px' : theme === 'aether' ? '4px' : '6px',
-                background: theme === 'kawaii' ? '#d8e2dc' : theme === 'aether' ? '#59bcf4' : theme === 'deathnote' ? 'rgba(18, 18, 18, 0.9)' : undefined,
-                border: theme === 'aether' ? '1px solid #236c9e' : theme === 'deathnote' ? '1px solid rgba(163, 38, 45, 0.6)' : undefined,
-                boxShadow: theme === 'aether'
-                  ? 'inset -1px -1px 0 #1b537a, inset 1px 1px 0 #b3e3ff'
-                  : theme === 'deathnote'
-                    ? '0 0 8px rgba(163, 38, 45, 0.25)'
-                    : undefined,
-                color: theme === 'kawaii' ? '#2d1e4e' : theme === 'deathnote' ? '#eae6df' : undefined
+                borderRadius: theme === 'kawaii' || theme === 'candy' ? '10px' : theme === 'aether' || theme === 'eldenring' || theme === 'onepiece' ? '4px' : '6px',
+                background: theme === 'kawaii' ? '#d8e2dc' : theme === 'candy' ? '#fff0f5' : theme === 'aether' ? '#59bcf4' : theme === 'deathnote' ? 'rgba(18, 18, 18, 0.9)' : theme === 'eldenring' || theme === 'onepiece' ? 'transparent' : undefined,
+                border: theme === 'candy' ? '1.5px solid #fbcfe8' : theme === 'aether' ? '1px solid #236c9e' : theme === 'deathnote' ? '1px solid rgba(163, 38, 45, 0.6)' : theme === 'eldenring' || theme === 'onepiece' ? 'none' : undefined,
+                boxShadow: theme === 'candy'
+                  ? '0 2px 6px rgba(244, 114, 182, 0.35), inset 0 1px 0 #fff'
+                  : theme === 'aether'
+                    ? 'inset -1px -1px 0 #1b537a, inset 1px 1px 0 #b3e3ff'
+                    : theme === 'deathnote'
+                      ? '0 0 8px rgba(163, 38, 45, 0.25)'
+                      : theme === 'eldenring' || theme === 'onepiece'
+                        ? 'none'
+                        : undefined,
+                color: theme === 'kawaii' || theme === 'candy' ? '#db2777' : theme === 'deathnote' ? '#eae6df' : theme === 'eldenring' ? '#EAC477' : theme === 'onepiece' ? '#f59e0b' : undefined
               }}
             >
-              {isMaximized ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
+              {theme === 'eldenring' ? (
+                <img
+                  src={getAssetUrl('/eldenring/header/header_control_expand.png')}
+                  alt="Expand"
+                  style={{ width: '26px', height: '26px', objectFit: 'contain' }}
+                />
+              ) : theme === 'onepiece' ? (
+                <img
+                  src={getAssetUrl('/onepiece/icons/expand.png')}
+                  alt="Expand"
+                  style={{ width: '26px', height: '26px', objectFit: 'contain' }}
+                />
+              ) : isMaximized ? (
+                <Minimize2 size={13} color={theme === 'candy' ? '#db2777' : undefined} />
+              ) : (
+                <Maximize2 size={13} color={theme === 'candy' ? '#db2777' : undefined} />
+              )}
             </button>
 
             <button
@@ -694,25 +1002,41 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                borderRadius: theme === 'kawaii' ? '10px' : theme === 'aether' ? '4px' : '6px',
-                background: theme === 'kawaii' ? '#ffccd5' : theme === 'aether' ? '#4db5ff' : theme === 'deathnote' ? 'rgba(18, 18, 18, 0.9)' : undefined,
-                border: theme === 'aether' ? '1px solid #236c9e' : theme === 'deathnote' ? '1px solid rgba(163, 38, 45, 0.6)' : undefined,
-                boxShadow: theme === 'aether'
-                  ? 'inset -1px -1px 0 #1b537a, inset 1px 1px 0 #b3e3ff'
-                  : theme === 'deathnote'
-                    ? '0 0 8px rgba(163, 38, 45, 0.25)'
-                    : undefined,
-                color: theme === 'kawaii' ? '#2d1e4e' : theme === 'deathnote' ? '#eae6df' : undefined
+                borderRadius: theme === 'kawaii' || theme === 'candy' ? '10px' : theme === 'aether' || theme === 'eldenring' || theme === 'onepiece' ? '4px' : '6px',
+                background: theme === 'kawaii' ? '#ffccd5' : theme === 'candy' ? '#fff0f5' : theme === 'aether' ? '#4db5ff' : theme === 'deathnote' ? 'rgba(18, 18, 18, 0.9)' : theme === 'eldenring' || theme === 'onepiece' ? 'transparent' : undefined,
+                border: theme === 'candy' ? '1.5px solid #fbcfe8' : theme === 'aether' ? '1px solid #236c9e' : theme === 'deathnote' ? '1px solid rgba(163, 38, 45, 0.6)' : theme === 'eldenring' || theme === 'onepiece' ? 'none' : undefined,
+                boxShadow: theme === 'candy'
+                  ? '0 2px 6px rgba(244, 114, 182, 0.35), inset 0 1px 0 #fff'
+                  : theme === 'aether'
+                    ? 'inset -1px -1px 0 #1b537a, inset 1px 1px 0 #b3e3ff'
+                    : theme === 'deathnote'
+                      ? '0 0 8px rgba(163, 38, 45, 0.25)'
+                      : theme === 'eldenring' || theme === 'onepiece'
+                        ? 'none'
+                        : undefined,
+                color: theme === 'kawaii' || theme === 'candy' ? '#db2777' : theme === 'deathnote' ? '#eae6df' : theme === 'eldenring' ? '#EAC477' : theme === 'onepiece' ? '#f59e0b' : undefined
               }}
             >
               {theme === 'aether' ? (
                 <img
-                  src="/aether/close_red.png"
+                  src={getAssetUrl('/aether/close_red.png')}
                   alt="Close"
                   style={{ width: '20px', height: '20px', objectFit: 'contain', imageRendering: 'pixelated' }}
                 />
+              ) : theme === 'eldenring' ? (
+                <img
+                  src={getAssetUrl('/eldenring/header/header_control_close.png')}
+                  alt="Close"
+                  style={{ width: '26px', height: '26px', objectFit: 'contain' }}
+                />
+              ) : theme === 'onepiece' ? (
+                <img
+                  src={getAssetUrl('/onepiece/icons/close.png')}
+                  alt="Close"
+                  style={{ width: '26px', height: '26px', objectFit: 'contain' }}
+                />
               ) : (
-                <X size={15} />
+                <X size={15} color={theme === 'candy' ? '#db2777' : undefined} />
               )}
             </button>
           </div>
@@ -809,67 +1133,124 @@ export const DockFrame: React.FC<DockFrameProps> = ({
             zIndex: 2
           }}
         >
-          <button
-            onClick={onOpenSettings}
-            className="btn-dock"
-            title="Settings & Appearance"
-            aria-label="Settings"
-            style={{
-              height: '28px',
-              padding: theme === 'aether' ? '0 8px' : '0 10px',
-              borderRadius: theme === 'kawaii' ? '14px' : theme === 'aether' ? '4px' : '6px',
-              gap: '6px',
-              fontSize: '11px',
-              fontWeight: 600,
-              fontFamily: theme === 'deathnote' ? 'var(--font-gothic)' : undefined,
-              background: theme === 'kawaii'
-                ? '#fff0f5'
-                : theme === 'aether'
-                  ? '#5c3e23'
-                  : theme === 'deathnote'
-                    ? 'rgba(18, 18, 18, 0.92)'
-                    : undefined,
-              borderColor: theme === 'kawaii'
-                ? '#ffccd5'
-                : theme === 'aether'
-                  ? '#8c6038'
-                  : theme === 'deathnote'
-                    ? '#a3262d'
-                    : undefined,
-              color: theme === 'kawaii'
-                ? '#2d1e4e'
-                : theme === 'aether'
-                  ? '#ffdf59'
-                  : theme === 'deathnote'
-                    ? '#eae6df'
-                    : undefined,
-              boxShadow: theme === 'kawaii'
-                ? '0 2px 8px rgba(255, 180, 200, 0.4)'
-                : theme === 'aether'
-                  ? 'inset -1px -1px 0 #2e1c0d, inset 1px 1px 0 #8c6038, 0 2px 4px rgba(0,0,0,0.15)'
-                  : theme === 'deathnote'
-                    ? '0 0 10px rgba(163, 38, 45, 0.4), inset 0 0 6px rgba(163, 38, 45, 0.15)'
-                    : undefined,
-              textShadow: theme === 'aether' ? '1px 1px 0 #181005' : undefined
-            }}
-          >
-            {theme === 'kawaii' ? (
+          {theme === 'eldenring' ? (
+            <button
+              onClick={onOpenSettings}
+              className="btn-dock eldenring-settings-btn"
+              title="Settings & Appearance"
+              aria-label="Settings"
+              style={{
+                height: '28px',
+                padding: 0,
+                background: 'transparent',
+                border: 'none',
+                boxShadow: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'transform 0.2s ease, filter 0.2s ease'
+              }}
+            >
               <img
-                src={getAssetUrl('/stickers/swirl_galaxy.png')}
-                alt="Galaxy"
-                style={{ width: '18px', height: '18px', objectFit: 'contain', animation: 'galaxySpin 8s linear infinite' }}
+                src={getAssetUrl('/eldenring/misc/settings_button.png')}
+                alt="Settings"
+                style={{
+                  height: '26px',
+                  width: 'auto',
+                  objectFit: 'contain',
+                  filter: 'drop-shadow(0 2px 6px rgba(0, 0, 0, 0.7))'
+                }}
               />
-            ) : theme === 'aether' ? (
-              <img
-                src={getAssetUrl('/aether/crystal.png')}
-                alt="Aether Gem"
-                style={{ width: '16px', height: '16px', objectFit: 'contain', imageRendering: 'pixelated', filter: 'drop-shadow(0 0 3px #4db5ff)' }}
-              />
-            ) : (
-              <Settings size={13} color={theme === 'deathnote' ? '#e05a61' : undefined} />
-            )}
-            <span>Settings {theme === 'kawaii' && '🌸'}</span>
-          </button>
+            </button>
+          ) : (
+            <button
+              onClick={onOpenSettings}
+              className="btn-dock"
+              title="Settings & Appearance"
+              aria-label="Settings"
+              style={{
+                height: '28px',
+                padding: theme === 'aether' ? '0 8px' : '0 10px',
+                borderRadius: theme === 'kawaii' || theme === 'candy' ? '14px' : theme === 'aether' || theme === 'onepiece' ? '4px' : '6px',
+                gap: '6px',
+                fontSize: '11px',
+                fontWeight: 600,
+                fontFamily: theme === 'deathnote' ? 'var(--font-gothic)' : theme === 'onepiece' ? 'var(--font-fantasy)' : undefined,
+                letterSpacing: theme === 'onepiece' ? '0.8px' : undefined,
+                background: theme === 'kawaii' || theme === 'candy'
+                  ? '#fff0f5'
+                  : theme === 'aether'
+                    ? '#5c3e23'
+                    : theme === 'deathnote'
+                      ? 'rgba(18, 18, 18, 0.92)'
+                      : theme === 'onepiece'
+                        ? 'rgba(33, 25, 20, 0.95)'
+                        : undefined,
+                borderColor: theme === 'kawaii'
+                  ? '#ffccd5'
+                  : theme === 'candy'
+                    ? '#f472b6'
+                    : theme === 'aether'
+                      ? '#8c6038'
+                      : theme === 'deathnote'
+                        ? '#a3262d'
+                        : theme === 'onepiece'
+                          ? 'rgba(245, 158, 11, 0.45)'
+                          : undefined,
+                color: theme === 'kawaii'
+                  ? '#2d1e4e'
+                  : theme === 'candy'
+                    ? '#be185d'
+                    : theme === 'aether'
+                      ? '#ffdf59'
+                      : theme === 'deathnote'
+                        ? '#eae6df'
+                        : theme === 'onepiece'
+                          ? '#f59e0b'
+                          : undefined,
+                boxShadow: theme === 'kawaii' || theme === 'candy'
+                  ? '0 2px 8px rgba(255, 180, 200, 0.4)'
+                  : theme === 'aether'
+                    ? 'inset -1px -1px 0 #2e1c0d, inset 1px 1px 0 #8c6038, 0 2px 4px rgba(0,0,0,0.15)'
+                    : theme === 'deathnote'
+                      ? '0 0 10px rgba(163, 38, 45, 0.4), inset 0 0 6px rgba(163, 38, 45, 0.15)'
+                      : theme === 'onepiece'
+                        ? '0 2px 8px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(245, 158, 11, 0.2)'
+                        : undefined,
+                textShadow: theme === 'aether' ? '1px 1px 0 #181005' : theme === 'onepiece' ? '0 0 6px rgba(245, 158, 11, 0.4)' : theme === 'candy' ? '0 0 6px rgba(244, 114, 182, 0.45)' : undefined
+              }}
+            >
+              {theme === 'kawaii' ? (
+                <img
+                  src={getAssetUrl('/stickers/swirl_galaxy.png')}
+                  alt="Galaxy"
+                  style={{ width: '18px', height: '18px', objectFit: 'contain', animation: 'galaxySpin 8s linear infinite' }}
+                />
+              ) : theme === 'aether' ? (
+                <img
+                  src={getAssetUrl('/aether/crystal.png')}
+                  alt="Aether Gem"
+                  style={{ width: '16px', height: '16px', objectFit: 'contain', imageRendering: 'pixelated', filter: 'drop-shadow(0 0 3px #4db5ff)' }}
+                />
+              ) : theme === 'onepiece' ? (
+                <img
+                  src={getAssetUrl('/onepiece/icons/settings.png')}
+                  alt="Settings"
+                  style={{ width: '16px', height: '16px', objectFit: 'contain', filter: 'drop-shadow(0 0 3px rgba(245, 158, 11, 0.5))' }}
+                />
+              ) : theme === 'candy' ? (
+                <img
+                  src={getAssetUrl('/candy/icons/settings.png')}
+                  alt="Candy Settings"
+                  style={{ width: '16px', height: '16px', objectFit: 'contain', filter: 'drop-shadow(0 0 3px rgba(244, 114, 182, 0.6))' }}
+                />
+              ) : (
+                <Settings size={13} color={theme === 'deathnote' ? '#e05a61' : undefined} />
+              )}
+              <span>Settings {(theme === 'kawaii' || theme === 'candy') && '🌸'}</span>
+            </button>
+          )}
 
           {theme === 'kawaii' && (
             <img
@@ -887,20 +1268,45 @@ export const DockFrame: React.FC<DockFrameProps> = ({
             />
           )}
 
-          {theme === 'aether' && (
+          {theme === 'eldenring' && (
             <img
-              src="/aether/cloud.png"
-              alt="Aether Cloud"
+              src={getAssetUrl('/eldenring/misc/decorative_rune_site_of_grace.png')}
+              alt="Site of Grace"
               style={{
-                width: '28px',
-                height: '20px',
+                height: '26px',
                 objectFit: 'contain',
-                cursor: 'pointer',
-                imageRendering: 'pixelated',
-                animation: 'aetherDrift 4s ease-in-out infinite alternate',
-                filter: 'drop-shadow(0 2px 5px rgba(89, 188, 244, 0.4))'
+                filter: 'drop-shadow(0 0 8px rgba(234, 196, 119, 0.85))',
+                cursor: 'pointer'
               }}
-              title="Aether Cloud"
+              title="Site of Grace"
+            />
+          )}
+
+          {theme === 'onepiece' && (
+            <img
+              src={getAssetUrl('/onepiece/icons/pirate_skull_logo.png')}
+              alt="Pirate Skull"
+              style={{
+                height: '26px',
+                objectFit: 'contain',
+                filter: 'drop-shadow(0 0 6px rgba(245, 158, 11, 0.6))',
+                cursor: 'pointer'
+              }}
+              title="Straw Hat Pirate Skull"
+            />
+          )}
+
+          {theme === 'candy' && (
+            <img
+              src={getAssetUrl('/candy/decorations/lollipop_candy.png')}
+              alt="Lollipop"
+              style={{
+                height: '24px',
+                objectFit: 'contain',
+                filter: 'drop-shadow(0 0 6px rgba(244, 114, 182, 0.65))',
+                cursor: 'pointer'
+              }}
+              title="Sweet Candy Land"
             />
           )}
         </footer>
@@ -915,15 +1321,14 @@ export const DockFrame: React.FC<DockFrameProps> = ({
             flexDirection: 'row',
             alignItems: 'flex-start',
             justifyContent: 'flex-start',
-            gap: '8px',
             height: '100%',
-            width: (activeModule || isExiting) ? '340px' : '54px',
+            width: '340px',
             flexShrink: 0,
-            overflow: 'visible',
+            overflow: 'hidden',
             position: 'relative'
           }}
         >
-          {/* Anchor Column sticking directly flush against Main Drawer */}
+          {/* Anchor Column — always flush against Main Drawer at left edge of companion area */}
           <div
             style={{
               width: '48px',
@@ -934,7 +1339,8 @@ export const DockFrame: React.FC<DockFrameProps> = ({
               justifyContent: 'flex-start',
               paddingTop: '8px',
               position: 'relative',
-              flexShrink: 0
+              flexShrink: 0,
+              zIndex: 2
             }}
           >
             {/* Small Handles Hub Box sticking directly to the main UI at the top */}
@@ -943,6 +1349,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
               isExpanded={isExpanded}
               activeModule={activeModule}
               onSelectModule={onSelectModule}
+              theme={theme}
             />
 
             {/* Main Handle (EdgeToggle) stays visible when opened, sticking to Drawer at vertical center */}
@@ -969,55 +1376,26 @@ export const DockFrame: React.FC<DockFrameProps> = ({
             </div>
           </div>
 
-          {/* Active Companion Module (Music / Weather / Calendar) */}
+          {/* Active Companion Module (Music / Weather / Calendar) — animates in/out within the fixed 340px space */}
           {renderedModule && companionContent && (
             <div
-              className={
-                theme === 'deathnote'
-                  ? `deathnote-book-wrapper ${isExiting ? 'is-exiting' : 'is-entering'}`
-                  : (isExiting ? 'hub-module-exit-left' : 'hub-module-enter-left')
-              }
+              key={renderedModule}
+              className={isExiting ? 'hub-module-exit-left' : 'hub-module-enter-left'}
               style={{
-                width: '280px',
-                height: '100%',
+                position: 'absolute',
+                top: 0,
+                left: '52px',
+                right: 0,
+                bottom: 0,
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
                 alignItems: 'center',
                 overflow: 'visible',
-                perspective: '1200px',
-                position: 'relative'
+                zIndex: 1
               }}
             >
-              {theme === 'deathnote' && (
-                <div
-                  className={`deathnote-book-cover ${isExiting ? 'cover-close-left' : 'cover-open-left'}`}
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    zIndex: 30,
-                    pointerEvents: 'none'
-                  }}
-                >
-                  <div className="deathnote-cover-spine spine-left" />
-                  <div className="deathnote-cover-inner">
-                    <img
-                      src={getAssetUrl('/deathnote/icons/logo_deathnote_white.png')}
-                      alt="Death Note"
-                      className="deathnote-cover-logo"
-                    />
-                    <div className="deathnote-cover-shinigami">
-                      <span style={{ fontFamily: 'var(--font-gothic)', fontSize: '24px', color: '#c41e24', textShadow: '0 0 10px rgba(196, 30, 36, 0.8)' }}>
-                        †
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              )}
-              <div
-                className={theme === 'deathnote' ? `deathnote-book-pages ${isExiting ? 'pages-exit' : 'pages-enter'}` : undefined}
-                style={{ width: '100%', display: 'flex', justifyContent: 'center' }}
-              >
+              <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
                 {companionContent}
               </div>
             </div>
@@ -1059,6 +1437,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
               isExpanded={isExpanded}
               activeModule={activeModule}
               onSelectModule={onSelectModule}
+              theme={theme}
             />
             <EdgeToggle
               isExpanded={true}

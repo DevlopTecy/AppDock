@@ -46,15 +46,16 @@ function Get-IconBase64([string]$targetFile) {
                 if ($sc) {
                     if (![string]::IsNullOrEmpty($sc.IconLocation)) {
                         $parts = $sc.IconLocation.Split(',')
-                        $cand = $parts[0].Trim()
+                        $cand = [System.Environment]::ExpandEnvironmentVariables($parts[0].Trim())
                         if ([System.IO.File]::Exists($cand)) {
                             $extractTarget = $cand
                             $resolved = $true
                         }
                     }
                     if (-not $resolved -and ![string]::IsNullOrEmpty($sc.TargetPath)) {
-                        if ([System.IO.File]::Exists($sc.TargetPath)) {
-                            $extractTarget = $sc.TargetPath
+                        $expandedTarget = [System.Environment]::ExpandEnvironmentVariables($sc.TargetPath)
+                        if ([System.IO.File]::Exists($expandedTarget)) {
+                            $extractTarget = $expandedTarget
                             $resolved = $true
                         }
                     }

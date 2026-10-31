@@ -21,6 +21,7 @@ contextBridge.exposeInMainWorld('appDock', {
   extractIcon: (filePath) => ipcRenderer.invoke('app:extract-icon', filePath),
   scanSystemShortcuts: () => ipcRenderer.invoke('app:scan-system'),
   browseFile: () => ipcRenderer.invoke('app:browse-file'),
+  showItemInFolder: (filePath) => ipcRenderer.invoke('app:show-item-in-folder', filePath),
   saveStorage: (payload) => ipcRenderer.invoke('storage:save', payload),
   loadStorage: () => ipcRenderer.invoke('storage:load'),
   closeApp: () => ipcRenderer.invoke('dock:close'),
@@ -28,6 +29,8 @@ contextBridge.exposeInMainWorld('appDock', {
   showFromTray: () => ipcRenderer.invoke('dock:show-from-tray'),
   setSkipTaskbar: (skip) => ipcRenderer.invoke('dock:set-skip-taskbar', skip),
   getSkipTaskbar: () => ipcRenderer.invoke('dock:get-skip-taskbar'),
+  getAutoLaunch: () => ipcRenderer.invoke('dock:get-auto-launch'),
+  setAutoLaunch: (enable) => ipcRenderer.invoke('dock:set-auto-launch', enable),
   getMediaState: () => ipcRenderer.invoke('media:get-state'),
   controlMedia: (action) => ipcRenderer.invoke('media:control', action),
   onDockCollapse: (callback) => {

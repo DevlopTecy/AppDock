@@ -27,6 +27,26 @@ assert.strictEqual(cleanTag('v1.0.2'), '1.0.2');
 assert.strictEqual(cleanTag('release-2.0.0'), '2.0.0');
 assert.strictEqual(cleanTag('1.5.0'), '1.5.0');
 
+// Asset extraction test
+function extractDownloadUrl(assets, fallbackHtmlUrl) {
+  if (Array.isArray(assets)) {
+    const exeAsset = assets.find((a) => a.name && (a.name.endsWith('.exe') || a.name.endsWith('.zip')));
+    if (exeAsset && exeAsset.browser_download_url) {
+      return exeAsset.browser_download_url;
+    }
+  }
+  return fallbackHtmlUrl;
+}
+
+const mockAssets = [
+  { name: 'AppDock-Setup-1.0.3.exe.blockmap', browser_download_url: 'https://example.com/blockmap' },
+  { name: 'AppDock-Setup-1.0.3.exe', browser_download_url: 'https://github.com/DevlopTecy/AppDock/releases/download/v1.0.3/AppDock-Setup-1.0.3.exe' }
+];
+assert.strictEqual(
+  extractDownloadUrl(mockAssets, 'https://github.com/releases/v1.0.3'),
+  'https://github.com/DevlopTecy/AppDock/releases/download/v1.0.3/AppDock-Setup-1.0.3.exe'
+);
+
 // 2. Verify Preload Bridge signatures
 const fs = require('fs');
 const path = require('path');

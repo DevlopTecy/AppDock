@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { getAssetUrl } from '../utils/assets';
-import { AppGroup, DockPosition } from '../types/dock';
+import { AppGroup, DockPosition, DockTheme } from '../types/dock';
 import {
   Gamepad2,
   Briefcase,
@@ -12,7 +13,9 @@ import {
   Terminal,
   Plus,
   X,
-  AlertTriangle
+  AlertTriangle,
+  Edit3,
+  Trash2
 } from 'lucide-react';
 
 export const getGroupIcon = (iconName: string, size = 15) => {
@@ -48,6 +51,8 @@ interface GroupSidebarProps {
   onSelectGroup: (groupId: string) => void;
   onAddNewGroup: () => void;
   onDeleteGroup: (groupId: string) => void;
+  onEditGroup?: (group: AppGroup) => void;
+  theme?: DockTheme;
 }
 
 export const GroupSidebar: React.FC<GroupSidebarProps> = ({
@@ -56,11 +61,38 @@ export const GroupSidebar: React.FC<GroupSidebarProps> = ({
   dockPosition = 'right',
   onSelectGroup,
   onAddNewGroup,
-  onDeleteGroup
+  onDeleteGroup,
+  onEditGroup,
+  theme
 }) => {
   const [hoveredGroupId, setHoveredGroupId] = useState<string | null>(null);
   const [confirmDeleteGroup, setConfirmDeleteGroup] = useState<AppGroup | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ group: AppGroup; x: number; y: number } | null>(null);
   const isRightDock = dockPosition === 'right';
+  const isEldenRing = theme === 'eldenring' || (typeof document !== 'undefined' && document.documentElement.getAttribute('data-theme') === 'eldenring');
+
+  useEffect(() => {
+    if (!contextMenu) return;
+    const handleOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && target.closest('.group-context-menu')) return;
+      setContextMenu(null);
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setContextMenu(null);
+    };
+    const timer = setTimeout(() => {
+      window.addEventListener('click', handleOutside);
+      window.addEventListener('contextmenu', handleOutside);
+    }, 50);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('click', handleOutside);
+      window.removeEventListener('contextmenu', handleOutside);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [contextMenu]);
 
   return (
     <aside
@@ -128,12 +160,17 @@ export const GroupSidebar: React.FC<GroupSidebarProps> = ({
               {/* 3D Tactile Group Button */}
               <button
                 onClick={() => onSelectGroup(group.id)}
-                title={`${group.name} (${group.items.length})`}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setContextMenu({ group, x: e.clientX, y: e.clientY });
+                }}
+                title={`${group.name} (${group.items.length}) - Right-click to edit`}
                 aria-label={group.name}
                 style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '10px',
+                  width: isEldenRing ? '38px' : '36px',
+                  height: isEldenRing ? '38px' : '36px',
+                  borderRadius: isEldenRing ? '8px' : '10px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -173,7 +210,61 @@ export const GroupSidebar: React.FC<GroupSidebarProps> = ({
                     transition: 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
                   }}
                 >
-                  {getGroupIcon(group.iconName, 16)}
+                  {isEldenRing && (group.iconName?.toLowerCase().includes('game') || group.name.toLowerCase().includes('game')) ? (
+                    <img
+                      src={getAssetUrl('/eldenring/icons/gamepad.png')}
+                      alt="Games"
+                      style={{
+                        height: '26px',
+                        width: '26px',
+                        objectFit: 'contain',
+                        filter: isActive
+                          ? 'drop-shadow(0 0 8px rgba(234, 196, 119, 0.95)) brightness(1.2)'
+                          : 'drop-shadow(0 1px 4px rgba(0, 0, 0, 0.8))'
+                      }}
+                    />
+                  ) : isEldenRing && (group.iconName?.toLowerCase().includes('globe') || group.iconName?.toLowerCase().includes('web')) ? (
+                    <img
+                      src={getAssetUrl('/eldenring/icons/globe.png')}
+                      alt="Web"
+                      style={{
+                        height: '24px',
+                        width: '24px',
+                        objectFit: 'contain',
+                        filter: isActive
+                          ? 'drop-shadow(0 0 8px rgba(234, 196, 119, 0.95))'
+                          : 'drop-shadow(0 1px 4px rgba(0, 0, 0, 0.8))'
+                      }}
+                    />
+                  ) : isEldenRing && (group.iconName?.toLowerCase().includes('music') || group.name.toLowerCase().includes('music')) ? (
+                    <img
+                      src={getAssetUrl('/eldenring/sidebar/music_sidebar.png')}
+                      alt="Music"
+                      style={{
+                        height: '34px',
+                        width: 'auto',
+                        objectFit: 'contain',
+                        filter: isActive
+                          ? 'drop-shadow(0 0 8px rgba(234, 196, 119, 0.95))'
+                          : 'drop-shadow(0 1px 4px rgba(0, 0, 0, 0.8))'
+                      }}
+                    />
+                  ) : isEldenRing && (group.iconName?.toLowerCase().includes('calendar') || group.name.toLowerCase().includes('calendar')) ? (
+                    <img
+                      src={getAssetUrl('/eldenring/sidebar/calendar_sidebar.png')}
+                      alt="Calendar"
+                      style={{
+                        height: '34px',
+                        width: 'auto',
+                        objectFit: 'contain',
+                        filter: isActive
+                          ? 'drop-shadow(0 0 8px rgba(234, 196, 119, 0.95))'
+                          : 'drop-shadow(0 1px 4px rgba(0, 0, 0, 0.8))'
+                      }}
+                    />
+                  ) : (
+                    getGroupIcon(group.iconName, isEldenRing ? 20 : 16)
+                  )}
                 </span>
               </button>
 
@@ -268,15 +359,15 @@ export const GroupSidebar: React.FC<GroupSidebarProps> = ({
           title="Add New Group"
           aria-label="Add New Group"
           style={{
-            width: '36px',
-            height: '36px',
-            borderRadius: '10px',
+            width: isEldenRing ? '38px' : '36px',
+            height: isEldenRing ? '38px' : '36px',
+            borderRadius: isEldenRing ? '8px' : '10px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'var(--bg-surface)',
-            color: 'var(--text-muted)',
-            border: '1px dashed var(--btn-border)',
+            background: isEldenRing ? 'rgba(23, 24, 19, 0.9)' : 'var(--bg-surface)',
+            color: isEldenRing ? '#EAC477' : 'var(--text-muted)',
+            border: isEldenRing ? '1px dashed rgba(197, 161, 90, 0.6)' : '1px dashed var(--btn-border)',
             boxShadow: 'var(--btn-shadow)',
             cursor: 'pointer',
             transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
@@ -289,14 +380,22 @@ export const GroupSidebar: React.FC<GroupSidebarProps> = ({
             e.currentTarget.style.transform = 'translateY(-2px) scale(1.05)';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.color = 'var(--text-muted)';
-            e.currentTarget.style.borderColor = 'var(--btn-border)';
+            e.currentTarget.style.color = isEldenRing ? '#EAC477' : 'var(--text-muted)';
+            e.currentTarget.style.borderColor = isEldenRing ? 'rgba(197, 161, 90, 0.6)' : 'var(--btn-border)';
             e.currentTarget.style.boxShadow = 'var(--btn-shadow)';
-            e.currentTarget.style.background = 'var(--bg-surface)';
+            e.currentTarget.style.background = isEldenRing ? 'rgba(23, 24, 19, 0.9)' : 'var(--bg-surface)';
             e.currentTarget.style.transform = 'translateY(0) scale(1)';
           }}
         >
-          <Plus size={15} strokeWidth={2.2} />
+          {isEldenRing ? (
+            <img
+              src={getAssetUrl('/eldenring/icons/add.png')}
+              alt="Add"
+              style={{ width: '20px', height: '20px', objectFit: 'contain', filter: 'drop-shadow(0 0 5px rgba(234, 196, 119, 0.7))' }}
+            />
+          ) : (
+            <Plus size={15} strokeWidth={2.2} />
+          )}
         </button>
 
         {/* Cute Kawaii Space Candy Sticker */}
@@ -444,6 +543,118 @@ export const GroupSidebar: React.FC<GroupSidebarProps> = ({
           </div>
         </div>
       )}
+
+      {/* Right-click Context Menu on Group Icon */}
+      {contextMenu &&
+        createPortal(
+          <div
+            className="group-context-menu"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: 'fixed',
+              top: `${Math.min(contextMenu.y, window.innerHeight - 80)}px`,
+              left: isRightDock
+                ? `${Math.max(10, contextMenu.x - 155)}px`
+                : `${Math.min(contextMenu.x + 10, window.innerWidth - 165)}px`,
+              zIndex: 99999,
+              background: 'var(--modal-bg)',
+              border: '1px solid var(--border-hover)',
+              borderRadius: '8px',
+              padding: '5px',
+              boxShadow: 'var(--shadow-dock), 0 10px 28px rgba(0, 0, 0, 0.5)',
+              minWidth: '150px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '3px',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)'
+            }}
+          >
+            <div
+              style={{
+                padding: '4px 8px 3px 8px',
+                fontSize: '10px',
+                fontWeight: 600,
+                color: 'var(--text-muted)',
+                borderBottom: '1px solid var(--border-subtle)',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}
+            >
+              {contextMenu.group.name}
+            </div>
+
+            <button
+              onClick={() => {
+                const grp = contextMenu.group;
+                setContextMenu(null);
+                if (onEditGroup) onEditGroup(grp);
+              }}
+              className="context-menu-item"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '6px 8px',
+                borderRadius: '5px',
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--text-primary)',
+                fontSize: '11.5px',
+                cursor: 'pointer',
+                textAlign: 'left',
+                width: '100%',
+                transition: 'all 0.12s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'var(--bg-surface-hover)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'transparent';
+              }}
+            >
+              <Edit3 size={13} color="var(--text-secondary)" />
+              <span>Edit Group</span>
+            </button>
+
+            {groups.length > 1 && (
+              <button
+                onClick={() => {
+                  const grp = contextMenu.group;
+                  setContextMenu(null);
+                  setConfirmDeleteGroup(grp);
+                }}
+                className="context-menu-item"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '6px 8px',
+                  borderRadius: '5px',
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#ef4444',
+                  fontSize: '11.5px',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  width: '100%',
+                  transition: 'all 0.12s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(239, 68, 68, 0.12)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent';
+                }}
+              >
+                <Trash2 size={13} color="#ef4444" />
+                <span>Delete Group</span>
+              </button>
+            )}
+          </div>,
+          document.body
+        )}
     </aside>
   );
 };

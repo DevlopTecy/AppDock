@@ -33,6 +33,25 @@ interface WeatherModuleProps {
 
 const DEFAULT_CITIES = ['Visakhapatnam', 'Tokyo', 'London', 'New York'];
 
+const FALLBACK_WEATHER: WeatherData = {
+  city: 'London',
+  temp: '18°',
+  condition: 'Clear Sky',
+  humidity: '55%',
+  wind: '12 km/h',
+  aqi: 'Good AQI',
+  realfeel: '18°',
+  isDay: true,
+  code: 0,
+  dateStr: 'Saturday, Oct 31',
+  forecast: [
+    { date: 'Sun', dayName: 'Sun', code: 1, condition: 'Mainly Clear', maxTemp: '19°', minTemp: '11°' },
+    { date: 'Mon', dayName: 'Mon', code: 2, condition: 'Partly Cloudy', maxTemp: '17°', minTemp: '10°' },
+    { date: 'Tue', dayName: 'Tue', code: 3, condition: 'Overcast', maxTemp: '16°', minTemp: '9°' },
+    { date: 'Wed', dayName: 'Wed', code: 61, condition: 'Slight Rain', maxTemp: '15°', minTemp: '9°' }
+  ]
+};
+
 const weatherCodeMap: Record<number, string> = {
   0: 'Clear Sky',
   1: 'Mainly Clear',
@@ -58,6 +77,21 @@ const weatherCodeMap: Record<number, string> = {
 
 const weatherCache: Record<string, { data: WeatherData; timestamp: number }> = {};
 
+// Safe cross-platform timeout signal helper
+const createTimeoutSignal = (ms: number): AbortSignal | undefined => {
+  try {
+    if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function') {
+      return AbortSignal.timeout(ms);
+    }
+    if (typeof AbortController !== 'undefined') {
+      const controller = new AbortController();
+      setTimeout(() => controller.abort(), ms);
+      return controller.signal;
+    }
+  } catch {}
+  return undefined;
+};
+
 export const WeatherModule: React.FC<WeatherModuleProps> = ({
   cities = DEFAULT_CITIES,
   activeCity = 'Visakhapatnam',
@@ -66,14 +100,15 @@ export const WeatherModule: React.FC<WeatherModuleProps> = ({
   const cityList = cities.length > 0 ? cities.slice(0, 5) : DEFAULT_CITIES;
   const [selectedCity, setSelectedCity] = useState(activeCity || cityList[0] || 'Visakhapatnam');
   const [isExpanded, setIsExpanded] = useState(true);
-  const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [weather, setWeather] = useState<WeatherData | null>(FALLBACK_WEATHER);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (activeCity && cityList.includes(activeCity)) {
-      setSelectedCity(activeCity);
+    if (activeCity) {
+      const match = cityList.find((c) => c.toLowerCase() === activeCity.toLowerCase());
+      setSelectedCity(match || activeCity);
     }
-  }, [activeCity]);
+  }, [activeCity, cityList]);
 
   useEffect(() => {
     let isCurrent = true;
@@ -91,7 +126,7 @@ export const WeatherModule: React.FC<WeatherModuleProps> = ({
         // Step 1: Accurate Geocoding
         const geoRes = await fetch(
           `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`,
-          { signal: AbortSignal.timeout(4500) }
+          { signal: createTimeoutSignal(4500) }
         );
         const geoData = await geoRes.json();
         if (!geoData.results || geoData.results.length === 0) {
@@ -102,7 +137,7 @@ export const WeatherModule: React.FC<WeatherModuleProps> = ({
         // Step 2: Accurate Live Forecast + 7-Day Prediction
         const forecastRes = await fetch(
           `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto`,
-          { signal: AbortSignal.timeout(4500) }
+          { signal: createTimeoutSignal(4500) }
         );
         const forecastData = await forecastRes.json();
         const curr = forecastData.current;
@@ -410,11 +445,6 @@ export const WeatherModule: React.FC<WeatherModuleProps> = ({
                 ))}
               </div>
             )}
-
-            {/* Limegreen Status Strip (.card3) */}
-            <div className="card3">
-              Live Forecast · Next 4 Days
-            </div>
           </div>
         </>
       )}

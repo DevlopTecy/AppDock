@@ -1,7 +1,7 @@
 {
   "name": "appdock",
   "productName": "AppDock",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "AppDock - Sleek Windows Application & URL Dock Launcher",
   "main": "electron/main.cjs",
   "type": "module",
@@ -13,7 +13,7 @@
     "electron:start": "cross-env SERVE_DIST=1 electron .",
     "electron:pack": "npm run build && electron-builder --dir -p never",
     "dist": "npm run build && electron-builder -p never",
-    "test": "node tests/scaffold.test.cjs && node tests/storage.test.cjs && node tests/dock-bounds.test.cjs && node tests/native-ops.test.cjs && node tests/integration.test.cjs && node tests/update-logic.test.cjs && node tests/launch.test.cjs",
+    "test": "node tests/scaffold.test.cjs && node tests/storage.test.cjs && node tests/dock-bounds.test.cjs && node tests/native-ops.test.cjs && node tests/integration.test.cjs && node tests/update-logic.test.cjs && node tests/icon-extraction-deep.test.cjs && node tests/assets-integrity.test.cjs && node tests/autolaunch.test.cjs && node tests/interactions.test.cjs && node tests/bug-fixes-verification.test.cjs && node tests/launch.test.cjs",
     "preview": "vite preview"
   },
   "build": {
@@ -47,7 +47,11 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "AppDock"
-    }
+    },
+    "asar": true,
+    "asarUnpack": [
+      "electron/*.ps1"
+    ]
   },
   "dependencies": {
     "electron-updater": "^6.8.11",

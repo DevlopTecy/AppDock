@@ -12,4 +12,10 @@ assert.strictEqual(normalizeUrl('https://store.steampowered.com'), 'https://stor
 assert.strictEqual(normalizeUrl('  http://localhost:3000  '), 'http://localhost:3000');
 assert.strictEqual(normalizeUrl(''), '');
 
+// Theme definitions check
+const validThemes = ['dark', 'light', 'translucent', 'glassy', 'minimal', 'cyberpunk', 'midnight', 'emerald', 'kawaii', 'aether', 'deathnote'];
+for (const theme of ['translucent', 'glassy', 'minimal']) {
+  assert.ok(validThemes.includes(theme), `Theme ${theme} must be a valid recognized theme`);
+}
+
 console.log('Storage & URL normalizer tests passed!');

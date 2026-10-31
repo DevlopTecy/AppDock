@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { getAssetUrl } from '../utils/assets';
 import { AppGroup, AppItem, GroupDensity, DockTheme } from '../types/dock';
 import { AppCard } from './AppCard';
-import { Plus, UploadCloud, FolderPlus, Sparkles, LayoutGrid } from 'lucide-react';
+import { Plus, UploadCloud, FolderPlus, Sparkles, LayoutGrid, FolderOpen, Trash2 } from 'lucide-react';
 import { resolveGroupDensity } from '../utils/density';
 import { KawaiiSpaceStickers } from './common/KawaiiSpaceStickers';
 import { AetherSpaceStickers } from './common/AetherSpaceStickers';
@@ -15,6 +16,7 @@ interface AppGridProps {
   cleanDockIconSize?: 'small' | 'medium' | 'large' | 'xlarge';
   onLaunchItem: (item: AppItem) => void;
   onDeleteItem: (itemId: string) => void;
+  onReorderItems?: (groupId: string, items: AppItem[]) => void;
   onOpenAddModal: () => void;
   onAddNewGroup: () => void;
   onDropFiles?: (files: FileList) => void;
@@ -29,12 +31,80 @@ export const AppGrid: React.FC<AppGridProps> = ({
   cleanDockIconSize = 'medium',
   onLaunchItem,
   onDeleteItem,
+  onReorderItems,
   onOpenAddModal,
   onAddNewGroup,
   onDropFiles,
   onUpdateGroupDensity
 }) => {
   const [isDragOver, setIsDragOver] = useState(false);
+  const [contextMenu, setContextMenu] = useState<{ item: AppItem; x: number; y: number } | null>(null);
+  const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
+  const [dragOverItemId, setDragOverItemId] = useState<string | null>(null);
+
+  // Close context menu on outside click or Esc
+  useEffect(() => {
+    if (!contextMenu) return;
+    const handleOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && target.closest('.glass-card-context-menu')) return;
+      setContextMenu(null);
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setContextMenu(null);
+    };
+    const timer = setTimeout(() => {
+      window.addEventListener('click', handleOutside);
+      window.addEventListener('contextmenu', handleOutside);
+    }, 50);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('click', handleOutside);
+      window.removeEventListener('contextmenu', handleOutside);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [contextMenu]);
+
+  const handleCardDragStart = (e: React.DragEvent, itemId: string) => {
+    e.dataTransfer.setData('text/plain', itemId);
+    e.dataTransfer.effectAllowed = 'move';
+    setDraggedItemId(itemId);
+  };
+
+  const handleCardDragOver = (e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (draggedItemId && draggedItemId !== targetId && dragOverItemId !== targetId) {
+      setDragOverItemId(targetId);
+    }
+  };
+
+  const handleCardDrop = (e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    setDragOverItemId(null);
+
+    // If external files dropped directly on an AppCard, forward to file drop handler
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0 && onDropFiles) {
+      onDropFiles(e.dataTransfer.files);
+      setDraggedItemId(null);
+      return;
+    }
+
+    if (!draggedItemId || !group || draggedItemId === targetId) {
+      setDraggedItemId(null);
+      return;
+    }
+    const fromIndex = group.items.findIndex((it) => it.id === draggedItemId);
+    const toIndex = group.items.findIndex((it) => it.id === targetId);
+    if (fromIndex !== -1 && toIndex !== -1 && onReorderItems) {
+      const nextItems = [...group.items];
+      const [moved] = nextItems.splice(fromIndex, 1);
+      nextItems.splice(toIndex, 0, moved);
+      onReorderItems(group.id, nextItems);
+    }
+    setDraggedItemId(null);
+  };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -52,6 +122,10 @@ export const AppGrid: React.FC<AppGridProps> = ({
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(false);
+
+    // Clear active card drag state when dropped anywhere in grid
+    setDraggedItemId(null);
+    setDragOverItemId(null);
 
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0 && onDropFiles) {
       onDropFiles(e.dataTransfer.files);
@@ -247,10 +321,10 @@ export const AppGrid: React.FC<AppGridProps> = ({
           {densities.map((d) => {
             const isSelected = currentDensity === d.id;
             const aetherIcons: Record<string, string> = {
-              auto: '/aether/btn_A.png',
-              large: '/aether/btn_L.png',
-              medium: '/aether/btn_M.png',
-              compact: '/aether/btn_S.png'
+              auto: getAssetUrl('/aether/btn_A.png'),
+              large: getAssetUrl('/aether/btn_L.png'),
+              medium: getAssetUrl('/aether/btn_M.png'),
+              compact: getAssetUrl('/aether/btn_S.png')
             };
 
             return (
@@ -388,6 +462,14 @@ export const AppGrid: React.FC<AppGridProps> = ({
                 item={item}
                 onLaunch={onLaunchItem}
                 onDelete={onDeleteItem}
+                onContextMenu={(it, e) => setContextMenu({ item: it, x: e.clientX, y: e.clientY })}
+                draggable={true}
+                onDragStart={(e) => handleCardDragStart(e, item.id)}
+                onDragOver={(e) => handleCardDragOver(e, item.id)}
+                onDrop={(e) => handleCardDrop(e, item.id)}
+                onDragEnd={() => { setDraggedItemId(null); setDragOverItemId(null); }}
+                isDragging={draggedItemId === item.id}
+                isDragOver={dragOverItemId === item.id}
                 iconSize={layout.iconSize}
                 cardHeight={layout.cardHeight}
                 fontSize={layout.fontSize}
@@ -483,6 +565,80 @@ export const AppGrid: React.FC<AppGridProps> = ({
                     Add
                   </span>
                 </>
+              ) : theme === 'eldenring' ? (
+                <>
+                  <span
+                    style={{
+                      fontSize: layout.density === 'large' ? '22px' : '17px',
+                      color: '#EAC477',
+                      fontFamily: 'var(--font-fantasy)',
+                      fontWeight: 700,
+                      lineHeight: 1,
+                      textShadow: '0 0 10px rgba(234, 196, 119, 0.75)'
+                    }}
+                  >
+                    +
+                  </span>
+                  <span
+                    style={{
+                      fontSize: `${layout.fontSize}px`,
+                      fontWeight: 600,
+                      color: '#C5A15A',
+                      fontFamily: 'var(--font-fantasy)',
+                      letterSpacing: '1px'
+                    }}
+                  >
+                    Add
+                  </span>
+                </>
+              ) : theme === 'onepiece' ? (
+                <>
+                  <span
+                    style={{
+                      fontSize: layout.density === 'large' ? '22px' : '17px',
+                      color: '#f59e0b',
+                      fontWeight: 700,
+                      lineHeight: 1,
+                      textShadow: '0 0 10px rgba(245, 158, 11, 0.75)'
+                    }}
+                  >
+                    +
+                  </span>
+                  <span
+                    style={{
+                      fontSize: `${layout.fontSize}px`,
+                      fontWeight: 600,
+                      color: '#fbbf24',
+                      letterSpacing: '0.8px'
+                    }}
+                  >
+                    Add
+                  </span>
+                </>
+              ) : theme === 'candy' ? (
+                <>
+                  <span
+                    style={{
+                      fontSize: layout.density === 'large' ? '22px' : '17px',
+                      color: '#ec4899',
+                      fontWeight: 800,
+                      lineHeight: 1,
+                      textShadow: '0 0 10px rgba(244, 114, 182, 0.75)'
+                    }}
+                  >
+                    +
+                  </span>
+                  <span
+                    style={{
+                      fontSize: `${layout.fontSize}px`,
+                      fontWeight: 700,
+                      color: '#db2777',
+                      letterSpacing: '0.4px'
+                    }}
+                  >
+                    Add
+                  </span>
+                </>
               ) : (
                 <>
                   <Plus size={layout.density === 'large' ? 18 : 14} />
@@ -494,6 +650,116 @@ export const AppGrid: React.FC<AppGridProps> = ({
           )}
         </div>
       )}
+
+      {/* Right-click Context Menu on App Card */}
+      {contextMenu &&
+        createPortal(
+          <div
+            className="glass-card-context-menu"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: 'fixed',
+              top: `${Math.min(contextMenu.y, window.innerHeight - 90)}px`,
+              left: `${Math.max(10, Math.min(contextMenu.x, window.innerWidth - 175))}px`,
+              zIndex: 99999,
+              background: 'var(--modal-bg)',
+              border: '1px solid var(--border-hover)',
+              borderRadius: '8px',
+              padding: '5px',
+              boxShadow: 'var(--shadow-dock), 0 10px 28px rgba(0, 0, 0, 0.5)',
+              minWidth: '165px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '3px',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)'
+            }}
+          >
+            <div
+              style={{
+                padding: '4px 8px 3px 8px',
+                fontSize: '10px',
+                fontWeight: 600,
+                color: 'var(--text-muted)',
+                borderBottom: '1px solid var(--border-subtle)',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}
+            >
+              {contextMenu.item.name}
+            </div>
+
+            <button
+              onClick={async () => {
+                const item = contextMenu.item;
+                setContextMenu(null);
+                if (typeof window !== 'undefined' && (window as any).appDock?.showItemInFolder) {
+                  await (window as any).appDock.showItemInFolder(item.target);
+                }
+              }}
+              className="context-menu-item"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '6px 8px',
+                borderRadius: '5px',
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--text-primary)',
+                fontSize: '11.5px',
+                cursor: 'pointer',
+                textAlign: 'left',
+                width: '100%',
+                transition: 'all 0.12s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'var(--bg-surface-hover)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'transparent';
+              }}
+            >
+              <FolderOpen size={13} color="var(--text-secondary)" />
+              <span>Open file location</span>
+            </button>
+
+            <button
+              onClick={() => {
+                const itemId = contextMenu.item.id;
+                setContextMenu(null);
+                onDeleteItem(itemId);
+              }}
+              className="context-menu-item"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '6px 8px',
+                borderRadius: '5px',
+                background: 'transparent',
+                border: 'none',
+                color: '#ef4444',
+                fontSize: '11.5px',
+                cursor: 'pointer',
+                textAlign: 'left',
+                width: '100%',
+                transition: 'all 0.12s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(239, 68, 68, 0.12)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'transparent';
+              }}
+            >
+              <Trash2 size={13} color="#ef4444" />
+              <span>Delete</span>
+            </button>
+          </div>,
+          document.body
+        )}
     </div>
   );
 };

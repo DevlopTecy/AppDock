@@ -132,7 +132,12 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
     onClose();
   };
 
-  const isDeathNote = (theme || (typeof document !== 'undefined' ? document.documentElement.getAttribute('data-theme') : '')) === 'deathnote';
+  const currentTheme = (theme || (typeof document !== 'undefined' ? document.documentElement.getAttribute('data-theme') : '')) as DockTheme;
+  const isDeathNote = currentTheme === 'deathnote';
+  const isEldenRing = currentTheme === 'eldenring';
+  const isOnePiece = currentTheme === 'onepiece';
+  const isCandy = currentTheme === 'candy';
+  const isAether = currentTheme === 'aether';
 
   return (
     <div
@@ -147,7 +152,7 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
         overflow: 'hidden'
       }}
     >
-      {/* Death Note Thematic Background Artwork */}
+      {/* Thematic Background Artwork */}
       {isDeathNote && (
         <div
           className="deathnote-modal-bg"
@@ -180,6 +185,134 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
         </div>
       )}
 
+      {isEldenRing && (
+        <div
+          className="eldenring-modal-bg"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 0,
+            pointerEvents: 'none',
+            overflow: 'hidden'
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: `url('${getAssetUrl('/eldenring/backgrounds/vertical_golden_tree_wallpaper.png')}')`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              filter: 'brightness(0.35) contrast(1.15)',
+              opacity: 0.55
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(180deg, rgba(8, 10, 9, 0.88) 0%, rgba(17, 19, 16, 0.95) 100%)'
+            }}
+          />
+        </div>
+      )}
+
+      {isOnePiece && (
+        <div
+          className="onepiece-modal-bg"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 0,
+            pointerEvents: 'none',
+            overflow: 'hidden'
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: `url('${getAssetUrl('/onepiece/backgrounds/portrait_ship_background.png')}')`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              filter: 'brightness(0.35) contrast(1.15)',
+              opacity: 0.5
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(180deg, rgba(14, 22, 32, 0.88) 0%, rgba(10, 16, 24, 0.96) 100%)'
+            }}
+          />
+        </div>
+      )}
+
+      {isCandy && (
+        <div
+          className="candy-modal-bg"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 0,
+            pointerEvents: 'none',
+            overflow: 'hidden'
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: `url('${getAssetUrl('/candy/backgrounds/sweet_home_candy_cottage.png')}')`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              filter: 'brightness(0.85) contrast(1.05)',
+              opacity: 0.35
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(180deg, rgba(255, 240, 245, 0.88) 0%, rgba(255, 228, 238, 0.95) 100%)'
+            }}
+          />
+        </div>
+      )}
+
+      {isAether && (
+        <div
+          className="aether-modal-bg"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 0,
+            pointerEvents: 'none',
+            overflow: 'hidden'
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: `url('${getAssetUrl('/aether/wallpaper_aether_sky.jpg')}')`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              filter: 'brightness(0.4) contrast(1.1)',
+              opacity: 0.45
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(180deg, rgba(20, 35, 52, 0.88) 0%, rgba(12, 22, 34, 0.95) 100%)'
+            }}
+          />
+        </div>
+      )}
+
       {/* Header */}
       <div
         style={{
@@ -187,8 +320,16 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          borderBottom: '1px solid var(--border-subtle)',
-          background: 'var(--bg-header)',
+          borderBottom: isEldenRing
+            ? '1px solid rgba(197, 161, 90, 0.35)'
+            : isOnePiece
+              ? '1px solid rgba(245, 158, 11, 0.35)'
+              : '1px solid var(--border-subtle)',
+          background: isEldenRing
+            ? '#080A09'
+            : isOnePiece
+              ? 'rgba(20, 28, 38, 0.95)'
+              : 'var(--bg-header)',
           position: 'relative',
           zIndex: 2
         }}
@@ -201,13 +342,51 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
               style={{ height: '15px', objectFit: 'contain' }}
             />
           )}
+          {isEldenRing && (
+            <img
+              src={getAssetUrl('/eldenring/icons/sword.png')}
+              alt="Elden Ring"
+              style={{ height: '18px', width: '18px', objectFit: 'contain' }}
+            />
+          )}
+          {isOnePiece && (
+            <img
+              src={getAssetUrl('/onepiece/icons/straw_hat_emblem.png')}
+              alt="One Piece"
+              style={{ height: '18px', width: '18px', objectFit: 'contain' }}
+            />
+          )}
+          {isCandy && (
+            <img
+              src={getAssetUrl('/candy/decorations/lollipop_candy.png')}
+              alt="Candy"
+              style={{ height: '18px', width: '18px', objectFit: 'contain' }}
+            />
+          )}
+          {isAether && (
+            <img
+              src={getAssetUrl('/aether/crafting_table.png')}
+              alt="Aether"
+              style={{ height: '18px', width: '18px', objectFit: 'contain', imageRendering: 'pixelated' }}
+            />
+          )}
           <span
             style={{
               fontSize: '12.5px',
               fontWeight: 600,
-              color: 'var(--text-primary)',
-              fontFamily: isDeathNote ? 'var(--font-gothic)' : undefined,
-              letterSpacing: isDeathNote ? '0.5px' : undefined
+              color: isEldenRing
+                ? '#EAC477'
+                : isOnePiece
+                  ? '#f59e0b'
+                  : 'var(--text-primary)',
+              fontFamily: isDeathNote
+                ? 'var(--font-gothic)'
+                : isEldenRing
+                  ? 'var(--font-fantasy)'
+                  : isOnePiece
+                    ? 'var(--font-onepiece)'
+                    : undefined,
+              letterSpacing: isDeathNote || isEldenRing || isOnePiece ? '0.6px' : undefined
             }}
           >
             Add to {activeGroup.name}

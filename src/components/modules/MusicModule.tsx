@@ -206,8 +206,15 @@ export const MusicModule: React.FC = () => {
       }
     } else {
       if (isShuffle) {
-        const nextIdx = Math.floor(Math.random() * PLAYLIST.length);
-        setTrackIndex(nextIdx);
+        if (PLAYLIST.length > 1) {
+          let nextIdx = trackIndex;
+          while (nextIdx === trackIndex) {
+            nextIdx = Math.floor(Math.random() * PLAYLIST.length);
+          }
+          setTrackIndex(nextIdx);
+        } else {
+          setTrackIndex(0);
+        }
       } else {
         setTrackIndex((prev) => (prev + 1) % PLAYLIST.length);
       }

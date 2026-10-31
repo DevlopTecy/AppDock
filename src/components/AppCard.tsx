@@ -1,26 +1,47 @@
 import React, { useState } from 'react';
 import { AppItem } from '../types/dock';
 import { AppWindow, Globe, Trash2, ArrowUpRight } from 'lucide-react';
+import { isGenericOrBrokenIcon } from '../utils/assets';
 
 interface AppCardProps {
   item: AppItem;
   accentColor?: string;
   onLaunch: (item: AppItem) => void;
   onDelete: (itemId: string) => void;
+  onContextMenu?: (item: AppItem, e: React.MouseEvent) => void;
   iconSize?: number;
   cardHeight?: number;
   fontSize?: number;
   density?: 'large' | 'medium' | 'compact';
+  draggable?: boolean;
+  onDragStart?: (e: React.DragEvent) => void;
+  onDragOver?: (e: React.DragEvent) => void;
+  onDragEnter?: (e: React.DragEvent) => void;
+  onDragLeave?: (e: React.DragEvent) => void;
+  onDrop?: (e: React.DragEvent) => void;
+  onDragEnd?: (e: React.DragEvent) => void;
+  isDragging?: boolean;
+  isDragOver?: boolean;
 }
 
 export const AppCard: React.FC<AppCardProps> = ({
   item,
   onLaunch,
   onDelete,
+  onContextMenu,
   iconSize = 32,
   cardHeight,
   fontSize = 10.5,
-  density = 'compact'
+  density = 'compact',
+  draggable = false,
+  onDragStart,
+  onDragOver,
+  onDragEnter,
+  onDragLeave,
+  onDrop,
+  onDragEnd,
+  isDragging = false,
+  isDragOver = false
 }) => {
   const [isLaunching, setIsLaunching] = useState(false);
   const [imgError, setImgError] = useState(false);
@@ -41,7 +62,7 @@ export const AppCard: React.FC<AppCardProps> = ({
   const lucideIconSize = Math.max(16, Math.round(iconSize * 0.56));
 
   const renderIcon = () => {
-    if (item.icon && !imgError) {
+    if (item.icon && !imgError && !isGenericOrBrokenIcon(item.icon)) {
       return (
         <img
           src={item.icon}
@@ -106,7 +127,21 @@ export const AppCard: React.FC<AppCardProps> = ({
   return (
     <div
       onClick={handleLaunchClick}
-      className="glass-card"
+      onContextMenu={(e) => {
+        if (onContextMenu) {
+          e.preventDefault();
+          e.stopPropagation();
+          onContextMenu(item, e);
+        }
+      }}
+      draggable={draggable}
+      onDragStart={onDragStart}
+      onDragOver={onDragOver}
+      onDragEnter={onDragEnter}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
+      onDragEnd={onDragEnd}
+      className={`glass-card ${isDragging ? 'is-dragging' : ''} ${isDragOver ? 'is-drag-over' : ''}`}
       title={`${item.name}\n${item.target}`}
       style={{
         position: 'relative',
@@ -116,14 +151,24 @@ export const AppCard: React.FC<AppCardProps> = ({
         justifyContent: 'center',
         padding: isLarge ? '12px 8px 10px 8px' : '8px 4px 6px 4px',
         borderRadius: isLarge ? '12px' : '8px',
-        cursor: 'pointer',
+        cursor: isDragging ? 'grabbing' : 'grab',
         textAlign: 'center',
         minHeight: cardHeight ? `${cardHeight}px` : isLarge ? '94px' : '66px',
         minWidth: 0,
         overflow: 'hidden',
         boxSizing: 'border-box',
-        transform: isLaunching ? 'scale(0.95)' : 'scale(1)',
-        borderColor: isLaunching ? '#ffffff' : undefined,
+        opacity: isDragging ? 0.35 : 1,
+        transform: isDragging
+          ? 'scale(0.92)'
+          : isDragOver
+            ? 'scale(1.05)'
+            : isLaunching
+              ? 'scale(0.95)'
+              : 'scale(1)',
+        borderColor: isDragOver ? 'var(--accent)' : isLaunching ? '#ffffff' : undefined,
+        boxShadow: isDragOver
+          ? '0 0 0 2px var(--accent), 0 8px 24px rgba(0, 0, 0, 0.45)'
+          : undefined,
         transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
       }}
     >

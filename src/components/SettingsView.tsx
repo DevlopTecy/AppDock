@@ -19,6 +19,8 @@ import {
   Sliders,
   Sparkles,
   Layers,
+  Droplets,
+  Square,
   Monitor,
   ArrowUpCircle,
   RefreshCw,
@@ -30,7 +32,8 @@ import {
   Gem,
   Heart,
   Feather,
-  BookOpen
+  BookOpen,
+  Flame
 } from 'lucide-react';
 
 interface SettingsViewProps {
@@ -172,7 +175,8 @@ const CustomRangeBar: React.FC<CustomRangeBarProps> = ({
 export interface ThemeItemDef {
   id: DockTheme;
   name: string;
-  icon: React.ComponentType<{ size?: number; color?: string; strokeWidth?: number; className?: string; style?: React.CSSProperties }>;
+  icon?: React.ComponentType<{ size?: number; color?: string; strokeWidth?: number; className?: string; style?: React.CSSProperties }>;
+  imageIcon?: string;
   accentColor: string;
 }
 
@@ -188,6 +192,24 @@ const DEFAULT_THEMES: ThemeItemDef[] = [
     name: 'Light',
     icon: Sun,
     accentColor: '#2563eb'
+  },
+  {
+    id: 'translucent',
+    name: 'Translucent',
+    icon: Layers,
+    accentColor: '#38bdf8'
+  },
+  {
+    id: 'glassy',
+    name: 'Glassy',
+    icon: Droplets,
+    accentColor: '#60a5fa'
+  },
+  {
+    id: 'minimal',
+    name: 'Minimal',
+    icon: Square,
+    accentColor: '#e2e8f0'
   },
   {
     id: 'cyberpunk',
@@ -214,19 +236,43 @@ const CUSTOM_THEMES: ThemeItemDef[] = [
     id: 'kawaii',
     name: 'Kawaii',
     icon: Heart,
+    imageIcon: '/stickers/star_helmet.png',
     accentColor: '#f43f5e'
   },
   {
     id: 'aether',
     name: 'Aether',
     icon: Feather,
+    imageIcon: '/aether/crafting_table.png',
     accentColor: '#ffdf59'
   },
   {
     id: 'deathnote',
     name: 'Death Note',
     icon: BookOpen,
+    imageIcon: '/deathnote/decorations/apple.png',
     accentColor: '#e05a61'
+  },
+  {
+    id: 'eldenring',
+    name: 'Elden Ring',
+    icon: Flame,
+    imageIcon: '/eldenring/icons/sword.png',
+    accentColor: '#C5A15A'
+  },
+  {
+    id: 'onepiece',
+    name: 'One Piece',
+    icon: Compass,
+    imageIcon: '/onepiece/icons/straw_hat_emblem.png',
+    accentColor: '#f59e0b'
+  },
+  {
+    id: 'candy',
+    name: 'Candy',
+    icon: Sparkles,
+    imageIcon: '/candy/decorations/lollipop_candy.png',
+    accentColor: '#f472b6'
   }
 ];
 
@@ -244,7 +290,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
   // App updates state
   const [updateStatus, setUpdateStatus] = useState<'idle' | 'checking' | 'latest' | 'available' | 'error'>('idle');
-  const [appVersion, setAppVersion] = useState<string>('1.0.0');
+  const [updateErrorMessage, setUpdateErrorMessage] = useState<string>('');
+  const [appVersion, setAppVersion] = useState<string>('1.0.4');
   const [latestReleaseInfo, setLatestReleaseInfo] = useState<{ version: string; downloadUrl?: string } | null>(null);
 
   React.useEffect(() => {
@@ -269,22 +316,42 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
   const handleManualCheckUpdates = async () => {
     setUpdateStatus('checking');
+    setUpdateErrorMessage('');
+    const startTime = Date.now();
     try {
       if (typeof window !== 'undefined' && (window as any).appDock?.checkForUpdates) {
         const repo = settings.githubRepo || 'DevlopTecy/AppDock';
         const res = await (window as any).appDock.checkForUpdates(repo);
-        if (res && res.hasUpdate) {
+
+        // Ensure user sees the spinner for at least 500ms so they know a real network check occurred
+        const elapsed = Date.now() - startTime;
+        if (elapsed < 500) {
+          await new Promise((r) => setTimeout(r, 500 - elapsed));
+        }
+
+        if (res && res.error) {
+          setUpdateStatus('error');
+          setUpdateErrorMessage(res.error);
+          setTimeout(() => setUpdateStatus('idle'), 4000);
+        } else if (res && res.hasUpdate) {
           setUpdateStatus('available');
           setLatestReleaseInfo({ version: res.version, downloadUrl: res.downloadUrl });
         } else {
-          // If no newer release or already newest, user has the latest version!
           setUpdateStatus('latest');
+          if (res?.currentVersion) setAppVersion(res.currentVersion);
+          // Automatically revert back to 'idle' after 3.5s so user can re-check anytime!
+          setTimeout(() => setUpdateStatus('idle'), 3500);
         }
       } else {
-        setTimeout(() => setUpdateStatus('latest'), 800);
+        setTimeout(() => {
+          setUpdateStatus('latest');
+          setTimeout(() => setUpdateStatus('idle'), 3500);
+        }, 800);
       }
-    } catch {
-      setUpdateStatus('latest');
+    } catch (err: any) {
+      setUpdateStatus('error');
+      setUpdateErrorMessage(err?.message || 'Check failed');
+      setTimeout(() => setUpdateStatus('idle'), 4000);
     }
   };
 
@@ -705,11 +772,25 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                       }
                     }}
                   >
-                    <IconComp
-                      size={18}
-                      strokeWidth={2.2}
-                      color={isSelected && isAether ? '#2e1c0d' : th.accentColor}
-                    />
+                    {th.imageIcon ? (
+                      <img
+                        src={getAssetUrl(th.imageIcon)}
+                        alt={th.name}
+                        style={{
+                          width: '20px',
+                          height: '20px',
+                          objectFit: 'contain',
+                          filter: isSelected ? 'drop-shadow(0 0 4px rgba(255,255,255,0.7))' : undefined,
+                          transition: 'transform 0.15s ease'
+                        }}
+                      />
+                    ) : IconComp ? (
+                      <IconComp
+                        size={18}
+                        strokeWidth={2.2}
+                        color={isSelected && isAether ? '#2e1c0d' : th.accentColor}
+                      />
+                    ) : null}
                     <span
                       style={{
                         fontSize: '11px',
@@ -796,11 +877,25 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                       }
                     }}
                   >
-                    <IconComp
-                      size={18}
-                      strokeWidth={2.2}
-                      color={isSelected && isAether ? '#2e1c0d' : th.accentColor}
-                    />
+                    {th.imageIcon ? (
+                      <img
+                        src={getAssetUrl(th.imageIcon)}
+                        alt={th.name}
+                        style={{
+                          width: '20px',
+                          height: '20px',
+                          objectFit: 'contain',
+                          filter: isSelected ? 'drop-shadow(0 0 4px rgba(255,255,255,0.7))' : undefined,
+                          transition: 'transform 0.15s ease'
+                        }}
+                      />
+                    ) : IconComp ? (
+                      <IconComp
+                        size={18}
+                        strokeWidth={2.2}
+                        color={isSelected && isAether ? '#2e1c0d' : th.accentColor}
+                      />
+                    ) : null}
                     <span
                       style={{
                         fontSize: '11px',
@@ -1235,6 +1330,72 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 </button>
               </div>
             </div>
+
+            {/* Start with Windows (Auto Setup on Windows Boot) */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '9px 12px',
+                borderRadius: '6px',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--btn-border)',
+                marginTop: '2px'
+              }}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', maxWidth: '75%' }}>
+                <span style={{ fontSize: '11.5px', color: isAether ? '#fff9e6' : 'var(--text-primary)', fontWeight: 500 }}>
+                  Start with Windows
+                </span>
+                <span style={{ fontSize: '10px', color: 'var(--text-muted)', lineHeight: '1.4' }}>
+                  Automatically launch and set up AppDock docked at screen edge whenever Windows powers on.
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newVal = !(settings.autoStartWithWindows ?? true);
+                    onUpdateSettings({ autoStartWithWindows: newVal });
+                    if (typeof window !== 'undefined' && (window as any).appDock?.setAutoLaunch) {
+                      (window as any).appDock.setAutoLaunch(newVal);
+                    }
+                  }}
+                  className={`toggle-switch ${(settings.autoStartWithWindows ?? true) ? 'active' : ''}`}
+                  style={{
+                    width: '36px',
+                    height: '20px',
+                    borderRadius: '10px',
+                    background: (settings.autoStartWithWindows ?? true)
+                      ? (currentTheme === 'deathnote' ? '#c41e24' : isAether ? '#59bcf4' : 'var(--accent-color, #3b82f6)')
+                      : 'var(--btn-border)',
+                    position: 'relative',
+                    cursor: 'pointer',
+                    border: 'none',
+                    padding: 0,
+                    transition: 'background 0.2s ease',
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}
+                  aria-label="Toggle Start with Windows"
+                  title="Toggle Start with Windows"
+                >
+                  <div
+                    style={{
+                      width: '14px',
+                      height: '14px',
+                      borderRadius: '50%',
+                      background: '#fff',
+                      position: 'absolute',
+                      left: (settings.autoStartWithWindows ?? true) ? '19px' : '3px',
+                      transition: 'left 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+                    }}
+                  />
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Handle Opacity */}
@@ -1350,6 +1511,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 <>
                   <Check size={13} color="#22c55e" strokeWidth={2.5} />
                   <span>Up to Date (v{appVersion})</span>
+                </>
+              ) : updateStatus === 'error' ? (
+                <>
+                  <X size={13} color="#ef4444" strokeWidth={2.5} />
+                  <span>{updateErrorMessage ? `Check Failed: ${updateErrorMessage}` : 'Check Failed - Click to Retry'}</span>
                 </>
               ) : (
                 <>

@@ -24,7 +24,21 @@ export interface AppGroup {
   density?: GroupDensity; // Configurable density or auto-scaling based on app count
 }
 
-export type DockTheme = 'dark' | 'light' | 'cyberpunk' | 'midnight' | 'emerald' | 'kawaii' | 'aether' | 'deathnote';
+export type DockTheme =
+  | 'dark'
+  | 'light'
+  | 'translucent'
+  | 'glassy'
+  | 'minimal'
+  | 'cyberpunk'
+  | 'midnight'
+  | 'emerald'
+  | 'kawaii'
+  | 'aether'
+  | 'deathnote'
+  | 'eldenring'
+  | 'onepiece'
+  | 'candy';
 
 export interface DockSettings {
   dockPosition: DockPosition;
@@ -46,6 +60,7 @@ export interface DockSettings {
   autoCheckUpdates?: boolean;   // Automatically check for GitHub updates
   githubRepo?: string;          // GitHub repository (e.g. "owner/repo")
   hideFromTaskbar?: boolean;    // Hide from Windows taskbar, running quietly in tray while staying on screen
+  autoStartWithWindows?: boolean;// Automatically run and set up when Windows boots (Default: true)
 }
 
 export interface SystemApp {

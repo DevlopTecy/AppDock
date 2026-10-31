@@ -20,7 +20,8 @@ export const DEFAULT_SETTINGS: DockSettings = {
   cleanDockHeight: 460,
   cleanDockGroupId: 'grp-games',
   autoCheckUpdates: true,
-  githubRepo: 'DevlopTecy/AppDock'
+  githubRepo: 'DevlopTecy/AppDock',
+  autoStartWithWindows: true
 };
 
 export const DEFAULT_GROUPS: AppGroup[] = [
