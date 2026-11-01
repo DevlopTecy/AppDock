@@ -768,6 +768,8 @@ export const App: React.FC = () => {
         hideSidebar: data.settings.customThemeHideSidebar,
         hideSidebarModules: data.settings.customThemeHideSidebarModules,
         keepSidebarModule: data.settings.customThemeKeepSidebarModule,
+        hideALMS: data.settings.customThemeHideALMS,
+        almsDensity: data.settings.customThemeALMSDensity,
         hideAppCount: data.settings.customThemeHideAppCount
       }}
     >
@@ -806,6 +808,9 @@ export const App: React.FC = () => {
             theme={data.settings.theme}
             isCleanDock={isCleanDock}
             cleanDockIconSize={data.settings.cleanDockIconSize || 'medium'}
+            hideAppCount={data.settings.customThemeHideAppCount}
+            hideALMS={data.settings.customThemeHideALMS}
+            lockedDensity={data.settings.customThemeHideALMS ? data.settings.customThemeALMSDensity : undefined}
             onLaunchItem={handleLaunchItem}
             onDeleteItem={(id) => {
               const targetGrp = isCleanDock ? cleanDockGroup : activeGroup;

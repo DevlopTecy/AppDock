@@ -22,9 +22,12 @@ test('Custom Theme Studio & Sub-Options Verification', async (t) => {
     assert.ok(content.includes('customThemeSidebarColor?: string'), 'DockSettings must include customThemeSidebarColor');
     assert.ok(content.includes('customThemeButtonColor?: string'), 'DockSettings must include customThemeButtonColor');
     assert.ok(content.includes('customThemeSidebarModuleColor?: string'), 'DockSettings must include customThemeSidebarModuleColor');
+    assert.ok(content.includes('customThemeFontColor?: string'), 'DockSettings must include customThemeFontColor');
     assert.ok(content.includes('customThemeHideSidebar?: boolean'), 'DockSettings must include customThemeHideSidebar');
     assert.ok(content.includes('customThemeHideSidebarModules?: boolean'), 'DockSettings must include customThemeHideSidebarModules');
     assert.ok(content.includes('customThemeKeepSidebarModule?: \'music\' | \'weather\' | \'calendar\''), 'DockSettings must include customThemeKeepSidebarModule');
+    assert.ok(content.includes('customThemeHideALMS?: boolean'), 'DockSettings must include customThemeHideALMS');
+    assert.ok(content.includes('customThemeALMSDensity?: \'auto\' | \'large\' | \'medium\' | \'compact\''), 'DockSettings must include customThemeALMSDensity');
     assert.ok(content.includes('customThemeHideAppCount?: boolean'), 'DockSettings must include customThemeHideAppCount');
   });
 
@@ -57,9 +60,11 @@ test('Custom Theme Studio & Sub-Options Verification', async (t) => {
     assert.ok(content.includes('Hide Background'), 'Panel must include Hide Background toggle');
     assert.ok(content.includes('Hide Sidebar'), 'Panel must include Hide Sidebar toggle');
     assert.ok(content.includes('Hide Module Buttons'), 'Panel must include Hide Module Buttons toggle');
+    assert.ok(content.includes('Hide A, L, M, S Buttons'), 'Panel must include Hide A, L, M, S Buttons toggle');
     assert.ok(content.includes('Hide App Count'), 'Panel must include Hide App Count toggle');
     assert.ok(content.includes('Background Rotation'), 'Panel must include Background Rotation toggle');
     assert.ok(content.includes('Reset Custom Theme'), 'Panel must include Reset Custom Theme button');
+    assert.ok(content.includes('Font Color'), 'Panel must include Font Color picker');
   });
 
   await t.test('5. SettingsView.tsx has Default Themes, Fancy Themes, Custom Theme, and Sub-Options', () => {
@@ -93,4 +98,12 @@ test('Custom Theme Studio & Sub-Options Verification', async (t) => {
     assert.ok(sidebarContent.includes('hideAppCount'), 'GroupSidebar must support hideAppCount');
     assert.ok(sidebarContent.includes('--sidebar-bg-custom'), 'GroupSidebar must read --sidebar-bg-custom');
   });
+
+  await t.test('8. AppGrid.tsx supports hideAppCount and hideALMS to hide badge and density selector', () => {
+    const gridFile = path.join(ROOT, 'src', 'components', 'AppGrid.tsx');
+    const gridContent = fs.readFileSync(gridFile, 'utf8');
+    assert.ok(gridContent.includes('hideAppCount'), 'AppGrid must support hideAppCount');
+    assert.ok(gridContent.includes('hideALMS'), 'AppGrid must support hideALMS');
+  });
 });
+

@@ -15,6 +15,9 @@ interface AppGridProps {
   theme?: DockTheme;
   isCleanDock?: boolean;
   cleanDockIconSize?: 'small' | 'medium' | 'large' | 'xlarge';
+  hideAppCount?: boolean;
+  hideALMS?: boolean;
+  lockedDensity?: GroupDensity;
   onLaunchItem: (item: AppItem) => void;
   onDeleteItem: (itemId: string) => void;
   onUpdateItem?: (updatedItem: AppItem) => void;
@@ -31,6 +34,9 @@ export const AppGrid: React.FC<AppGridProps> = ({
   theme,
   isCleanDock = false,
   cleanDockIconSize = 'medium',
+  hideAppCount = false,
+  hideALMS = false,
+  lockedDensity,
   onLaunchItem,
   onDeleteItem,
   onUpdateItem,
@@ -225,8 +231,12 @@ export const AppGrid: React.FC<AppGridProps> = ({
   }
 
   const isNarrow = typeof drawerWidth === 'number' && drawerWidth <= 245;
-  const standardLayout = resolveGroupDensity(group, drawerWidth);
-  const currentDensity: GroupDensity = group.density || 'auto';
+  const effectiveDensity: GroupDensity = lockedDensity || group.density || 'auto';
+  const standardLayout = resolveGroupDensity(
+    lockedDensity ? { ...group, density: lockedDensity } : group,
+    drawerWidth
+  );
+  const currentDensity: GroupDensity = effectiveDensity;
 
   const cleanDockConfig = cleanDockIconSize === 'small'
     ? { iconSize: 26, minColWidth: 52, cardHeight: 62, gap: 6, fontSize: 10, density: 'compact' as const }
@@ -292,13 +302,13 @@ export const AppGrid: React.FC<AppGridProps> = ({
       {/* Celestial Aether & Sky Antigravity Flight Floating Objects Layer */}
       {theme === 'aether' && <AetherSpaceStickers />}
 
-      {/* Grid Subheader: Item count indicator + Density Quick Selector (Hidden in Clean Dock mode) */}
-      {!isCleanDock && (
+      {/* Grid Subheader: Item count indicator + Density Quick Selector (Hidden in Clean Dock mode or when both are toggled off) */}
+      {!isCleanDock && (!hideAppCount || !hideALMS) && (
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
+          justifyContent: hideAppCount ? 'flex-end' : 'space-between',
           marginBottom: '8px',
           padding: '2px 0',
           flexShrink: 0,
@@ -308,147 +318,151 @@ export const AppGrid: React.FC<AppGridProps> = ({
           zIndex: 3
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', minWidth: 0, overflow: 'hidden' }}>
-          <span
-            style={{
-              fontSize: '11px',
-              color: 'var(--text-secondary)',
-              fontWeight: 600,
-              whiteSpace: 'nowrap',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px'
-            }}
-          >
-            {theme === 'deathnote' ? (
-              <span
-                style={{
-                  borderBottom: '2px solid #a3262d',
-                  paddingBottom: '2px',
-                  color: '#eae6df',
-                  fontFamily: 'var(--font-gothic)',
-                  letterSpacing: '0.5px'
-                }}
-              >
-                {group.items.length} {group.items.length === 1 ? 'app' : 'apps'}
-              </span>
-            ) : theme === 'aether' ? (
-              <span
-                style={{
-                  color: '#0e385e',
-                  fontWeight: 800,
-                  textShadow: '0 1px 2px rgba(255, 255, 255, 0.9), 0 0 8px rgba(255, 255, 255, 0.95)'
-                }}
-              >
-                {group.items.length} {group.items.length === 1 ? 'app' : 'apps'}
-              </span>
-            ) : (
-              <span>{group.items.length} {group.items.length === 1 ? 'app' : 'apps'}</span>
-            )}
-            {theme === 'kawaii' && '💖 🍬'}
-            {theme === 'aether' && (
-              <img
-                src={getAssetUrl('/aether/feather.png')}
-                alt="Aether Feather"
-                style={{ width: '13px', height: '13px', objectFit: 'contain', imageRendering: 'pixelated' }}
-                title="Aether Weightless Feather"
-              />
-            )}
-          </span>
-        </div>
+        {!hideAppCount && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', minWidth: 0, overflow: 'hidden' }}>
+            <span
+              style={{
+                fontSize: '11px',
+                color: 'var(--text-secondary)',
+                fontWeight: 600,
+                whiteSpace: 'nowrap',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+            >
+              {theme === 'deathnote' ? (
+                <span
+                  style={{
+                    borderBottom: '2px solid #a3262d',
+                    paddingBottom: '2px',
+                    color: '#eae6df',
+                    fontFamily: 'var(--font-gothic)',
+                    letterSpacing: '0.5px'
+                  }}
+                >
+                  {group.items.length} {group.items.length === 1 ? 'app' : 'apps'}
+                </span>
+              ) : theme === 'aether' ? (
+                <span
+                  style={{
+                    color: '#0e385e',
+                    fontWeight: 800,
+                    textShadow: '0 1px 2px rgba(255, 255, 255, 0.9), 0 0 8px rgba(255, 255, 255, 0.95)'
+                  }}
+                >
+                  {group.items.length} {group.items.length === 1 ? 'app' : 'apps'}
+                </span>
+              ) : (
+                <span>{group.items.length} {group.items.length === 1 ? 'app' : 'apps'}</span>
+              )}
+              {theme === 'kawaii' && '💖 🍬'}
+              {theme === 'aether' && (
+                <img
+                  src={getAssetUrl('/aether/feather.png')}
+                  alt="Aether Feather"
+                  style={{ width: '13px', height: '13px', objectFit: 'contain', imageRendering: 'pixelated' }}
+                  title="Aether Weightless Feather"
+                />
+              )}
+            </span>
+          </div>
+        )}
 
         {/* Density Selector (A, L, M, S) */}
-        <div
-          className="density-selector-box"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            background: theme === 'aether' ? 'transparent' : 'var(--bg-surface)',
-            border: theme === 'aether' ? 'none' : '1px solid var(--btn-border)',
-            borderRadius: '8px',
-            padding: theme === 'aether' ? '0' : '2px',
-            gap: theme === 'aether' ? '4px' : '2px',
-            flexShrink: 0
-          }}
-        >
-          {theme === 'kawaii' && (
-            <span style={{ fontSize: '11px', padding: '0 2px 0 4px', userSelect: 'none' }} title="Cosmic Crater Density">
-              🪐
-            </span>
-          )}
-          {densities.map((d) => {
-            const isSelected = currentDensity === d.id;
-            const aetherIcons: Record<string, string> = {
-              auto: getAssetUrl('/aether/btn_A.png'),
-              large: getAssetUrl('/aether/btn_L.png'),
-              medium: getAssetUrl('/aether/btn_M.png'),
-              compact: getAssetUrl('/aether/btn_S.png')
-            };
+        {!hideALMS && (
+          <div
+            className="density-selector-box"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              background: theme === 'aether' ? 'transparent' : 'var(--bg-surface)',
+              border: theme === 'aether' ? 'none' : '1px solid var(--btn-border)',
+              borderRadius: '8px',
+              padding: theme === 'aether' ? '0' : '2px',
+              gap: theme === 'aether' ? '4px' : '2px',
+              flexShrink: 0
+            }}
+          >
+            {theme === 'kawaii' && (
+              <span style={{ fontSize: '11px', padding: '0 2px 0 4px', userSelect: 'none' }} title="Cosmic Crater Density">
+                🪐
+              </span>
+            )}
+            {densities.map((d) => {
+              const isSelected = currentDensity === d.id;
+              const aetherIcons: Record<string, string> = {
+                auto: getAssetUrl('/aether/btn_A.png'),
+                large: getAssetUrl('/aether/btn_L.png'),
+                medium: getAssetUrl('/aether/btn_M.png'),
+                compact: getAssetUrl('/aether/btn_S.png')
+              };
 
-            return (
-              <button
-                key={d.id}
-                type="button"
-                onClick={() => onUpdateGroupDensity && onUpdateGroupDensity(group.id, d.id)}
-                title={`Layout size: ${d.label}`}
-                style={{
-                  border: theme === 'aether'
-                    ? 'none'
-                    : theme === 'deathnote'
-                      ? (isSelected ? '1.5px solid #a3262d' : '1px solid rgba(52, 48, 47, 0.6)')
-                      : 'none',
-                  background: theme === 'aether'
-                    ? 'transparent'
-                    : theme === 'deathnote'
-                      ? (isSelected ? '#ffffff' : 'rgba(18, 18, 18, 0.85)')
-                      : isSelected ? 'var(--text-primary)' : 'transparent',
-                  color: theme === 'aether'
-                    ? (isSelected ? '#2e1c0d' : '#e8f4fc')
-                    : theme === 'deathnote'
-                      ? (isSelected ? '#a3262d' : '#96908a')
-                      : isSelected ? 'var(--bg-dock)' : 'var(--text-muted)',
-                  fontSize: '9.5px',
-                  fontWeight: isSelected ? 800 : 500,
-                  fontFamily: theme === 'deathnote' ? 'var(--font-gothic)' : undefined,
-                  width: theme === 'aether' ? '25px' : '20px',
-                  height: theme === 'aether' ? '23px' : '20px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: theme === 'aether' ? '0' : theme === 'deathnote' ? '6px' : '4px',
-                  cursor: 'pointer',
-                  padding: 0,
-                  boxShadow: theme === 'aether'
-                    ? 'none'
-                    : theme === 'deathnote' && isSelected
-                      ? '0 0 8px rgba(163, 38, 45, 0.7)'
-                      : undefined,
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                {theme === 'aether' && aetherIcons[d.id] ? (
-                  <img
-                    src={aetherIcons[d.id]}
-                    alt={d.short}
-                    style={{
-                      width: '25px',
-                      height: '23px',
-                      objectFit: 'contain',
-                      imageRendering: 'pixelated',
-                      filter: isSelected
-                        ? 'drop-shadow(0 0 5px rgba(255, 223, 89, 0.95)) brightness(1.15)'
-                        : 'brightness(0.76) contrast(0.95)',
-                      transform: isSelected ? 'scale(1.08)' : 'scale(0.96)',
-                      transition: 'transform 0.15s ease, filter 0.15s ease'
-                    }}
-                  />
-                ) : (
-                  d.short
-                )}
-              </button>
-            );
-          })}
-        </div>
+              return (
+                <button
+                  key={d.id}
+                  type="button"
+                  onClick={() => onUpdateGroupDensity && onUpdateGroupDensity(group.id, d.id)}
+                  title={`Layout size: ${d.label}`}
+                  style={{
+                    border: theme === 'aether'
+                      ? 'none'
+                      : theme === 'deathnote'
+                        ? (isSelected ? '1.5px solid #a3262d' : '1px solid rgba(52, 48, 47, 0.6)')
+                        : 'none',
+                    background: theme === 'aether'
+                      ? 'transparent'
+                      : theme === 'deathnote'
+                        ? (isSelected ? '#ffffff' : 'rgba(18, 18, 18, 0.85)')
+                        : isSelected ? 'var(--text-primary)' : 'transparent',
+                    color: theme === 'aether'
+                      ? (isSelected ? '#2e1c0d' : '#e8f4fc')
+                      : theme === 'deathnote'
+                        ? (isSelected ? '#a3262d' : '#96908a')
+                        : isSelected ? 'var(--bg-dock)' : 'var(--text-muted)',
+                    fontSize: '9.5px',
+                    fontWeight: isSelected ? 800 : 500,
+                    fontFamily: theme === 'deathnote' ? 'var(--font-gothic)' : undefined,
+                    width: theme === 'aether' ? '25px' : '20px',
+                    height: theme === 'aether' ? '23px' : '20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: theme === 'aether' ? '0' : theme === 'deathnote' ? '6px' : '4px',
+                    cursor: 'pointer',
+                    padding: 0,
+                    boxShadow: theme === 'aether'
+                      ? 'none'
+                      : theme === 'deathnote' && isSelected
+                        ? '0 0 8px rgba(163, 38, 45, 0.7)'
+                        : undefined,
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  {theme === 'aether' && aetherIcons[d.id] ? (
+                    <img
+                      src={aetherIcons[d.id]}
+                      alt={d.short}
+                      style={{
+                        width: '25px',
+                        height: '23px',
+                        objectFit: 'contain',
+                        imageRendering: 'pixelated',
+                        filter: isSelected
+                          ? 'drop-shadow(0 0 5px rgba(255, 223, 89, 0.95)) brightness(1.15)'
+                          : 'brightness(0.76) contrast(0.95)',
+                        transform: isSelected ? 'scale(1.08)' : 'scale(0.96)',
+                        transition: 'transform 0.15s ease, filter 0.15s ease'
+                      }}
+                    />
+                  ) : (
+                    d.short
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
       )}
 

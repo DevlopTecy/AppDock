@@ -38,6 +38,8 @@ interface DockFrameProps {
     hideSidebar?: boolean;
     hideSidebarModules?: boolean;
     keepSidebarModule?: 'music' | 'weather' | 'calendar';
+    hideALMS?: boolean;
+    almsDensity?: 'auto' | 'large' | 'medium' | 'compact';
     hideAppCount?: boolean;
   };
 }

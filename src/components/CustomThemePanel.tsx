@@ -125,6 +125,8 @@ export const CustomThemePanel: React.FC<CustomThemePanelProps> = ({ settings, on
   const hideSidebar = settings.customThemeHideSidebar || false;
   const hideMods = settings.customThemeHideSidebarModules || false;
   const keepMod = settings.customThemeKeepSidebarModule || 'music';
+  const hideALMS = settings.customThemeHideALMS || false;
+  const almsDensity = settings.customThemeALMSDensity || 'auto';
   const hideAppCount = settings.customThemeHideAppCount || false;
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -167,9 +169,12 @@ export const CustomThemePanel: React.FC<CustomThemePanelProps> = ({ settings, on
       customThemeSidebarColor: undefined,
       customThemeButtonColor: undefined,
       customThemeSidebarModuleColor: undefined,
+      customThemeFontColor: undefined,
       customThemeHideSidebar: false,
       customThemeHideSidebarModules: false,
       customThemeKeepSidebarModule: 'music',
+      customThemeHideALMS: false,
+      customThemeALMSDensity: 'auto',
       customThemeHideAppCount: false
     });
   };
@@ -201,6 +206,37 @@ export const CustomThemePanel: React.FC<CustomThemePanelProps> = ({ settings, on
               }}
             >
               {m.charAt(0).toUpperCase() + m.slice(1)}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <Toggle label="Hide A, L, M, S Buttons" checked={hideALMS} onChange={(v) => onUpdateSettings({ customThemeHideALMS: v, customThemeALMSDensity: settings.customThemeALMSDensity || 'auto' })} />
+      {hideALMS && (
+        <div style={{ display: 'flex', gap: '6px', marginTop: '4px', marginBottom: '8px', paddingLeft: '8px', alignItems: 'center' }}>
+          <span style={{ fontSize: '10.5px', color: 'var(--text-muted)' }}>Select:</span>
+          {[
+            { id: 'auto', label: 'A (Auto)' },
+            { id: 'large', label: 'L (Large)' },
+            { id: 'medium', label: 'M (Medium)' },
+            { id: 'compact', label: 'S (Small)' }
+          ].map((opt) => (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => onUpdateSettings({ customThemeALMSDensity: opt.id as any })}
+              style={{
+                padding: '3px 8px',
+                borderRadius: '6px',
+                fontSize: '10.5px',
+                fontWeight: almsDensity === opt.id ? 700 : 500,
+                background: almsDensity === opt.id ? 'var(--accent, #7c3aed)' : 'var(--bg-surface)',
+                color: almsDensity === opt.id ? '#fff' : 'var(--text-secondary)',
+                border: almsDensity === opt.id ? '1px solid var(--accent, #7c3aed)' : '1px solid var(--btn-border)',
+                cursor: 'pointer'
+              }}
+            >
+              {opt.label}
             </button>
           ))}
         </div>
@@ -402,6 +438,7 @@ export const CustomThemePanel: React.FC<CustomThemePanelProps> = ({ settings, on
 
       {/* Section A: Colors */}
       <div style={SECTION_TITLE}>Colors</div>
+      <ColorRow label="Font Color" value={settings.customThemeFontColor} defaultColor="#ffffff" onChange={(v) => onUpdateSettings({ customThemeFontColor: v })} />
       <ColorRow label="Header Color" value={settings.customThemeHeaderColor} defaultColor="#1a1a2e" onChange={(v) => onUpdateSettings({ customThemeHeaderColor: v })} />
       <ColorRow label="Base Color" value={settings.customThemeBaseColor} defaultColor="#0d0d1a" onChange={(v) => onUpdateSettings({ customThemeBaseColor: v })} />
       <ColorRow label="Sidebar Color" value={settings.customThemeSidebarColor} defaultColor="#13131f" onChange={(v) => onUpdateSettings({ customThemeSidebarColor: v })} />

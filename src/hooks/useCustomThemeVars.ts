@@ -19,6 +19,9 @@ export function useCustomThemeVars(settings: DockSettings): void {
       root.style.removeProperty('--accent');
       root.style.removeProperty('--btn-border');
       root.style.removeProperty('--module-bg-custom');
+      root.style.removeProperty('--text-primary');
+      root.style.removeProperty('--text-secondary');
+      root.style.removeProperty('--text-muted');
       return;
     }
 
@@ -43,12 +46,27 @@ export function useCustomThemeVars(settings: DockSettings): void {
     if (settings.customThemeBaseColor) {
       root.style.setProperty('--bg-surface', settings.customThemeBaseColor + 'cc');
     }
+    // Font / text color
+    if (settings.customThemeFontColor) {
+      root.style.setProperty('--text-primary', settings.customThemeFontColor);
+      if (settings.customThemeFontColor.startsWith('#') && settings.customThemeFontColor.length === 7) {
+        root.style.setProperty('--text-secondary', settings.customThemeFontColor + 'cc');
+        root.style.setProperty('--text-muted', settings.customThemeFontColor + '88');
+      } else {
+        root.style.setProperty('--text-secondary', settings.customThemeFontColor);
+      }
+    } else {
+      root.style.removeProperty('--text-primary');
+      root.style.removeProperty('--text-secondary');
+      root.style.removeProperty('--text-muted');
+    }
   }, [
     settings.theme,
     settings.customThemeHeaderColor,
     settings.customThemeBaseColor,
     settings.customThemeSidebarColor,
     settings.customThemeButtonColor,
-    settings.customThemeSidebarModuleColor
+    settings.customThemeSidebarModuleColor,
+    settings.customThemeFontColor
   ]);
 }

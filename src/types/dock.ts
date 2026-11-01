@@ -76,10 +76,13 @@ export interface DockSettings {
   customThemeSidebarColor?: string;
   customThemeButtonColor?: string;
   customThemeSidebarModuleColor?: string;
+  customThemeFontColor?: string;               // Font / text color
   customThemeHideSidebar?: boolean;            // Hides entire companion area
   customThemeHideSidebarModules?: boolean;     // Hides Music/Weather/Calendar hub
   customThemeKeepSidebarModule?: 'music' | 'weather' | 'calendar';
-  customThemeHideAppCount?: boolean;           // Hides app count badge in sidebar tooltip
+  customThemeHideALMS?: boolean;               // Hides A, L, M, S density selector
+  customThemeALMSDensity?: 'auto' | 'large' | 'medium' | 'compact'; // Density selected before hiding
+  customThemeHideAppCount?: boolean;           // Hides app count badge in grid and sidebar
 }
 
 export interface SystemApp {
