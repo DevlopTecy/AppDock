@@ -40,7 +40,8 @@ export type DockTheme =
   | 'deathnote'
   | 'eldenring'
   | 'onepiece'
-  | 'candy';
+  | 'candy'
+  | 'custom';
 
 export interface DockSettings {
   dockPosition: DockPosition;
@@ -63,6 +64,22 @@ export interface DockSettings {
   githubRepo?: string;          // GitHub repository (e.g. "owner/repo")
   hideFromTaskbar?: boolean;    // Hide from Windows taskbar, running quietly in tray while staying on screen
   autoStartWithWindows?: boolean;// Automatically run and set up when Windows boots (Default: false)
+  // Custom Theme Studio settings
+  customThemeBgImages?: string[];              // Up to 5 base64 JPEG data URLs
+  customThemeBgBlur?: boolean;                 // Blur the background image
+  customThemeBgHide?: boolean;                 // Hide background (solid color only)
+  customThemeBgOpacity?: number;               // 0–100, default 100
+  customThemeBgRotation?: boolean;             // Auto-rotate through images
+  customThemeBgRotationSecs?: 20 | 30 | 40 | 50 | 60;
+  customThemeHeaderColor?: string;             // CSS color string
+  customThemeBaseColor?: string;
+  customThemeSidebarColor?: string;
+  customThemeButtonColor?: string;
+  customThemeSidebarModuleColor?: string;
+  customThemeHideSidebar?: boolean;            // Hides entire companion area
+  customThemeHideSidebarModules?: boolean;     // Hides Music/Weather/Calendar hub
+  customThemeKeepSidebarModule?: 'music' | 'weather' | 'calendar';
+  customThemeHideAppCount?: boolean;           // Hides app count badge in sidebar tooltip
 }
 
 export interface SystemApp {

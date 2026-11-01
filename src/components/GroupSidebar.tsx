@@ -74,6 +74,7 @@ interface GroupSidebarProps {
   onEditGroup?: (group: AppGroup) => void;
   onMoveGroup?: (groupId: string, direction: 'up' | 'down') => void;
   theme?: DockTheme;
+  hideAppCount?: boolean;
 }
 
 export const GroupSidebar: React.FC<GroupSidebarProps> = ({
@@ -85,7 +86,8 @@ export const GroupSidebar: React.FC<GroupSidebarProps> = ({
   onDeleteGroup,
   onEditGroup,
   onMoveGroup,
-  theme
+  theme,
+  hideAppCount = false
 }) => {
   const [hoveredGroupId, setHoveredGroupId] = useState<string | null>(null);
   const [confirmDeleteGroup, setConfirmDeleteGroup] = useState<AppGroup | null>(null);
@@ -127,7 +129,7 @@ export const GroupSidebar: React.FC<GroupSidebarProps> = ({
         alignItems: 'center',
         padding: '10px 0',
         gap: '6px',
-        background: 'var(--bg-header)',
+        background: 'var(--sidebar-bg-custom, var(--bg-header))',
         borderRight: isRightDock ? 'none' : '1px solid var(--border-subtle)',
         borderLeft: isRightDock ? '1px solid var(--border-subtle)' : 'none',
         overflowY: 'auto',
@@ -187,7 +189,7 @@ export const GroupSidebar: React.FC<GroupSidebarProps> = ({
                   e.stopPropagation();
                   setContextMenu({ group, x: e.clientX, y: e.clientY });
                 }}
-                title={`${group.name} (${group.items.length}) - Right-click to edit`}
+                title={hideAppCount ? `${group.name} - Right-click to edit` : `${group.name} (${group.items.length}) - Right-click to edit`}
                 aria-label={group.name}
                 style={{
                   width: isEldenRing ? '38px' : '36px',
@@ -237,17 +239,17 @@ export const GroupSidebar: React.FC<GroupSidebarProps> = ({
                       src={group.customIcon}
                       alt={group.name}
                       style={{
-                        width: isEldenRing ? '26px' : '22px',
-                        height: isEldenRing ? '26px' : '22px',
+                        width: isEldenRing ? '32px' : '28px',
+                        height: isEldenRing ? '32px' : '28px',
                         objectFit: 'cover',
-                        borderRadius: '5px',
+                        borderRadius: '6px',
                         boxShadow: '0 2px 6px rgba(0, 0, 0, 0.4)'
                       }}
                     />
                   ) : group.iconName === 'grid' ? (
                     <GroupGridIcon
                       items={group.items}
-                      size={isEldenRing ? 26 : 22}
+                      size={isEldenRing ? 34 : 32}
                       accentColor={group.accentColor}
                       gridItemIds={group.gridItemIds}
                     />
@@ -331,9 +333,11 @@ export const GroupSidebar: React.FC<GroupSidebarProps> = ({
                   }}
                 >
                   <span>{group.name}</span>
-                  <span style={{ color: 'var(--text-muted)', marginLeft: '4px', fontSize: '10px' }}>
-                    ({group.items.length})
-                  </span>
+                  {!hideAppCount && (
+                    <span style={{ color: 'var(--text-muted)', marginLeft: '4px', fontSize: '10px' }}>
+                      ({group.items.length})
+                    </span>
+                  )}
                 </div>
               )}
 

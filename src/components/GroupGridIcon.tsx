@@ -5,14 +5,14 @@ import { isGenericOrBrokenIcon } from '../utils/assets';
 
 interface GroupGridIconProps {
   items?: AppItem[];
-  size?: number; // Outer container size in pixels (e.g. 24 - 28)
+  size?: number; // Outer container size in pixels (e.g. 28 - 34)
   accentColor?: string;
   gridItemIds?: string[];
 }
 
 export const GroupGridIcon: React.FC<GroupGridIconProps> = ({
   items = [],
-  size = 24,
+  size = 32,
   accentColor,
   gridItemIds
 }) => {
@@ -38,13 +38,15 @@ export const GroupGridIcon: React.FC<GroupGridIconProps> = ({
           style={{
             width: `${thumbSize}px`,
             height: `${thumbSize}px`,
+            maxWidth: '100%',
+            maxHeight: '100%',
             objectFit: 'contain',
-            borderRadius: '2px',
+            borderRadius: '2.5px',
             pointerEvents: 'none',
-            userSelect: 'none'
+            userSelect: 'none',
+            filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45))'
           }}
           onError={(e) => {
-            // If image fails, fallback to Lucide icon
             (e.currentTarget as HTMLElement).style.display = 'none';
           }}
         />
@@ -52,19 +54,15 @@ export const GroupGridIcon: React.FC<GroupGridIconProps> = ({
     }
 
     if (item.type === 'url') {
-      return <Globe size={Math.max(6, Math.round(thumbSize * 0.72))} color="var(--text-primary)" />;
+      return <Globe size={Math.max(9, Math.round(thumbSize * 0.8))} color="var(--text-primary)" />;
     }
 
-    return <AppWindow size={Math.max(6, Math.round(thumbSize * 0.72))} color="var(--text-primary)" />;
+    return <AppWindow size={Math.max(9, Math.round(thumbSize * 0.8))} color="var(--text-primary)" />;
   };
 
   const containerStyle: React.CSSProperties = {
     width: `${size}px`,
     height: `${size}px`,
-    borderRadius: size > 26 ? '7px' : '5px',
-    background: 'rgba(0, 0, 0, 0.42)',
-    border: '1px solid rgba(255, 255, 255, 0.12)',
-    boxShadow: '0 2px 5px rgba(0, 0, 0, 0.35)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -83,18 +81,19 @@ export const GroupGridIcon: React.FC<GroupGridIconProps> = ({
             display: 'grid',
             gridTemplateColumns: 'repeat(2, 1fr)',
             gridTemplateRows: 'repeat(2, 1fr)',
-            gap: '2px',
+            gap: '2.5px',
             width: '100%',
-            height: '100%'
+            height: '100%',
+            padding: '1px'
           }}
         >
           {[0, 1, 2, 3].map((i) => (
             <div
               key={i}
               style={{
-                borderRadius: '2px',
-                border: '1px dashed rgba(255, 255, 255, 0.22)',
-                background: 'rgba(255, 255, 255, 0.03)'
+                borderRadius: '3px',
+                border: '1px dashed rgba(255, 255, 255, 0.3)',
+                background: 'rgba(255, 255, 255, 0.05)'
               }}
             />
           ))}
@@ -103,9 +102,9 @@ export const GroupGridIcon: React.FC<GroupGridIconProps> = ({
     );
   }
 
-  // Case 1: 1 item (single centered icon)
+  // Case 1: 1 item (single large centered icon taking full space)
   if (count === 1) {
-    const singleSize = Math.max(12, Math.round(size * 0.68));
+    const singleSize = Math.max(16, Math.round(size * 0.82));
     return (
       <div style={containerStyle}>
         <div
@@ -114,9 +113,7 @@ export const GroupGridIcon: React.FC<GroupGridIconProps> = ({
             height: '100%',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            background: 'rgba(255, 255, 255, 0.05)',
-            borderRadius: '4px'
+            justifyContent: 'center'
           }}
         >
           {renderItemThumb(displayItems[0], singleSize)}
@@ -125,27 +122,24 @@ export const GroupGridIcon: React.FC<GroupGridIconProps> = ({
     );
   }
 
-  // Case 2: 2 items side-by-side
+  // Case 2: 2 items side-by-side filling the space
   if (count === 2) {
-    const cellW = Math.max(8, Math.floor((size - 7) / 2));
-    const cellH = Math.max(10, Math.floor(size - 6));
-    const thumbSize = Math.min(cellW, cellH) - 1;
+    const cellW = Math.max(12, Math.floor((size - 5) / 2));
+    const cellH = Math.max(14, Math.floor(size - 3));
+    const thumbSize = Math.min(cellW, cellH);
 
     return (
       <div style={containerStyle}>
-        <div style={{ display: 'flex', gap: '2px', width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', gap: '3px', width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}>
           {displayItems.map((it) => (
             <div
               key={it.id}
               style={{
-                width: `${cellW}px`,
-                height: `${cellH}px`,
+                flex: 1,
+                height: '100%',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                background: 'rgba(255, 255, 255, 0.07)',
-                borderRadius: '3px',
-                overflow: 'hidden'
+                justifyContent: 'center'
               }}
             >
               {renderItemThumb(it, thumbSize)}
@@ -158,12 +152,12 @@ export const GroupGridIcon: React.FC<GroupGridIconProps> = ({
 
   // Case 3: 3 items (2 on top row, 1 centered on bottom row)
   if (count === 3) {
-    const cellSize = Math.max(7, Math.floor((size - 7) / 2));
+    const cellSize = Math.max(11, Math.floor((size - 5) / 2));
 
     return (
       <div style={containerStyle}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ display: 'flex', gap: '2px', justifyContent: 'center', width: '100%' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5px', width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', gap: '2.5px', justifyContent: 'center', width: '100%', flex: 1, alignItems: 'center' }}>
             {displayItems.slice(0, 2).map((it) => (
               <div
                 key={it.id}
@@ -172,17 +166,14 @@ export const GroupGridIcon: React.FC<GroupGridIconProps> = ({
                   height: `${cellSize}px`,
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  background: 'rgba(255, 255, 255, 0.07)',
-                  borderRadius: '2.5px',
-                  overflow: 'hidden'
+                  justifyContent: 'center'
                 }}
               >
-                {renderItemThumb(it, cellSize - 1)}
+                {renderItemThumb(it, cellSize)}
               </div>
             ))}
           </div>
-          <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', width: '100%', flex: 1, alignItems: 'center' }}>
             <div
               key={displayItems[2].id}
               style={{
@@ -190,13 +181,10 @@ export const GroupGridIcon: React.FC<GroupGridIconProps> = ({
                 height: `${cellSize}px`,
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                background: 'rgba(255, 255, 255, 0.07)',
-                borderRadius: '2.5px',
-                overflow: 'hidden'
+                justifyContent: 'center'
               }}
             >
-              {renderItemThumb(displayItems[2], cellSize - 1)}
+              {renderItemThumb(displayItems[2], cellSize)}
             </div>
           </div>
         </div>
@@ -204,8 +192,8 @@ export const GroupGridIcon: React.FC<GroupGridIconProps> = ({
     );
   }
 
-  // Case 4: 4 items (2x2 grid, matching example image)
-  const cellSize = Math.max(7, Math.floor((size - 7) / 2));
+  // Case 4: 4 items (2x2 grid filling all available space)
+  const cellSize = Math.max(11, Math.floor((size - 5) / 2));
 
   return (
     <div style={containerStyle}>
@@ -214,24 +202,25 @@ export const GroupGridIcon: React.FC<GroupGridIconProps> = ({
           display: 'grid',
           gridTemplateColumns: 'repeat(2, 1fr)',
           gridTemplateRows: 'repeat(2, 1fr)',
-          gap: '2px',
+          gap: '2.5px',
           width: '100%',
-          height: '100%'
+          height: '100%',
+          alignItems: 'center',
+          justifyItems: 'center'
         }}
       >
         {displayItems.map((it) => (
           <div
             key={it.id}
             style={{
+              width: '100%',
+              height: '100%',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              background: 'rgba(255, 255, 255, 0.07)',
-              borderRadius: '2.5px',
-              overflow: 'hidden'
+              justifyContent: 'center'
             }}
           >
-            {renderItemThumb(it, cellSize - 1)}
+            {renderItemThumb(it, cellSize)}
           </div>
         ))}
       </div>

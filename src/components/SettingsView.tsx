@@ -3,6 +3,7 @@ import { getAssetUrl } from '../utils/assets';
 import { DockSettings, DockPosition, DockTheme, AppGroup } from '../types/dock';
 import { COUNTRIES } from '../utils/holidays';
 import { getGroupIcon } from './GroupSidebar';
+import { CustomThemePanel } from './CustomThemePanel';
 import {
   X,
   AlignLeft,
@@ -231,7 +232,7 @@ const DEFAULT_THEMES: ThemeItemDef[] = [
   }
 ];
 
-const CUSTOM_THEMES: ThemeItemDef[] = [
+const FANCY_THEMES: ThemeItemDef[] = [
   {
     id: 'kawaii',
     name: 'Kawaii',
@@ -275,6 +276,13 @@ const CUSTOM_THEMES: ThemeItemDef[] = [
     accentColor: '#f472b6'
   }
 ];
+
+const CUSTOM_THEME_ITEM: ThemeItemDef = {
+  id: 'custom',
+  name: 'Custom Theme',
+  icon: Palette,
+  accentColor: '#a78bfa'
+};
 
 export const SettingsView: React.FC<SettingsViewProps> = ({
   isOpen,
@@ -809,8 +817,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             </div>
           </div>
 
-          {/* Group B: Custom Themes */}
-          <div>
+          {/* Group B: Fancy Themes */}
+          <div style={{ marginBottom: '16px' }}>
             <div
               style={{
                 fontSize: '9.5px',
@@ -824,12 +832,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 gap: '5px'
               }}
             >
-              <span>Custom Themes</span>
-              <span style={{ fontSize: '9px', opacity: 0.65 }}>({CUSTOM_THEMES.length})</span>
+              <span>Fancy Themes</span>
+              <span style={{ fontSize: '9px', opacity: 0.65 }}>({FANCY_THEMES.length})</span>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(78px, 1fr))', gap: '8px' }}>
-              {CUSTOM_THEMES.map((th) => {
+              {FANCY_THEMES.map((th) => {
                 const isSelected = currentTheme === th.id;
                 const IconComp = th.icon;
                 return (
@@ -912,6 +920,107 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 );
               })}
             </div>
+          </div>
+
+          {/* Group C: Custom Theme */}
+          <div style={{ marginBottom: '14px' }}>
+            <div
+              style={{
+                fontSize: '9.5px',
+                fontWeight: 700,
+                color: isAether ? '#ffdf59' : 'var(--text-muted)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.6px',
+                marginBottom: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}
+            >
+              <span>Custom Theme</span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: '8px' }}>
+              {(() => {
+                const isSelected = currentTheme === 'custom';
+                const IconComp = CUSTOM_THEME_ITEM.icon;
+                return (
+                  <button
+                    type="button"
+                    onClick={() => handleThemeChange('custom')}
+                    title="Design your own Custom Theme"
+                    className={`settings-opt-btn ${isSelected ? 'is-selected' : ''}`}
+                    style={{
+                      padding: '10px 8px',
+                      borderRadius: '8px',
+                      background: isSelected
+                        ? (isAether ? '#ffdf59' : 'var(--bg-surface-active)')
+                        : 'var(--bg-surface)',
+                      color: isSelected
+                        ? (isAether ? '#2e1c0d' : 'var(--text-primary)')
+                        : (isAether ? '#fff9e6' : 'var(--text-secondary)'),
+                      border: isSelected
+                        ? (isAether ? '1.5px solid #ffe885' : `1.5px solid ${CUSTOM_THEME_ITEM.accentColor}`)
+                        : '1px solid var(--btn-border)',
+                      boxShadow: 'var(--btn-shadow)',
+                      display: 'flex',
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      cursor: 'pointer',
+                      fontWeight: isSelected ? 700 : 500,
+                      textShadow: !isSelected && isAether ? '1px 1px 0 #181005' : undefined,
+                      transition: 'all 0.16s ease'
+                    }}
+                  >
+                    {IconComp && (
+                      <IconComp
+                        size={18}
+                        strokeWidth={2.2}
+                        color={isSelected && isAether ? '#2e1c0d' : CUSTOM_THEME_ITEM.accentColor}
+                      />
+                    )}
+                    <span
+                      style={{
+                        fontSize: '11.5px',
+                        fontWeight: isSelected ? 700 : 600,
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      {CUSTOM_THEME_ITEM.name}
+                    </span>
+                  </button>
+                );
+              })()}
+            </div>
+          </div>
+
+          {/* Sub-Options & Studio */}
+          <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px dashed var(--border-subtle)' }}>
+            <div
+              style={{
+                fontSize: '10.5px',
+                fontWeight: 700,
+                color: isAether ? '#ffdf59' : 'var(--text-primary)',
+                letterSpacing: '0.2px',
+                marginBottom: '6px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}
+            >
+              <span>{currentTheme === 'custom' ? 'Custom Theme Studio' : 'Theme Sub-Options'}</span>
+              <span style={{ fontSize: '9.5px', color: 'var(--text-muted)', fontWeight: 500 }}>
+                Active: {currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1)}
+              </span>
+            </div>
+
+            {currentTheme === 'custom' ? (
+              <CustomThemePanel settings={settings} onUpdateSettings={onUpdateSettings} />
+            ) : (
+              <CustomThemePanel settings={settings} onUpdateSettings={onUpdateSettings} subOptionsOnly={true} />
+            )}
           </div>
         </div>
 

@@ -28,6 +28,18 @@ interface DockFrameProps {
   onExitCleanDock?: () => void;
   isMaximized?: boolean;
   onToggleMaximize?: () => void;
+  customTheme?: {
+    bgImages?: string[];
+    bgBlur?: boolean;
+    bgHide?: boolean;
+    bgOpacity?: number;
+    bgRotation?: boolean;
+    bgRotationSecs?: number;
+    hideSidebar?: boolean;
+    hideSidebarModules?: boolean;
+    keepSidebarModule?: 'music' | 'weather' | 'calendar';
+    hideAppCount?: boolean;
+  };
 }
 
 const ELDEN_RING_BACKGROUNDS = [
@@ -68,7 +80,8 @@ export const DockFrame: React.FC<DockFrameProps> = ({
   onResizeWidth,
   verticalPosition = 0.5,
   onUpdateVerticalPosition,
-  children
+  children,
+  customTheme
 }) => {
   const [isResizing, setIsResizing] = React.useState(false);
   const [renderedModule, setRenderedModule] = React.useState<CompanionModuleType>(activeModule);
@@ -77,7 +90,21 @@ export const DockFrame: React.FC<DockFrameProps> = ({
   const [eldenBgIndex, setEldenBgIndex] = React.useState(0);
   const [onePieceBgIndex, setOnePieceBgIndex] = React.useState(0);
   const [candyBgIndex, setCandyBgIndex] = React.useState(0);
+  const [customBgIndex, setCustomBgIndex] = React.useState(0);
   const exitTimerRef = React.useRef<number | null>(null);
+
+  const customBgImages = customTheme?.bgImages || [];
+
+  // Rotation timer for custom theme background pictures
+  React.useEffect(() => {
+    if (theme === 'custom' && customTheme?.bgRotation && customBgImages.length > 1) {
+      const intervalMs = (customTheme.bgRotationSecs || 30) * 1000;
+      const timer = window.setInterval(() => {
+        setCustomBgIndex((prev) => (prev + 1) % customBgImages.length);
+      }, intervalMs);
+      return () => window.clearInterval(timer);
+    }
+  }, [theme, customTheme?.bgRotation, customTheme?.bgRotationSecs, customBgImages.length]);
 
   // 30-second rotating background timer for atmospheric themes
   React.useEffect(() => {
@@ -127,7 +154,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
         setIsExiting(false);
         exitTimerRef.current = null;
         if (typeof window !== 'undefined' && (window as any).appDock?.setModuleWidth) {
-          (window as any).appDock.setModuleWidth(isCleanDock ? -1 : 54);
+          (window as any).appDock.setModuleWidth((isCleanDock || customTheme?.hideSidebar) ? -1 : 54);
         }
       }, 190);
     }
@@ -136,7 +163,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
         window.clearTimeout(exitTimerRef.current);
       }
     };
-  }, [isExiting, isCleanDock]);
+  }, [isExiting, isCleanDock, customTheme?.hideSidebar]);
 
   const isLeft = dockPosition === 'left';
   const isRight = dockPosition === 'right';
@@ -228,7 +255,8 @@ export const DockFrame: React.FC<DockFrameProps> = ({
   }
 
   const isModuleActive = Boolean(renderedModule || isExiting);
-  const companionW = isCleanDock ? 0 : (isModuleActive ? 340 : 54);
+  const isSidebarHidden = isCleanDock || Boolean(customTheme?.hideSidebar);
+  const companionW = isSidebarHidden ? 0 : (isModuleActive ? 340 : 54);
   const _totalExpandedWidth = drawerWidth + companionW;
 
   return (
@@ -247,7 +275,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
       }}
     >
       {/* Right dock layout: Companion Area */}
-      {isRight && !isCleanDock && (
+      {isRight && !isSidebarHidden && (
         <div
           style={{
             display: 'flex',
@@ -309,6 +337,8 @@ export const DockFrame: React.FC<DockFrameProps> = ({
               activeModule={activeModule}
               onSelectModule={onSelectModule}
               theme={theme}
+              hideSidebarModules={customTheme?.hideSidebarModules}
+              keepModule={customTheme?.keepSidebarModule}
             />
 
             {/* Main Handle (EdgeToggle) stays visible when opened, sticking to Drawer at vertical center */}
@@ -337,8 +367,8 @@ export const DockFrame: React.FC<DockFrameProps> = ({
         </div>
       )}
 
-      {/* Edge Handle for Right dock when in Clean Dock mode */}
-      {isRight && isCleanDock && (
+      {/* Edge Handle for Right dock when in Clean Dock or Hidden Sidebar mode */}
+      {isRight && isSidebarHidden && (
         <div
           style={{
             position: 'absolute',
@@ -418,8 +448,36 @@ export const DockFrame: React.FC<DockFrameProps> = ({
           />
         )}
 
+        {/* Full-Window Custom Theme Background Artwork Layer */}
+        {theme === 'custom' && !customTheme?.bgHide && customBgImages.length > 0 && (
+          <div
+            className="custom-theme-bg-layer"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              zIndex: 0,
+              pointerEvents: 'none',
+              overflow: 'hidden'
+            }}
+          >
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                backgroundImage: `url('${customBgImages[customBgIndex % customBgImages.length]}')`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                opacity: (customTheme?.bgOpacity ?? 100) / 100,
+                filter: customTheme?.bgBlur ? 'blur(12px) scale(1.06)' : undefined,
+                transition: 'background-image 0.5s ease-in-out, opacity 0.3s ease'
+              }}
+            />
+          </div>
+        )}
+
         {/* Full-Window Death Note Background Artwork Layer */}
-        {theme === 'deathnote' && (
+        {theme === 'deathnote' && !customTheme?.bgHide && (
           <div
             className="deathnote-bg-layer"
             style={{
@@ -439,7 +497,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 backgroundSize: 'cover',
                 backgroundPosition: 'center 12%',
                 backgroundRepeat: 'no-repeat',
-                filter: 'brightness(1.02) contrast(1.08)'
+                filter: customTheme?.bgBlur ? 'blur(12px) scale(1.06) brightness(1.02)' : 'brightness(1.02) contrast(1.08)'
               }}
             />
             {/* Subtle atmospheric dark gradient for icon & footer legibility */}
@@ -456,7 +514,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
         )}
 
         {/* Full-Window Kawaii Pastel Cat Gamer Nook Background Layer */}
-        {theme === 'kawaii' && (
+        {theme === 'kawaii' && !customTheme?.bgHide && (
           <div
             className="kawaii-bg-layer"
             style={{
@@ -476,7 +534,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 backgroundSize: 'cover',
                 backgroundPosition: 'center 20%',
                 backgroundRepeat: 'no-repeat',
-                filter: 'contrast(1.02) saturate(1.04)'
+                filter: customTheme?.bgBlur ? 'blur(12px) scale(1.06)' : 'contrast(1.02) saturate(1.04)'
               }}
             />
             {/* Soft dreamy vignette to preserve pastel tones while aiding text contrast */}
@@ -493,7 +551,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
         )}
 
         {/* Full-Window Celestial Aether Sky & Clouds Background Artwork Layer */}
-        {theme === 'aether' && (
+        {theme === 'aether' && !customTheme?.bgHide && (
           <div
             className="aether-bg-layer"
             style={{
@@ -514,7 +572,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 backgroundPosition: 'center top',
                 backgroundRepeat: 'no-repeat',
                 opacity: 0.98,
-                filter: 'contrast(1.02) saturate(1.05)'
+                filter: customTheme?.bgBlur ? 'blur(12px) scale(1.06)' : 'contrast(1.02) saturate(1.05)'
               }}
             />
             {/* Luminous Heavenly Sky Ambient Gradient */}
@@ -531,7 +589,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
         )}
 
         {/* Full-Window Cinematic Elden Ring Atmospheric Background Layer (Rotating 4 Wallpapers every 30s) */}
-        {theme === 'eldenring' && (
+        {theme === 'eldenring' && !customTheme?.bgHide && (
           <div
             className="eldenring-bg-layer"
             style={{
@@ -553,7 +611,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   backgroundRepeat: 'no-repeat',
-                  filter: 'contrast(1.04) brightness(0.97) saturate(1.08)',
+                  filter: customTheme?.bgBlur ? 'blur(12px) scale(1.06) contrast(1.04)' : 'contrast(1.04) brightness(0.97) saturate(1.08)',
                   imageRendering: '-webkit-optimize-contrast',
                   opacity: eldenBgIndex === idx ? 1 : 0,
                   transition: 'opacity 1.5s ease-in-out',
@@ -613,7 +671,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
         )}
 
         {/* Full-Window Grand Line One Piece Cinematic Atmospheric Background Layer (Rotating Wallpapers every 30s) */}
-        {theme === 'onepiece' && (
+        {theme === 'onepiece' && !customTheme?.bgHide && (
           <div
             className="onepiece-bg-layer"
             style={{
@@ -635,7 +693,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   backgroundRepeat: 'no-repeat',
-                  filter: 'contrast(1.02) brightness(0.98) saturate(1.06)',
+                  filter: customTheme?.bgBlur ? 'blur(12px) scale(1.06) contrast(1.02)' : 'contrast(1.02) brightness(0.98) saturate(1.06)',
                   opacity: onePieceBgIndex === idx ? 1 : 0,
                   transition: 'opacity 1.5s ease-in-out',
                   zIndex: 0
@@ -682,7 +740,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
         )}
 
         {/* Full-Window Fairy Tale Candy Land Atmospheric Background Layer (Rotating 4 Wallpapers every 30s) */}
-        {theme === 'candy' && (
+        {theme === 'candy' && !customTheme?.bgHide && (
           <div
             className="candy-bg-layer"
             style={{
@@ -704,7 +762,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   backgroundRepeat: 'no-repeat',
-                  filter: 'contrast(1.05) brightness(0.98) saturate(1.15)',
+                  filter: customTheme?.bgBlur ? 'blur(12px) scale(1.06) contrast(1.05)' : 'contrast(1.05) brightness(0.98) saturate(1.15)',
                   opacity: candyBgIndex === idx ? 1 : 0,
                   transition: 'opacity 1.5s ease-in-out',
                   zIndex: 0
@@ -1329,12 +1387,37 @@ export const DockFrame: React.FC<DockFrameProps> = ({
               title="Sweet Candy Land"
             />
           )}
+
+          {/* Custom Theme Rotation Dots Indicator */}
+          {theme === 'custom' && customTheme?.bgRotation && customBgImages.length > 1 && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                pointerEvents: 'none'
+              }}
+            >
+              {customBgImages.map((_, i) => (
+                <div
+                  key={i}
+                  style={{
+                    width: '5px',
+                    height: '5px',
+                    borderRadius: '50%',
+                    background: (customBgIndex % customBgImages.length) === i ? 'var(--accent, #fff)' : 'rgba(255, 255, 255, 0.3)',
+                    transition: 'all 0.3s ease'
+                  }}
+                />
+              ))}
+            </div>
+          )}
         </footer>
         )}
       </div>
 
-      {/* Left dock layout: Main Drawer -> Companion Area sticking to Main Drawer (Hidden in Clean Dock mode) */}
-      {isLeft && !isCleanDock && (
+      {/* Left dock layout: Main Drawer -> Companion Area sticking to Main Drawer (Hidden in Clean Dock or Hidden Sidebar mode) */}
+      {isLeft && !isSidebarHidden && (
         <div
           style={{
             display: 'flex',
@@ -1370,6 +1453,8 @@ export const DockFrame: React.FC<DockFrameProps> = ({
               activeModule={activeModule}
               onSelectModule={onSelectModule}
               theme={theme}
+              hideSidebarModules={customTheme?.hideSidebarModules}
+              keepModule={customTheme?.keepSidebarModule}
             />
 
             {/* Main Handle (EdgeToggle) stays visible when opened, sticking to Drawer at vertical center */}
@@ -1423,8 +1508,8 @@ export const DockFrame: React.FC<DockFrameProps> = ({
         </div>
       )}
 
-      {/* Edge Handle for Left dock when in Clean Dock mode */}
-      {isLeft && isCleanDock && (
+      {/* Edge Handle for Left dock when in Clean Dock or Hidden Sidebar mode */}
+      {isLeft && isSidebarHidden && (
         <div
           style={{
             position: 'absolute',
@@ -1458,6 +1543,8 @@ export const DockFrame: React.FC<DockFrameProps> = ({
               activeModule={activeModule}
               onSelectModule={onSelectModule}
               theme={theme}
+              hideSidebarModules={customTheme?.hideSidebarModules}
+              keepModule={customTheme?.keepSidebarModule}
             />
             <EdgeToggle
               isExpanded={true}

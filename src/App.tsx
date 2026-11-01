@@ -14,13 +14,14 @@ import { WeatherModule } from './components/modules/WeatherModule';
 import { CalendarModule } from './components/modules/CalendarModule';
 import { UpdateNotification } from './components/UpdateNotification';
 import { isGenericOrBrokenIcon } from './utils/assets';
+import { useCustomThemeVars } from './hooks/useCustomThemeVars';
 
 const initialDockData = (() => {
   const init = loadDockData();
   if (typeof window !== 'undefined') {
     const params = new URLSearchParams(window.location.search);
     const urlTheme = params.get('theme') as any;
-    if (['dark', 'light', 'cyberpunk', 'midnight', 'emerald', 'kawaii', 'aether', 'deathnote', 'eldenring', 'onepiece', 'candy', 'translucent', 'glassy', 'minimal'].includes(urlTheme)) {
+    if (['dark', 'light', 'cyberpunk', 'midnight', 'emerald', 'kawaii', 'aether', 'deathnote', 'eldenring', 'onepiece', 'candy', 'translucent', 'glassy', 'minimal', 'custom'].includes(urlTheme)) {
       init.settings.theme = urlTheme;
     }
     const urlWidth = params.get('width');
@@ -140,12 +141,15 @@ export const App: React.FC = () => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [data.settings.theme]);
 
+  // Injects custom theme CSS variables when theme === 'custom'
+  useCustomThemeVars(data.settings);
+
   // Sync module bounds with Electron when dock is expanded
   useEffect(() => {
     if (typeof window !== 'undefined' && (window as any).appDock?.setModuleWidth) {
       if (isExpanded) {
-        if (isCleanDock) {
-          // Clean dock: no companion area at all
+        if (isCleanDock || data.settings.customThemeHideSidebar) {
+          // Clean dock or custom theme hide sidebar: no companion area at all
           (window as any).appDock.setModuleWidth(-1);
         } else {
           // Dynamic companion width: 340px when module active, 54px when idle to prevent ghost hitbox
@@ -155,7 +159,7 @@ export const App: React.FC = () => {
         (window as any).appDock.setModuleWidth(0);
       }
     }
-  }, [isExpanded, isCleanDock, activeModule]);
+  }, [isExpanded, isCleanDock, data.settings.customThemeHideSidebar, activeModule]);
 
   // Sync state changes with persistence
   const updateGroups = useCallback((newGroups: AppGroup[]) => {
@@ -754,6 +758,18 @@ export const App: React.FC = () => {
       verticalPosition={data.settings.verticalPosition ?? 0.5}
       onUpdateVerticalPosition={(pos) => updateSettings({ verticalPosition: pos })}
       theme={data.settings.theme}
+      customTheme={{
+        bgImages: data.settings.customThemeBgImages,
+        bgBlur: data.settings.customThemeBgBlur,
+        bgHide: data.settings.customThemeBgHide,
+        bgOpacity: data.settings.customThemeBgOpacity,
+        bgRotation: data.settings.customThemeBgRotation,
+        bgRotationSecs: data.settings.customThemeBgRotationSecs,
+        hideSidebar: data.settings.customThemeHideSidebar,
+        hideSidebarModules: data.settings.customThemeHideSidebarModules,
+        keepSidebarModule: data.settings.customThemeKeepSidebarModule,
+        hideAppCount: data.settings.customThemeHideAppCount
+      }}
     >
       {/* Main Content Area: Vertical Group Sidebar + App Grid */}
       <div
@@ -779,6 +795,7 @@ export const App: React.FC = () => {
             }}
             onMoveGroup={handleMoveGroup}
             theme={data.settings.theme}
+            hideAppCount={data.settings.customThemeHideAppCount}
           />
         )}
 
