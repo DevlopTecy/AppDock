@@ -47,12 +47,10 @@ interface DockFrameProps {
 }
 
 const DEATH_NOTE_BACKGROUNDS = [
-  '/deathnote/backgrounds/wallpaper_kira_l_divided.png',
-  '/deathnote/backgrounds/wallpaper_ryuk_tokyo.jpg',
-  '/deathnote/backgrounds/wallpaper_l_investigation.jpg',
-  '/deathnote/backgrounds/wallpaper_main_1.jpg',
-  '/deathnote/backgrounds/wallpaper_main_2.jpg',
-  '/deathnote/backgrounds/wallpaper_main_4.jpg'
+  '/deathnote/backgrounds/death_note_l_and_kira_divided.png',
+  '/deathnote/backgrounds/death_note_moonlit_shinigami_poster.png',
+  '/deathnote/backgrounds/rainy_blood_moon_rooftop_with_death_note.png',
+  '/deathnote/backgrounds/shinigami_beneath_the_blood_moon.png'
 ];
 
 const KAWAII_BACKGROUNDS = [
