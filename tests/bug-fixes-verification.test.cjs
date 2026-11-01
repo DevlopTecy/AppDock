@@ -410,3 +410,57 @@ test('BUG-29: Header layout adjusts dynamically for small and compact UI widths 
   // Verify action buttons adapt dimensions dynamically
   assert.ok(dockFrameContent.includes("width: theme === 'eldenring' ? (isCompactUi ? '24px' : isSmallUi ? '27px' : '33px')"), 'Action buttons must adapt width dynamically');
 });
+
+test('BUG-30: Desktop shortcuts in OneDrive folders are not misidentified as OneDrive and corrupted items are auto-healed', () => {
+  const mainCjsPath = path.join(projectRoot, 'electron', 'main.cjs');
+  const mainCjs = fs.readFileSync(mainCjsPath, 'utf-8');
+
+  // 1. findStartApp ignores paths that exist on disk or checks only basename without reverse substring match
+  assert.ok(
+    mainCjs.includes('if (isPath && fs.existsSync(trimmed))'),
+    'findStartApp must skip local files that already exist on disk'
+  );
+  assert.ok(
+    mainCjs.includes('const baseWithoutExt = path.basename(trimmed, path.extname(trimmed))'),
+    'findStartApp must only use basename for paths, preventing folder names from matching'
+  );
+  assert.ok(
+    !mainCjs.includes('cleanId.includes(a.Name.toLowerCase())'),
+    'findStartApp must never perform reverse substring match cleanId.includes(a.Name)'
+  );
+
+  // 2. app:resolve-item resolves existing disk files directly and heals corrupted OneDrive names
+  assert.ok(
+    mainCjs.includes('isTargetOneDriveLnk') && mainCjs.includes('isNameCorruptedToOneDrive'),
+    'app:resolve-item must guard against corrupted OneDrive names and targets'
+  );
+  assert.ok(
+    mainCjs.includes('!resolvedName || (isNameCorruptedToOneDrive && !isTargetOneDrive)'),
+    'app:resolve-item must restore real shortcut name from targetBase when name was corrupted to OneDrive'
+  );
+
+  // 3. App.tsx pre-heals corrupted items before deduplication to prevent dropping tiles
+  const appTsxPath = path.join(projectRoot, 'src', 'App.tsx');
+  const appTsx = fs.readFileSync(appTsxPath, 'utf-8');
+
+  assert.ok(
+    appTsx.includes('const preHealedItems = grp.items.map('),
+    'App.tsx must pre-heal corrupted items before deduplication loop'
+  );
+  assert.ok(
+    appTsx.includes("normName === 'onedrive'") && appTsx.includes("targetBase.toLowerCase() !== 'onedrive'"),
+    'App.tsx must restore targetBase name for items mistakenly named onedrive'
+  );
+  assert.ok(
+    appTsx.includes("normName !== 'onedrive' && normTarget.endsWith('onedrive.lnk')"),
+    'App.tsx must clear corrupted OneDrive.lnk target for non-OneDrive apps so resolveItem can find real shortcut'
+  );
+  assert.ok(
+    appTsx.includes("!isPath && (item.target.includes('.') || item.target.includes('!'))"),
+    'App.tsx isMismatchedAumid must not falsely treat filesystem paths with extensions as mismatched AUMIDs'
+  );
+  assert.ok(
+    appTsx.includes("res.name.toLowerCase() !== 'onedrive' || baseName.toLowerCase() === 'onedrive'"),
+    'App.tsx drop handler must guard against renaming dropped apps to onedrive'
+  );
+});

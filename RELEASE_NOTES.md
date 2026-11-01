@@ -16,7 +16,17 @@
 ---
 
 ## 📋 Upcoming Release Staging: v1.0.7
-- *Staging open for v1.0.7 post-release changes.*
+
+### 🐛 Critical Bug Fixes
+- **OneDrive Desktop Shortcut Misidentification & Auto-Healing (BUG-30)**:
+  - **Issue**: Desktop shortcuts located in OneDrive-synchronized folders (such as `C:\Users\<user>\OneDrive\Desktop\<App>.lnk`) were mistakenly identified as "OneDrive", overwriting their titles with "OneDrive" and showing the blue OneDrive cloud icon.
+  - **Root Cause**: In `electron/main.cjs`, `findStartApp` performed a reverse substring match (`cleanId.includes(a.Name.toLowerCase())`). For any file path containing the folder name "onedrive", `cleanId.includes('onedrive')` evaluated to `true`, falsely matching the Windows StartApp entry for OneDrive. In turn, `App.tsx` item resolution and deduplication cascades caused existing desktop items to be renamed to OneDrive.
+  - **Resolution**:
+    1. **Path-Safe `findStartApp`**: Local file paths that exist on disk now bypass StartApp matching entirely. For unresolved file paths, only the base filename without extension is compared. Removed the inverted `cleanId.includes(a.Name)` substring match so parent folder names are never matched against app names.
+    2. **Local Shortcut Priority in `app:resolve-item`**: When a target already exists on disk, `resolve-item` resolves it directly and extracts its native icon. If an item was previously corrupted to have the name "OneDrive" or target "OneDrive.lnk", it is automatically healed back to its real shortcut path and title (e.g. restoring ManorLords, CapCut, etc.).
+    3. **Startup Pre-Healing in `src/App.tsx`**: Added pre-deduplication healing pass so that any corrupted items are restored to their true application names before deduplication runs, preventing duplicate removal.
+    4. **AUMID Mismatch Refinement**: Adjusted `isMismatchedAumid` so ordinary file paths with extensions (`.lnk`, `.exe`) are not mistakenly treated as mismatched AUMIDs.
+  - **Verification**: Verified with automated test `BUG-30` in `tests/bug-fixes-verification.test.cjs` and full test suite passing 100% green.
 
 ---
 

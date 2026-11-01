@@ -607,8 +607,19 @@ function getStartAppsList() {
 
 function findStartApp(identifier) {
   if (!identifier || typeof identifier !== 'string') return null;
-  const cleanId = identifier.replace(/^shell:appsfolder\\/i, '').trim().toLowerCase();
+  const trimmed = identifier.trim();
+  if (!trimmed) return null;
+
+  // If identifier contains path separators and exists on disk, it is a local file, NOT a Windows StartApp / AUMID
+  const isPath = trimmed.includes('\\') || trimmed.includes('/');
+  if (isPath && fs.existsSync(trimmed)) {
+    return null;
+  }
+
   const apps = getStartAppsList();
+  if (!apps || apps.length === 0) return null;
+
+  const cleanId = trimmed.replace(/^shell:appsfolder\\/i, '').trim().toLowerCase();
 
   // 1. Exact match on AppID
   let match = apps.find((a) => a.AppID && a.AppID.toLowerCase() === cleanId);
@@ -618,17 +629,29 @@ function findStartApp(identifier) {
   match = apps.find((a) => a.Name && a.Name.toLowerCase() === cleanId);
   if (match) return match;
 
-  // 3. Substring match on AppID
-  match = apps.find(
-    (a) => a.AppID && (a.AppID.toLowerCase().includes(cleanId) || cleanId.includes(a.AppID.toLowerCase()))
-  );
-  if (match) return match;
+  // 3. If identifier is a path, only use the basename (without extension) for matching.
+  // Never perform fuzzy or path-level substring search that matches directory names like "OneDrive".
+  if (isPath) {
+    const baseWithoutExt = path.basename(trimmed, path.extname(trimmed)).trim().toLowerCase();
+    if (!baseWithoutExt) return null;
+    match = apps.find((a) => a.Name && a.Name.toLowerCase() === baseWithoutExt);
+    if (match) return match;
+    match = apps.find((a) => a.AppID && a.AppID.toLowerCase() === baseWithoutExt);
+    return match || null;
+  }
 
-  // 4. Substring match on Name
-  match = apps.find(
-    (a) => a.Name && (a.Name.toLowerCase().includes(cleanId) || cleanId.includes(a.Name.toLowerCase()))
-  );
-  return match || null;
+  // 4. Non-path identifier: substring match (App's Name or AppID must contain query).
+  // Never test cleanId.includes(a.Name) which reverses the search and misidentifies queries containing
+  // folder or words like "onedrive".
+  if (cleanId.length >= 3) {
+    match = apps.find((a) => a.Name && a.Name.toLowerCase().includes(cleanId));
+    if (match) return match;
+
+    match = apps.find((a) => a.AppID && a.AppID.toLowerCase().includes(cleanId));
+    if (match) return match;
+  }
+
+  return null;
 }
 
 function resolveShortcutPath(inputPath) {
@@ -979,8 +1002,48 @@ ipcMain.handle('app:extract-icon', async (event, filePath) => {
 });
 
 ipcMain.handle('app:resolve-item', async (event, { name, target }) => {
-  // 1. Check if target or name matches a Windows StartApp (AUMID / Windows 11 Start Menu pinned item)
-  const startApp = findStartApp(target) || findStartApp(name);
+  const trimmedTarget = (target || '').trim();
+  const trimmedName = (name || '').trim();
+
+  // 1. If target is an existing file on disk, resolve it directly!
+  // Guard against corrupted target (e.g. target pointing to OneDrive.lnk when name is 'ManorLords')
+  const isTargetOneDriveLnk = trimmedTarget.toLowerCase().endsWith('onedrive.lnk');
+  const isNameCorruptedToOneDrive = trimmedName.toLowerCase() === 'onedrive';
+  const targetBase = trimmedTarget ? path.basename(trimmedTarget, path.extname(trimmedTarget)) : '';
+
+  if (trimmedTarget && fs.existsSync(trimmedTarget)) {
+    try {
+      if (fs.statSync(trimmedTarget).isFile()) {
+        // If target is OneDrive.lnk but name is a different app (e.g. ManorLords), target was corrupted by the bug.
+        // Don't treat it as valid target - let step 2/3 find the real shortcut for trimmedName!
+        const isCorruptedOneDriveTarget = isTargetOneDriveLnk && !isNameCorruptedToOneDrive;
+        if (!isCorruptedOneDriveTarget) {
+          const icon = await extractNativeIcon(trimmedTarget);
+          let resolvedName = trimmedName;
+          const isTargetOneDrive =
+            targetBase.toLowerCase() === 'onedrive' || trimmedTarget.toLowerCase().includes('onedrive.exe');
+          // If name is missing or was mistakenly named 'OneDrive' while target is NOT onedrive, restore real name from targetBase
+          if (!resolvedName || (isNameCorruptedToOneDrive && !isTargetOneDrive)) {
+            resolvedName = targetBase;
+          }
+          return {
+            target: trimmedTarget,
+            icon,
+            name: resolvedName
+          };
+        }
+      }
+    } catch (e) {}
+  }
+
+  // 2. Check if name or target matches a Windows StartApp (AUMID / Windows 11 Start Menu pinned item)
+  let startApp = null;
+  if (trimmedName && !isNameCorruptedToOneDrive) {
+    startApp = findStartApp(trimmedName);
+  }
+  if (!startApp && trimmedTarget && (!isTargetOneDriveLnk || isNameCorruptedToOneDrive)) {
+    startApp = findStartApp(trimmedTarget);
+  }
   if (startApp) {
     const lnkPath = resolveShortcutPath(startApp.Name) || resolveShortcutPath(startApp.AppID);
     let icon = null;
@@ -994,12 +1057,25 @@ ipcMain.handle('app:resolve-item', async (event, { name, target }) => {
     };
   }
 
-  const resolved = resolveShortcutPath(target) || resolveShortcutPath(name);
+  // 3. Fallback: resolve via resolveShortcutPath
+  let resolved = null;
+  if (trimmedName && !isNameCorruptedToOneDrive) {
+    resolved = resolveShortcutPath(trimmedName);
+  }
+  if (!resolved && trimmedTarget) {
+    resolved = resolveShortcutPath(trimmedTarget);
+  }
   if (resolved) {
     const icon = await extractNativeIcon(resolved);
-    const resolvedName = path.basename(resolved, path.extname(resolved));
+    const base = path.basename(resolved, path.extname(resolved));
+    let resolvedName = trimmedName;
+    const isResolvedOneDrive = base.toLowerCase() === 'onedrive' || resolved.toLowerCase().includes('onedrive.exe');
+    if (!resolvedName || (isNameCorruptedToOneDrive && !isResolvedOneDrive)) {
+      resolvedName = base;
+    }
     return { target: resolved, icon, name: resolvedName };
   }
+
   return null;
 });
 

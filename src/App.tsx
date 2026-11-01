@@ -195,11 +195,40 @@ export const App: React.FC = () => {
       const newGroups = await Promise.all(
         data.groups.map(async (grp) => {
           let grpChanged = false;
+
+          // 0. Pre-heal any items corrupted by the OneDrive substring bug
+          // Do this BEFORE deduplication so items mistakenly renamed to "OneDrive"
+          // aren't dropped as duplicate "OneDrive" tiles!
+          const preHealedItems = grp.items.map((item) => {
+            if (item.type !== 'app') return item;
+            const normName = (item.name || '').toLowerCase().trim();
+            const normTarget = (item.target || '').toLowerCase().trim();
+
+            // Case A: Target has real app path (e.g. ...\CapCut.lnk) but name was corrupted to "OneDrive"
+            if (normName === 'onedrive') {
+              const targetBase = item.target ? item.target.split(/[/\\]/).pop()?.replace(/\.[^.]+$/, '') : '';
+              if (targetBase && targetBase.toLowerCase() !== 'onedrive' && !normTarget.includes('onedrive.exe')) {
+                grpChanged = true;
+                changed = true;
+                return { ...item, name: targetBase, icon: '' };
+              }
+            }
+
+            // Case B: Name is a real app (e.g. "ManorLords") but target was corrupted to OneDrive.lnk
+            if (normName !== 'onedrive' && normTarget.endsWith('onedrive.lnk')) {
+              grpChanged = true;
+              changed = true;
+              return { ...item, target: '', icon: '' };
+            }
+
+            return item;
+          });
+
           const seen = new Set<string>();
           const dedupedItems: typeof grp.items = [];
 
           // Deduplicate items in group by unique name + target
-          for (const item of grp.items) {
+          for (const item of preHealedItems) {
             const normName = item.name.toLowerCase().trim();
             const normTarget = item.target.toLowerCase().trim();
             // Automatically remove synthetic "download" artifacts mistakenly created from browser drag
@@ -244,17 +273,23 @@ export const App: React.FC = () => {
                 }
               }
 
-              const isRelative = item.type === 'app' && !item.target.includes('\\') && !item.target.includes('/');
+              const isPath = item.target.includes('\\') || item.target.includes('/');
+              const isRelative = item.type === 'app' && !isPath;
               const isGenericOrBroken = item.type === 'app' && isGenericOrBrokenIcon(item.icon);
+              const isCorruptedOneDrive =
+                item.type === 'app' &&
+                (item.name.toLowerCase() === 'onedrive' ||
+                  item.target.toLowerCase().endsWith('onedrive.lnk')) &&
+                !item.target.toLowerCase().includes('onedrive.exe');
               const isMismatchedAumid =
                 item.type === 'app' &&
                 (item.target.includes('Antigravity') ||
-                  item.target.includes('.') ||
                   item.name.toLowerCase() === 'google' ||
-                  item.target.toLowerCase().startsWith('shell:'));
+                  item.target.toLowerCase().startsWith('shell:') ||
+                  (!isPath && (item.target.includes('.') || item.target.includes('!'))));
               const needsFix =
                 item.type === 'app' &&
-                (isRelative || isGenericOrBroken || isMismatchedAumid || item.name.toLowerCase().includes('gemini'));
+                (isRelative || isGenericOrBroken || isCorruptedOneDrive || isMismatchedAumid || item.name.toLowerCase().includes('gemini'));
 
               if (needsFix) {
                 try {
@@ -265,7 +300,9 @@ export const App: React.FC = () => {
                   if ((window as any).appDock?.resolveItem) {
                     const res = await (window as any).appDock.resolveItem({ name: item.name, target: item.target });
                     if (res) {
-                      if (res.name && res.name !== item.name) newName = res.name;
+                      if (res.name && (res.name.toLowerCase() !== 'onedrive' || item.name.toLowerCase() === 'onedrive')) {
+                        newName = res.name;
+                      }
                       if (res.target) newTarget = res.target;
                       if (res.icon && !isGenericOrBrokenIcon(res.icon)) {
                         newIcon = res.icon;
@@ -709,7 +746,9 @@ export const App: React.FC = () => {
           if ((window as any).appDock.resolveItem) {
             const res = await (window as any).appDock.resolveItem({ name: baseName, target: filePath });
             if (res) {
-              if (res.name) finalName = res.name;
+              if (res.name && (res.name.toLowerCase() !== 'onedrive' || baseName.toLowerCase() === 'onedrive')) {
+                finalName = res.name;
+              }
               if (res.target) finalTarget = res.target;
               if (res.icon) icon = res.icon;
             }
