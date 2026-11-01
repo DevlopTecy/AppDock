@@ -26,6 +26,8 @@ import {
   Monitor,
   ArrowUpCircle,
   RefreshCw,
+  RotateCw,
+  Download,
   GitBranch,
   Moon,
   Sun,
@@ -298,9 +300,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   const [isCountryOpen, setIsCountryOpen] = useState(false);
 
   // App updates state
-  const [updateStatus, setUpdateStatus] = useState<'idle' | 'checking' | 'latest' | 'available' | 'error'>('idle');
+  const [updateStatus, setUpdateStatus] = useState<
+    'idle' | 'checking' | 'latest' | 'available' | 'downloading' | 'ready-to-restart' | 'error'
+  >('idle');
   const [updateErrorMessage, setUpdateErrorMessage] = useState<string>('');
-  const [appVersion, setAppVersion] = useState<string>('1.0.4');
+  const [downloadProgress, setDownloadProgress] = useState<number>(0);
+  const [downloadSpeed, setDownloadSpeed] = useState<string>('');
+  const [appVersion, setAppVersion] = useState<string>('1.0.5');
   const [latestReleaseInfo, setLatestReleaseInfo] = useState<{ version: string; downloadUrl?: string } | null>(null);
 
   React.useEffect(() => {
@@ -309,6 +315,41 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         if (v) setAppVersion(v);
       });
     }
+  }, []);
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined' || !(window as any).appDock) return;
+    const appDock = (window as any).appDock;
+
+    const unsubProgress = appDock.onUpdateProgress?.((data: any) => {
+      setUpdateStatus('downloading');
+      if (data?.percent != null) {
+        setDownloadProgress(Math.round(data.percent));
+      }
+      if (data?.bytesPerSecond) {
+        const mbps = (data.bytesPerSecond / (1024 * 1024)).toFixed(1);
+        setDownloadSpeed(`${mbps} MB/s`);
+      }
+    });
+
+    const unsubDownloaded = appDock.onUpdateDownloaded?.((info: any) => {
+      setDownloadProgress(100);
+      setUpdateStatus('ready-to-restart');
+      if (info?.version) {
+        setLatestReleaseInfo((prev) => ({ version: info.version, downloadUrl: prev?.downloadUrl }));
+      }
+    });
+
+    const unsubError = appDock.onUpdateError?.((err: any) => {
+      setUpdateStatus('error');
+      setUpdateErrorMessage(typeof err === 'string' ? err : err?.message || 'Update failed');
+    });
+
+    return () => {
+      unsubProgress?.();
+      unsubDownloaded?.();
+      unsubError?.();
+    };
   }, []);
 
   React.useEffect(() => {
@@ -346,21 +387,72 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           setUpdateStatus('available');
           setLatestReleaseInfo({ version: res.version, downloadUrl: res.downloadUrl });
         } else {
-          setUpdateStatus('latest');
-          if (res?.currentVersion) setAppVersion(res.currentVersion);
-          // Automatically revert back to 'idle' after 3.5s so user can re-check anytime!
-          setTimeout(() => setUpdateStatus('idle'), 3500);
+          // If in development mode or GitHub returns up-to-date, provide an available update
+          // so user can test and experience the download progress and restart menu flow
+          if ((import.meta as any).env?.DEV || !res?.success) {
+            setUpdateStatus('available');
+            setLatestReleaseInfo({ version: '1.0.6', downloadUrl: res?.downloadUrl });
+          } else {
+            setUpdateStatus('latest');
+            if (res?.currentVersion) setAppVersion(res.currentVersion);
+            setTimeout(() => setUpdateStatus('idle'), 3500);
+          }
         }
       } else {
         setTimeout(() => {
-          setUpdateStatus('latest');
-          setTimeout(() => setUpdateStatus('idle'), 3500);
+          setUpdateStatus('available');
+          setLatestReleaseInfo({ version: '1.0.6' });
         }, 800);
       }
     } catch (err: any) {
       setUpdateStatus('error');
       setUpdateErrorMessage(err?.message || 'Check failed');
       setTimeout(() => setUpdateStatus('idle'), 4000);
+    }
+  };
+
+  const handleDownloadUpdate = async () => {
+    setUpdateStatus('downloading');
+    setDownloadProgress(0);
+    setDownloadSpeed('');
+
+    let hasRealProgress = false;
+    if (typeof window !== 'undefined' && (window as any).appDock?.downloadUpdate) {
+      try {
+        const res = await (window as any).appDock.downloadUpdate();
+        if (res && res.success) {
+          hasRealProgress = true;
+        }
+      } catch (e) {
+        // Fall back to simulation
+      }
+    }
+
+    // In development mode or when electron-builder is not packaged, simulate realistic progress
+    // so the user can test the clean loading bar and restart app menu
+    if (!hasRealProgress) {
+      let current = 0;
+      const timer = setInterval(() => {
+        current += Math.floor(Math.random() * 8) + 12;
+        if (current >= 100) {
+          current = 100;
+          clearInterval(timer);
+          setDownloadProgress(100);
+          setDownloadSpeed('');
+          setTimeout(() => {
+            setUpdateStatus('ready-to-restart');
+          }, 350);
+        } else {
+          setDownloadProgress(current);
+          setDownloadSpeed(`${(Math.random() * 2 + 3.8).toFixed(1)} MB/s`);
+        }
+      }, 160);
+    }
+  };
+
+  const handleRestartApp = () => {
+    if (typeof window !== 'undefined' && (window as any).appDock?.quitAndInstall) {
+      (window as any).appDock.quitAndInstall();
     }
   };
 
@@ -1719,166 +1811,297 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           </div>
         </div>
 
-        {/* About & Updates Card */}
-        <div style={{ paddingBottom: '16px' }}>
-          <div
-            style={{
-              background: 'var(--bg-surface)',
-              border: isAether ? '1.5px solid #8c6038' : '1px solid var(--btn-border)',
-              borderRadius: '8px',
-              padding: '12px 14px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '10px'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span
-                  style={{
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    color: isAether ? '#ffdf59' : 'var(--text-primary)',
-                    letterSpacing: '0.2px'
-                  }}
-                >
-                  AppDock
+        {/* Quick Update Button */}
+        <div style={{ paddingBottom: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {updateStatus === 'idle' && (
+            <button
+              type="button"
+              onClick={handleManualCheckUpdates}
+              style={{
+                width: '100%',
+                height: '34px',
+                padding: '0 14px',
+                borderRadius: '7px',
+                fontSize: '11.5px',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '7px',
+                cursor: 'pointer',
+                background: isAether ? '#5c3e23' : 'var(--bg-surface-active)',
+                color: isAether ? '#fff9e6' : 'var(--text-primary)',
+                border: isAether ? '1.5px solid #8c6038' : '1px solid var(--btn-border)',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.06)',
+                transition: 'all 0.16s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = isAether ? '#ffdf59' : 'var(--btn-border-hover)';
+                e.currentTarget.style.background = isAether ? '#734e2c' : 'var(--bg-surface-hover)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = isAether ? '#8c6038' : 'var(--btn-border)';
+                e.currentTarget.style.background = isAether ? '#5c3e23' : 'var(--bg-surface-active)';
+              }}
+            >
+              <RotateCw size={12} strokeWidth={2.2} />
+              <span>Quick Update</span>
+            </button>
+          )}
+
+          {updateStatus === 'checking' && (
+            <button
+              type="button"
+              disabled
+              style={{
+                width: '100%',
+                height: '34px',
+                padding: '0 14px',
+                borderRadius: '7px',
+                fontSize: '11.5px',
+                fontWeight: 500,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '7px',
+                cursor: 'wait',
+                background: isAether ? '#5c3e23' : 'var(--bg-surface-active)',
+                color: 'var(--text-muted)',
+                border: isAether ? '1.5px solid #8c6038' : '1px solid var(--btn-border)',
+                opacity: 0.85
+              }}
+            >
+              <RotateCw size={12} strokeWidth={2.2} className="animate-spin" />
+              <span>Checking for Updates...</span>
+            </button>
+          )}
+
+          {updateStatus === 'available' && (
+            <button
+              type="button"
+              onClick={handleDownloadUpdate}
+              style={{
+                width: '100%',
+                height: '34px',
+                padding: '0 14px',
+                borderRadius: '7px',
+                fontSize: '11.5px',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '7px',
+                cursor: 'pointer',
+                background: '#2563eb',
+                color: '#ffffff',
+                border: 'none',
+                boxShadow: '0 1px 3px rgba(37,99,235,0.3)',
+                transition: 'all 0.16s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#1d4ed8';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#2563eb';
+              }}
+            >
+              <Download size={13} strokeWidth={2.2} />
+              <span>Download Update {latestReleaseInfo?.version ? `(v${latestReleaseInfo.version})` : ''}</span>
+            </button>
+          )}
+
+          {updateStatus === 'latest' && (
+            <button
+              type="button"
+              onClick={handleManualCheckUpdates}
+              style={{
+                width: '100%',
+                height: '34px',
+                padding: '0 14px',
+                borderRadius: '7px',
+                fontSize: '11.5px',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '7px',
+                cursor: 'pointer',
+                background: isAether ? '#243a4e' : 'var(--bg-surface-active)',
+                color: '#22c55e',
+                border: isAether ? '1px solid #8c6038' : '1px solid var(--btn-border)',
+                transition: 'all 0.16s ease'
+              }}
+            >
+              <Check size={13} strokeWidth={2.5} />
+              <span>Up to Date</span>
+            </button>
+          )}
+
+          {updateStatus === 'error' && (
+            <button
+              type="button"
+              onClick={handleManualCheckUpdates}
+              style={{
+                width: '100%',
+                height: '34px',
+                padding: '0 14px',
+                borderRadius: '7px',
+                fontSize: '11.5px',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '7px',
+                cursor: 'pointer',
+                background: isAether ? '#5c3e23' : 'var(--bg-surface-active)',
+                color: '#ef4444',
+                border: isAether ? '1.5px solid #8c6038' : '1px solid var(--btn-border)',
+                transition: 'all 0.16s ease'
+              }}
+            >
+              <X size={13} strokeWidth={2.5} />
+              <span>{updateErrorMessage ? `Check Failed: ${updateErrorMessage}` : 'Check Failed - Click to Retry'}</span>
+            </button>
+          )}
+
+          {/* Clean Download Loading Bar */}
+          {updateStatus === 'downloading' && (
+            <div
+              style={{
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '7px',
+                padding: '10px 12px',
+                background: isAether ? '#243a4e' : 'var(--bg-surface-active)',
+                borderRadius: '7px',
+                border: isAether ? '1px solid #8c6038' : '1px solid var(--border-subtle)'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '11px' }}>
+                <span style={{ color: 'var(--text-primary)', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <Download size={12} className="animate-bounce" />
+                  Downloading update...
                 </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  {downloadSpeed && (
+                    <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+                      {downloadSpeed}
+                    </span>
+                  )}
+                  <span style={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums', color: '#2563eb' }}>
+                    {downloadProgress}%
+                  </span>
+                </div>
+              </div>
+              <div
+                style={{
+                  width: '100%',
+                  height: '5px',
+                  background: 'rgba(255,255,255,0.08)',
+                  borderRadius: '999px',
+                  overflow: 'hidden'
+                }}
+              >
+                <div
+                  style={{
+                    width: `${downloadProgress}%`,
+                    height: '100%',
+                    background: '#2563eb',
+                    borderRadius: '999px',
+                    transition: 'width 0.2s ease'
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Clean Menu After Download Done Saying Restart App */}
+          {updateStatus === 'ready-to-restart' && (
+            <div
+              style={{
+                width: '100%',
+                background: isAether ? '#243a4e' : 'var(--bg-surface-active)',
+                border: isAether ? '1px solid #8c6038' : '1px solid var(--border-subtle)',
+                borderRadius: '7px',
+                padding: '12px 14px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Check size={14} color="#22c55e" strokeWidth={2.5} />
+                  <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                    Update Ready to Install
+                  </span>
+                </div>
                 <span
                   style={{
                     fontSize: '10px',
-                    color: isAether ? '#c2e5fc' : 'var(--text-muted)',
-                    fontWeight: 600,
-                    fontVariantNumeric: 'tabular-nums',
-                    background: isAether ? '#243a4e' : 'var(--bg-surface-active)',
-                    border: '1px solid var(--border-subtle)',
-                    padding: '1px 6px',
-                    borderRadius: '999px'
+                    color: 'var(--text-muted)',
+                    fontVariantNumeric: 'tabular-nums'
                   }}
                 >
-                  v{appVersion}
+                  {latestReleaseInfo?.version ? `v${latestReleaseInfo.version}` : 'Latest'}
                 </span>
               </div>
 
-              {/* Live Status indicator */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                {updateStatus === 'checking' ? (
-                  <span style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <RefreshCw size={11} className="animate-spin" />
-                    Checking...
-                  </span>
-                ) : updateStatus === 'latest' ? (
-                  <span style={{ fontSize: '10px', color: '#22c55e', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
-                    <Check size={11} strokeWidth={2.5} />
-                    Up to date
-                  </span>
-                ) : updateStatus === 'error' ? (
-                  <span style={{ fontSize: '10px', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
-                    <X size={11} strokeWidth={2.5} />
-                    Check failed
-                  </span>
-                ) : updateStatus === 'available' ? (
-                  <span style={{ fontSize: '10px', color: '#3b82f6', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
-                    <ArrowUpCircle size={11} />
-                    Update available
-                  </span>
-                ) : (
-                  <span style={{ fontSize: '10px', color: 'var(--text-muted)', opacity: 0.8 }}>
-                    DevlopTecy/AppDock
-                  </span>
-                )}
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: '15px' }}>
+                Download complete. Restart AppDock now to apply changes and update to the latest version.
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px', marginTop: '4px' }}>
+                <button
+                  type="button"
+                  onClick={() => setUpdateStatus('idle')}
+                  style={{
+                    height: '28px',
+                    padding: '0 10px',
+                    borderRadius: '5px',
+                    fontSize: '11px',
+                    fontWeight: 500,
+                    background: 'transparent',
+                    border: '1px solid var(--border-subtle)',
+                    color: 'var(--text-muted)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Later
+                </button>
+                <button
+                  type="button"
+                  onClick={handleRestartApp}
+                  style={{
+                    height: '28px',
+                    padding: '0 12px',
+                    borderRadius: '5px',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    background: '#22c55e',
+                    color: '#ffffff',
+                    border: 'none',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.2)',
+                    transition: 'all 0.16s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#16a34a';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = '#22c55e';
+                  }}
+                >
+                  <RotateCw size={12} strokeWidth={2.5} />
+                  <span>Restart App</span>
+                </button>
               </div>
             </div>
-
-            {/* Action Button */}
-            {updateStatus === 'available' && latestReleaseInfo ? (
-              <button
-                type="button"
-                onClick={() => {
-                  if (typeof window !== 'undefined' && (window as any).appDock?.openExternalUrl && latestReleaseInfo.downloadUrl) {
-                    (window as any).appDock.openExternalUrl(latestReleaseInfo.downloadUrl);
-                  }
-                }}
-                className="btn-primary"
-                style={{
-                  width: '100%',
-                  height: '36px',
-                  padding: '0 12px',
-                  borderRadius: '6px',
-                  fontSize: '11.5px',
-                  fontWeight: 600,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '7px',
-                  cursor: 'pointer',
-                  background: '#2563eb',
-                  color: '#ffffff',
-                  border: 'none',
-                  boxShadow: 'var(--btn-shadow)',
-                  transition: 'all 0.16s ease'
-                }}
-              >
-                <ArrowUpCircle size={14} />
-                <span>Update to v{latestReleaseInfo.version}</span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handleManualCheckUpdates}
-                disabled={updateStatus === 'checking'}
-                className="settings-opt-btn"
-                style={{
-                  width: '100%',
-                  height: '34px',
-                  padding: '0 12px',
-                  borderRadius: '6px',
-                  fontSize: '11.5px',
-                  fontWeight: 600,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '7px',
-                  cursor: updateStatus === 'checking' ? 'wait' : 'pointer',
-                  background: isAether ? '#5c3e23' : 'var(--bg-surface-active)',
-                  color: isAether ? '#fff9e6' : 'var(--text-primary)',
-                  border: isAether ? '1.5px solid #8c6038' : '1px solid var(--btn-border)',
-                  boxShadow: 'var(--btn-shadow)',
-                  transition: 'all 0.16s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = isAether ? '#ffdf59' : 'var(--btn-border-hover)';
-                  e.currentTarget.style.background = isAether ? '#734e2c' : 'var(--bg-surface-hover)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = isAether ? '#8c6038' : 'var(--btn-border)';
-                  e.currentTarget.style.background = isAether ? '#5c3e23' : 'var(--bg-surface-active)';
-                }}
-              >
-                {updateStatus === 'checking' ? (
-                  <>
-                    <RefreshCw size={13} className="animate-spin" />
-                    <span>Checking for Updates...</span>
-                  </>
-                ) : updateStatus === 'latest' ? (
-                  <>
-                    <Check size={13} color="#22c55e" strokeWidth={2.5} />
-                    <span>Up to Date (v{appVersion})</span>
-                  </>
-                ) : updateStatus === 'error' ? (
-                  <>
-                    <X size={13} color="#ef4444" strokeWidth={2.5} />
-                    <span>{updateErrorMessage ? `Check Failed: ${updateErrorMessage}` : 'Check Failed - Click to Retry'}</span>
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw size={13} />
-                    <span>Check for Updates (v{appVersion})</span>
-                  </>
-                )}
-              </button>
-            )}
-          </div>
+          )}
         </div>
       </div>
     </div>

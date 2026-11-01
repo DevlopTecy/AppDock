@@ -381,6 +381,7 @@ export const QuickIconsBar: React.FC<QuickIconsBarProps> = ({
         width: '44px',
         userSelect: 'none',
         flexShrink: 0,
+        maxHeight: '100%',
         position: 'relative'
       }}
       title="Quick Icons: Single-click to launch, or drag apps here"
@@ -389,6 +390,7 @@ export const QuickIconsBar: React.FC<QuickIconsBarProps> = ({
         className="uiverse-vbar-article quick-icons-article"
         style={{
           width: '100%',
+          maxHeight: '100%',
           borderRadius: containerRadius,
           background: isDragOverBar ? 'rgba(59, 130, 246, 0.22)' : containerBg,
           border: isDragOverBar ? '1.5px dashed #3b82f6' : containerBorder,
@@ -567,7 +569,9 @@ export const QuickIconsBar: React.FC<QuickIconsBarProps> = ({
               alignItems: 'center',
               gap: '3px',
               width: '100%',
-              maxHeight: '260px',
+              flex: 1,
+              minHeight: 0,
+              maxHeight: '100%',
               overflowY: 'auto',
               scrollbarWidth: 'none'
             }}

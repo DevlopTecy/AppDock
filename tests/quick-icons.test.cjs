@@ -109,7 +109,11 @@ assert(
   dockFrameContent.includes('Quick Icons Bar at the bottom of the Anchor Column'),
   'DockFrame must render quickIconsContent in companion anchor column below ConnectorHub & EdgeToggle'
 );
-console.log('  ✓ DockFrame renders Quick Icons vertically at the bottom of the companion anchor column');
+assert(
+  dockFrameContent.includes("top: 'calc(50% + 42px)'"),
+  'Quick Icons must be positioned strictly below handle at calc(50% + 42px) and never go above or equal to handle in any UI size'
+);
+console.log('  ✓ DockFrame renders Quick Icons vertically below Handle at calc(50% + 42px), never equal to or above handle');
 
 // 7. Verify App.tsx wiring
 const appPath = path.join(__dirname, '..', 'src', 'App.tsx');

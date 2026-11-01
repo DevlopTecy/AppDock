@@ -373,8 +373,13 @@ export const DockFrame: React.FC<DockFrameProps> = ({
             {quickIconsContent && !customTheme?.hideQuickIcons && (
               <div
                 style={{
-                  marginTop: 'auto',
-                  marginBottom: '10px',
+                  position: 'absolute',
+                  top: 'calc(50% + 42px)',
+                  bottom: '10px',
+                  left: 0,
+                  right: 0,
+                  justifyContent: 'flex-start',
+                  pointerEvents: 'auto',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
@@ -1524,8 +1529,13 @@ export const DockFrame: React.FC<DockFrameProps> = ({
             {quickIconsContent && !customTheme?.hideQuickIcons && (
               <div
                 style={{
-                  marginTop: 'auto',
-                  marginBottom: '10px',
+                  position: 'absolute',
+                  top: 'calc(50% + 42px)',
+                  bottom: '10px',
+                  left: 0,
+                  right: 0,
+                  justifyContent: 'flex-start',
+                  pointerEvents: 'auto',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
