@@ -152,4 +152,21 @@ assert(
 );
 console.log('  ✓ QuickIconsBar disguises Add button with theme stickers/icons and reveals Plus on hover');
 
+// 9. Verify Settings Sub-Options Hide Quick Icons Toggle
+const customPanelPath = path.join(__dirname, '..', 'src', 'components', 'CustomThemePanel.tsx');
+const customPanelContent = fs.readFileSync(customPanelPath, 'utf8');
+assert(
+  customPanelContent.includes('Hide Quick Icons'),
+  'CustomThemePanel.tsx must render "Hide Quick Icons" toggle in Sub-Options'
+);
+assert(
+  dockTypesContent.includes('customThemeHideQuickIcons?: boolean;') || dockTypesContent.includes('hideQuickIcons?: boolean;'),
+  'src/types/dock.ts must include customThemeHideQuickIcons/hideQuickIcons'
+);
+assert(
+  appContent.includes('customThemeHideQuickIcons') || appContent.includes('hideQuickIcons'),
+  'App.tsx must support toggling Quick Icons visibility'
+);
+console.log('  ✓ Settings Theme Sub-Options includes "Hide Quick Icons" toggle and hides Quick Icons bar');
+
 console.log('🎉 All Quick Icons tests passed successfully!\n');
