@@ -41,7 +41,15 @@ assert(
   modalContent.includes('searchQuery') || modalContent.includes('Search'),
   'AddToQuickIconsModal must include a search bar for finding apps/urls'
 );
-console.log('  ✓ AddToQuickIconsModal component implemented with search and selection');
+assert(
+  !modalContent.includes('<Zap'),
+  'AddToQuickIconsModal must not render Zap icon beside header title'
+);
+assert(
+  !modalContent.includes('0 0 6px'),
+  'AddToQuickIconsModal must not render glowing dot beside group titles'
+);
+console.log('  ✓ AddToQuickIconsModal component implemented with clean typography, no header icon box, and no glow dots');
 
 // 4. Verify QuickIconsBar component
 const barPath = path.join(__dirname, '..', 'src', 'components', 'QuickIconsBar.tsx');

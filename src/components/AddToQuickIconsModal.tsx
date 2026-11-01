@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { AppGroup, AppItem, DockTheme } from '../types/dock';
 import { getAssetUrl, isGenericOrBrokenIcon } from '../utils/assets';
-import { X, Search, Plus, Check, Globe, AppWindow, Zap } from 'lucide-react';
+import { X, Search, Plus, Check, Globe, AppWindow } from 'lucide-react';
 
 interface AddToQuickIconsModalProps {
   isOpen: boolean;
@@ -24,11 +24,13 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
   const [justAddedIds, setJustAddedIds] = useState<Set<string>>(new Set());
 
   // ALL HOOKS MUST RUN UNCONDITIONALLY AT THE TOP BEFORE ANY EARLY RETURN
-  const isDeathNote = theme === 'deathnote';
-  const isAether = theme === 'aether';
-  const isEldenRing = theme === 'eldenring';
-  const isKawaii = theme === 'kawaii';
-  const isCandy = theme === 'candy';
+  const currentTheme = (theme || (typeof document !== 'undefined' ? document.documentElement.getAttribute('data-theme') : '')) as DockTheme;
+  const isDeathNote = currentTheme === 'deathnote';
+  const isAether = currentTheme === 'aether';
+  const isEldenRing = currentTheme === 'eldenring';
+  const isOnePiece = currentTheme === 'onepiece';
+  const isKawaii = currentTheme === 'kawaii';
+  const isCandy = currentTheme === 'candy';
 
   const pinnedSet = useMemo(() => {
     const ids = Array.isArray(existingQuickItemIds) ? existingQuickItemIds.filter(Boolean) : [];
@@ -122,7 +124,15 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
       style={{
         position: 'absolute',
         inset: 0,
-        background: isAether ? '#142334' : 'var(--modal-bg)',
+        background: isAether
+          ? '#142334'
+          : isDeathNote
+            ? '#0a0808'
+            : isEldenRing
+              ? '#0a0c0a'
+              : isOnePiece
+                ? '#0d131a'
+                : 'var(--modal-bg)',
         backdropFilter: 'blur(28px)',
         WebkitBackdropFilter: 'blur(28px)',
         zIndex: 65,
@@ -131,9 +141,10 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
         overflow: 'hidden'
       }}
     >
-      {/* Death Note Theme Thematic Background Artwork with Soft Scrim */}
+      {/* Death Note Theme Thematic Background Artwork */}
       {isDeathNote && (
         <div
+          className="deathnote-modal-bg"
           style={{
             position: 'absolute',
             inset: 0,
@@ -149,63 +160,225 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
               backgroundImage: `url('${getAssetUrl('/deathnote/backgrounds/wallpaper_main_4.jpg')}')`,
               backgroundSize: 'cover',
               backgroundPosition: 'center 20%',
-              filter: 'brightness(0.35) contrast(1.1)',
-              opacity: 0.22
+              filter: 'brightness(0.35) contrast(1.15)',
+              opacity: 0.32
             }}
           />
           <div
             style={{
               position: 'absolute',
               inset: 0,
-              background: 'radial-gradient(ellipse at center, rgba(12, 12, 12, 0.8) 0%, rgba(5, 5, 5, 0.96) 100%)'
+              background: 'radial-gradient(ellipse at center, rgba(14, 10, 10, 0.85) 0%, rgba(6, 4, 4, 0.97) 100%)'
             }}
           />
         </div>
       )}
 
-      {/* Header */}
+      {/* Elden Ring Theme Thematic Background Artwork */}
+      {isEldenRing && (
+        <div
+          className="eldenring-modal-bg"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 0,
+            pointerEvents: 'none',
+            overflow: 'hidden'
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: `url('${getAssetUrl('/eldenring/backgrounds/vertical_golden_tree_wallpaper.png')}')`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              filter: 'brightness(0.35) contrast(1.15)',
+              opacity: 0.45
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(180deg, rgba(8, 10, 9, 0.9) 0%, rgba(14, 16, 13, 0.97) 100%)'
+            }}
+          />
+        </div>
+      )}
+
+      {/* One Piece Theme Thematic Background Artwork */}
+      {isOnePiece && (
+        <div
+          className="onepiece-modal-bg"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 0,
+            pointerEvents: 'none',
+            overflow: 'hidden'
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: `url('${getAssetUrl('/onepiece/backgrounds/portrait_ship_background.png')}')`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              filter: 'brightness(0.35) contrast(1.15)',
+              opacity: 0.45
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(180deg, rgba(14, 22, 32, 0.9) 0%, rgba(10, 16, 24, 0.97) 100%)'
+            }}
+          />
+        </div>
+      )}
+
+      {/* Candy Theme Thematic Background Artwork */}
+      {isCandy && (
+        <div
+          className="candy-modal-bg"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 0,
+            pointerEvents: 'none',
+            overflow: 'hidden'
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: `url('${getAssetUrl('/candy/backgrounds/sweet_home_candy_cottage.png')}')`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              filter: 'brightness(0.85) contrast(1.05)',
+              opacity: 0.35
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(180deg, rgba(255, 240, 245, 0.92) 0%, rgba(255, 228, 238, 0.97) 100%)'
+            }}
+          />
+        </div>
+      )}
+
+      {/* Aether Theme Thematic Background Artwork */}
+      {isAether && (
+        <div
+          className="aether-modal-bg"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 0,
+            pointerEvents: 'none',
+            overflow: 'hidden'
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: `url('${getAssetUrl('/aether/wallpaper_aether_sky.jpg')}')`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              filter: 'brightness(0.4) contrast(1.1)',
+              opacity: 0.45
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(180deg, rgba(20, 35, 52, 0.9) 0%, rgba(12, 22, 34, 0.97) 100%)'
+            }}
+          />
+        </div>
+      )}
+
+      {/* Header — Clean, prestigious typography without distracting icon box */}
       <div
         style={{
-          padding: '10px 14px',
+          padding: '12px 16px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          borderBottom: '1px solid var(--border-subtle)',
-          background: 'var(--bg-header)',
+          borderBottom: isDeathNote
+            ? '1px solid rgba(163, 38, 45, 0.45)'
+            : isEldenRing
+              ? '1px solid rgba(234, 196, 119, 0.35)'
+              : isOnePiece
+                ? '1px solid rgba(245, 158, 11, 0.35)'
+                : isAether
+                  ? '1px solid rgba(140, 96, 56, 0.45)'
+                  : isCandy
+                    ? '1px solid #ffccd5'
+                    : '1px solid var(--border-subtle)',
+          background: isDeathNote
+            ? 'rgba(16, 12, 12, 0.96)'
+            : isEldenRing
+              ? 'rgba(12, 14, 12, 0.96)'
+              : isOnePiece
+                ? 'rgba(20, 28, 38, 0.96)'
+                : isAether
+                  ? 'rgba(18, 32, 48, 0.96)'
+                  : isCandy
+                    ? 'rgba(255, 240, 245, 0.96)'
+                    : 'var(--bg-header)',
           position: 'relative',
           zIndex: 2
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
+        <div>
           <div
             style={{
-              width: '28px',
-              height: '28px',
-              borderRadius: '7px',
-              background: 'var(--bg-surface-active)',
-              border: '1px solid var(--border-subtle)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: 'var(--btn-shadow)'
+              fontSize: '13px',
+              fontWeight: 600,
+              color: isDeathNote
+                ? '#fca5a5'
+                : isEldenRing
+                  ? '#EAC477'
+                  : isOnePiece
+                    ? '#f59e0b'
+                    : isAether
+                      ? '#ffdf59'
+                      : isCandy
+                        ? '#be185d'
+                        : 'var(--text-primary)',
+              fontFamily: isDeathNote
+                ? 'var(--font-gothic)'
+                : isEldenRing || isOnePiece
+                  ? 'var(--font-fantasy)'
+                  : undefined,
+              letterSpacing: isDeathNote || isOnePiece ? '0.6px' : '0.1px'
             }}
           >
-            <Zap size={14} color={isDeathNote ? '#e05a61' : isAether ? '#ffdf59' : '#f59e0b'} strokeWidth={2.4} />
+            Add to Quick Icons
           </div>
-          <div>
-            <div
-              style={{
-                fontSize: '12.5px',
-                fontWeight: 600,
-                color: isDeathNote ? '#fca5a5' : isAether ? '#ffdf59' : 'var(--text-primary)',
-                letterSpacing: '0.1px'
-              }}
-            >
-              Add to Quick Icons
-            </div>
-            <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
-              Pin apps and links for fast 1-click launching
-            </div>
+          <div
+            style={{
+              fontSize: '10.5px',
+              color: isDeathNote
+                ? 'rgba(234, 230, 223, 0.55)'
+                : isEldenRing
+                  ? 'rgba(234, 196, 119, 0.6)'
+                  : isOnePiece
+                    ? 'rgba(245, 158, 11, 0.6)'
+                    : 'var(--text-muted)',
+              marginTop: '1px'
+            }}
+          >
+            Pin apps and links for fast 1-click launching
           </div>
         </div>
 
@@ -217,23 +390,31 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
           style={{
             width: '26px',
             height: '26px',
-            borderRadius: '6px',
+            borderRadius: isCandy ? '13px' : '6px',
             cursor: 'pointer',
-            border: '1px solid var(--btn-border)',
-            background: 'var(--bg-surface)',
-            color: 'var(--text-muted)',
+            border: isDeathNote
+              ? '1px solid rgba(163, 38, 45, 0.5)'
+              : isEldenRing
+                ? '1px solid rgba(234, 196, 119, 0.35)'
+                : isOnePiece
+                  ? '1px solid rgba(245, 158, 11, 0.35)'
+                  : '1px solid var(--btn-border)',
+            background: isDeathNote
+              ? 'rgba(24, 14, 14, 0.8)'
+              : 'var(--bg-surface)',
+            color: isDeathNote ? '#e05a61' : isEldenRing ? '#EAC477' : isOnePiece ? '#f59e0b' : 'var(--text-muted)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             transition: 'all 0.15s ease'
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'var(--bg-surface-hover)';
-            e.currentTarget.style.color = 'var(--text-primary)';
+            e.currentTarget.style.background = isDeathNote ? 'rgba(163, 38, 45, 0.25)' : 'var(--bg-surface-hover)';
+            e.currentTarget.style.color = isDeathNote ? '#ffffff' : 'var(--text-primary)';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'var(--bg-surface)';
-            e.currentTarget.style.color = 'var(--text-muted)';
+            e.currentTarget.style.background = isDeathNote ? 'rgba(24, 14, 14, 0.8)' : 'var(--bg-surface)';
+            e.currentTarget.style.color = isDeathNote ? '#e05a61' : isEldenRing ? '#EAC477' : isOnePiece ? '#f59e0b' : 'var(--text-muted)';
           }}
         >
           <X size={14} />
@@ -243,9 +424,23 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
       {/* Search Input Bar */}
       <div
         style={{
-          padding: '8px 12px',
-          background: 'var(--bg-surface)',
-          borderBottom: '1px solid var(--border-subtle)',
+          padding: '8px 14px',
+          background: isDeathNote
+            ? 'rgba(14, 10, 10, 0.8)'
+            : isEldenRing
+              ? 'rgba(10, 12, 10, 0.8)'
+              : isOnePiece
+                ? 'rgba(16, 22, 30, 0.8)'
+                : isCandy
+                  ? 'rgba(255, 245, 248, 0.8)'
+                  : 'var(--bg-surface)',
+          borderBottom: isDeathNote
+            ? '1px solid rgba(163, 38, 45, 0.3)'
+            : isEldenRing
+              ? '1px solid rgba(234, 196, 119, 0.25)'
+              : isOnePiece
+                ? '1px solid rgba(245, 158, 11, 0.25)'
+                : '1px solid var(--border-subtle)',
           position: 'relative',
           zIndex: 2
         }}
@@ -255,15 +450,27 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            background: 'var(--bg-dock)',
-            border: '1px solid var(--btn-border)',
-            borderRadius: '6px',
+            background: isDeathNote
+              ? 'rgba(8, 6, 6, 0.85)'
+              : isEldenRing
+                ? 'rgba(8, 9, 8, 0.85)'
+                : isOnePiece
+                  ? 'rgba(12, 17, 24, 0.85)'
+                  : 'var(--bg-dock)',
+            border: isDeathNote
+              ? '1px solid rgba(163, 38, 45, 0.35)'
+              : isEldenRing
+                ? '1px solid rgba(234, 196, 119, 0.3)'
+                : isOnePiece
+                  ? '1px solid rgba(245, 158, 11, 0.3)'
+                  : '1px solid var(--btn-border)',
+            borderRadius: isCandy ? '10px' : '6px',
             padding: '0 10px',
             height: '34px',
-            transition: 'border-color 0.15s ease'
+            transition: 'border-color 0.15s ease, box-shadow 0.15s ease'
           }}
         >
-          <Search size={13} color="var(--text-muted)" />
+          <Search size={13} color={isDeathNote ? '#e05a61' : isEldenRing ? '#EAC477' : isOnePiece ? '#f59e0b' : 'var(--text-muted)'} />
           <input
             type="text"
             placeholder="Search apps or URLs across groups..."
@@ -276,7 +483,8 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
               border: 'none',
               outline: 'none',
               fontSize: '11.5px',
-              color: 'var(--text-primary)'
+              color: isDeathNote ? '#eae6df' : 'var(--text-primary)',
+              fontFamily: 'inherit'
             }}
           />
           {searchQuery && (
@@ -306,7 +514,7 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
         style={{
           flex: 1,
           overflowY: 'auto',
-          padding: '12px',
+          padding: '12px 14px',
           display: 'flex',
           flexDirection: 'column',
           gap: '14px',
@@ -333,16 +541,34 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
                 width: '40px',
                 height: '40px',
                 borderRadius: '50%',
-                background: 'var(--bg-surface-active)',
+                background: isDeathNote
+                  ? 'rgba(163, 38, 45, 0.15)'
+                  : isEldenRing
+                    ? 'rgba(234, 196, 119, 0.12)'
+                    : isOnePiece
+                      ? 'rgba(245, 158, 11, 0.12)'
+                      : 'var(--bg-surface-active)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                border: '1px solid var(--border-subtle)'
+                border: isDeathNote
+                  ? '1px solid rgba(163, 38, 45, 0.3)'
+                  : isEldenRing
+                    ? '1px solid rgba(234, 196, 119, 0.25)'
+                    : isOnePiece
+                      ? '1px solid rgba(245, 158, 11, 0.25)'
+                      : '1px solid var(--border-subtle)'
               }}
             >
-              <Search size={18} color="var(--text-muted)" />
+              <Search size={18} color={isDeathNote ? '#e05a61' : isEldenRing ? '#EAC477' : isOnePiece ? '#f59e0b' : 'var(--text-muted)'} />
             </div>
-            <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+            <div
+              style={{
+                fontSize: '12px',
+                fontWeight: 600,
+                color: isDeathNote ? '#fca5a5' : isEldenRing ? '#EAC477' : 'var(--text-secondary)'
+              }}
+            >
               No matching items found
             </div>
             <div style={{ fontSize: '11px', maxWidth: '240px', lineHeight: '1.4' }}>
@@ -352,42 +578,83 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
         ) : (
           filteredGroups.map((grp) => (
             <div key={grp.id} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              {/* Group Section Header */}
+              {/* Group Section Header — Clean typography and subtle hairline divider (no glow dots) */}
               <div
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '6px',
-                  padding: '2px 4px',
+                  gap: '8px',
+                  padding: '4px 2px 2px 2px',
                   fontSize: '11px',
                   fontWeight: 600,
-                  color: isDeathNote ? '#e05a61' : grp.accentColor || 'var(--text-secondary)'
+                  fontFamily: isDeathNote
+                    ? 'var(--font-gothic)'
+                    : isEldenRing || isOnePiece
+                      ? 'var(--font-fantasy)'
+                      : undefined,
+                  letterSpacing: isDeathNote || isOnePiece ? '0.7px' : '0.4px',
+                  color: isDeathNote
+                    ? '#fca5a5'
+                    : isEldenRing
+                      ? '#EAC477'
+                      : isOnePiece
+                        ? '#f59e0b'
+                        : isAether
+                          ? '#ffdf59'
+                          : isCandy
+                            ? '#be185d'
+                            : 'var(--text-secondary)'
                 }}
               >
-                <span
-                  style={{
-                    width: '6px',
-                    height: '6px',
-                    borderRadius: '50%',
-                    background: grp.accentColor || 'var(--accent, #3b82f6)',
-                    boxShadow: `0 0 6px ${grp.accentColor || 'rgba(59, 130, 246, 0.4)'}`
-                  }}
-                />
-                <span style={{ letterSpacing: '0.1px' }}>{grp.name}</span>
+                <span>{grp.name}</span>
                 <span
                   style={{
                     fontSize: '9.5px',
                     fontWeight: 600,
                     fontVariantNumeric: 'tabular-nums',
-                    color: 'var(--text-muted)',
-                    background: 'var(--bg-surface-active)',
+                    color: isDeathNote
+                      ? 'rgba(252, 165, 165, 0.75)'
+                      : isEldenRing
+                        ? 'rgba(234, 196, 119, 0.8)'
+                        : isOnePiece
+                          ? 'rgba(245, 158, 11, 0.8)'
+                          : 'var(--text-muted)',
+                    background: isDeathNote
+                      ? 'rgba(163, 38, 45, 0.2)'
+                      : isEldenRing
+                        ? 'rgba(234, 196, 119, 0.12)'
+                        : isOnePiece
+                          ? 'rgba(245, 158, 11, 0.12)'
+                          : 'var(--bg-surface-active)',
                     padding: '1px 6px',
                     borderRadius: '999px',
-                    border: '1px solid var(--border-subtle)'
+                    border: isDeathNote
+                      ? '1px solid rgba(163, 38, 45, 0.35)'
+                      : isEldenRing
+                        ? '1px solid rgba(234, 196, 119, 0.25)'
+                        : isOnePiece
+                          ? '1px solid rgba(245, 158, 11, 0.25)'
+                          : '1px solid var(--border-subtle)'
                   }}
                 >
                   {grp.items.length}
                 </span>
+                <div
+                  style={{
+                    flex: 1,
+                    height: '1px',
+                    background: isDeathNote
+                      ? 'linear-gradient(90deg, rgba(163, 38, 45, 0.4) 0%, transparent 100%)'
+                      : isEldenRing
+                        ? 'linear-gradient(90deg, rgba(234, 196, 119, 0.35) 0%, transparent 100%)'
+                        : isOnePiece
+                          ? 'linear-gradient(90deg, rgba(245, 158, 11, 0.35) 0%, transparent 100%)'
+                          : isAether
+                            ? 'linear-gradient(90deg, rgba(140, 96, 56, 0.35) 0%, transparent 100%)'
+                            : 'linear-gradient(90deg, var(--border-subtle) 0%, transparent 100%)',
+                    marginLeft: '4px'
+                  }}
+                />
               </div>
 
               {/* Group Items Grid */}
@@ -400,6 +667,60 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
               >
                 {grp.items.map((item) => {
                   const isPinned = pinnedSet.has(item.id);
+
+                  const defaultBg = isPinned
+                    ? 'rgba(255, 255, 255, 0.02)'
+                    : isDeathNote
+                      ? 'rgba(18, 12, 12, 0.72)'
+                      : isEldenRing
+                        ? 'rgba(15, 18, 15, 0.72)'
+                        : isOnePiece
+                          ? 'rgba(20, 28, 38, 0.72)'
+                          : isAether
+                            ? 'rgba(20, 36, 54, 0.72)'
+                            : isCandy
+                              ? '#fff0f5'
+                              : 'var(--bg-surface)';
+
+                  const defaultBorder = isPinned
+                    ? isDeathNote
+                      ? '1px solid rgba(255, 255, 255, 0.04)'
+                      : '1px solid var(--border-subtle)'
+                    : isDeathNote
+                      ? '1px solid rgba(163, 38, 45, 0.28)'
+                      : isEldenRing
+                        ? '1px solid rgba(234, 196, 119, 0.25)'
+                        : isOnePiece
+                          ? '1px solid rgba(245, 158, 11, 0.25)'
+                          : isAether
+                            ? '1px solid rgba(140, 96, 56, 0.3)'
+                            : isCandy
+                              ? '1px solid #ffccd5'
+                              : '1px solid var(--btn-border)';
+
+                  const hoverBg = isDeathNote
+                    ? 'rgba(28, 16, 16, 0.9)'
+                    : isEldenRing
+                      ? 'rgba(24, 28, 22, 0.9)'
+                      : isOnePiece
+                        ? 'rgba(28, 38, 52, 0.9)'
+                        : isAether
+                          ? 'rgba(28, 48, 70, 0.9)'
+                          : isCandy
+                            ? '#ffffff'
+                            : 'var(--bg-surface-hover)';
+
+                  const hoverBorder = isDeathNote
+                    ? '1px solid rgba(224, 90, 97, 0.65)'
+                    : isEldenRing
+                      ? '1px solid rgba(234, 196, 119, 0.65)'
+                      : isOnePiece
+                        ? '1px solid rgba(245, 158, 11, 0.65)'
+                        : isAether
+                          ? '1px solid rgba(255, 223, 89, 0.65)'
+                          : isCandy
+                            ? '1px solid #f472b6'
+                            : '1px solid var(--btn-border-hover)';
 
                   return (
                     <button
@@ -414,13 +735,9 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
                         gap: '9px',
                         padding: '8px 10px',
                         borderRadius: isKawaii || isCandy ? '10px' : isEldenRing ? '6px' : '8px',
-                        background: isPinned
-                          ? 'rgba(255, 255, 255, 0.03)'
-                          : 'var(--bg-surface)',
-                        border: isPinned
-                          ? '1px solid var(--border-subtle)'
-                          : '1px solid var(--btn-border)',
-                        opacity: isPinned ? 0.6 : 1,
+                        background: defaultBg,
+                        border: defaultBorder,
+                        opacity: isPinned ? 0.55 : 1,
                         cursor: isPinned ? 'default' : 'pointer',
                         textAlign: 'left',
                         position: 'relative',
@@ -429,16 +746,24 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
                       }}
                       onMouseEnter={(e) => {
                         if (!isPinned) {
-                          e.currentTarget.style.borderColor = 'var(--btn-border-hover)';
-                          e.currentTarget.style.background = 'var(--bg-surface-hover)';
+                          e.currentTarget.style.border = hoverBorder;
+                          e.currentTarget.style.background = hoverBg;
                           e.currentTarget.style.transform = 'translateY(-1px)';
+                          e.currentTarget.style.boxShadow = isDeathNote
+                            ? '0 4px 14px rgba(163, 38, 45, 0.3)'
+                            : isEldenRing
+                              ? '0 4px 14px rgba(234, 196, 119, 0.25)'
+                              : isOnePiece
+                                ? '0 4px 14px rgba(245, 158, 11, 0.25)'
+                                : '0 4px 12px rgba(0, 0, 0, 0.3)';
                         }
                       }}
                       onMouseLeave={(e) => {
                         if (!isPinned) {
-                          e.currentTarget.style.borderColor = 'var(--btn-border)';
-                          e.currentTarget.style.background = 'var(--bg-surface)';
+                          e.currentTarget.style.border = defaultBorder;
+                          e.currentTarget.style.background = defaultBg;
                           e.currentTarget.style.transform = 'none';
+                          e.currentTarget.style.boxShadow = 'var(--btn-shadow)';
                         }
                       }}
                     >
@@ -452,7 +777,9 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
                           alignItems: 'center',
                           justifyContent: 'center',
                           flexShrink: 0,
-                          background: 'rgba(0, 0, 0, 0.2)'
+                          background: isDeathNote || isEldenRing
+                            ? 'rgba(0, 0, 0, 0.45)'
+                            : 'rgba(0, 0, 0, 0.2)'
                         }}
                       >
                         {renderIconThumb(item)}
@@ -464,7 +791,13 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
                           style={{
                             fontSize: '11.5px',
                             fontWeight: 600,
-                            color: 'var(--text-primary)',
+                            color: isPinned
+                              ? 'var(--text-muted)'
+                              : isDeathNote
+                                ? '#eae6df'
+                                : isEldenRing
+                                  ? '#f3ecd8'
+                                  : 'var(--text-primary)',
                             whiteSpace: 'nowrap',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis'
@@ -491,14 +824,38 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
                         style={{
                           width: '20px',
                           height: '20px',
-                          borderRadius: '5px',
+                          borderRadius: isCandy ? '10px' : '5px',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           flexShrink: 0,
-                          background: isPinned ? 'rgba(34, 197, 94, 0.14)' : 'var(--bg-surface-active)',
-                          color: isPinned ? '#22c55e' : 'var(--text-muted)',
-                          border: isPinned ? '1px solid rgba(34, 197, 94, 0.3)' : '1px solid var(--border-subtle)',
+                          background: isPinned
+                            ? 'rgba(34, 197, 94, 0.16)'
+                            : isDeathNote
+                              ? 'rgba(163, 38, 45, 0.16)'
+                              : isEldenRing
+                                ? 'rgba(234, 196, 119, 0.12)'
+                                : isOnePiece
+                                  ? 'rgba(245, 158, 11, 0.12)'
+                                  : 'var(--bg-surface-active)',
+                          color: isPinned
+                            ? '#22c55e'
+                            : isDeathNote
+                              ? '#fca5a5'
+                              : isEldenRing
+                                ? '#EAC477'
+                                : isOnePiece
+                                  ? '#f59e0b'
+                                  : 'var(--text-muted)',
+                          border: isPinned
+                            ? '1px solid rgba(34, 197, 94, 0.35)'
+                            : isDeathNote
+                              ? '1px solid rgba(163, 38, 45, 0.35)'
+                              : isEldenRing
+                                ? '1px solid rgba(234, 196, 119, 0.25)'
+                                : isOnePiece
+                                  ? '1px solid rgba(245, 158, 11, 0.25)'
+                                  : '1px solid var(--border-subtle)',
                           transition: 'all 0.15s ease'
                         }}
                         aria-label={isPinned ? 'Pinned' : 'Add to Quick Icons'}
@@ -517,9 +874,29 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
       {/* Footer Info & Close */}
       <div
         style={{
-          padding: '10px 14px',
-          borderTop: '1px solid var(--border-subtle)',
-          background: 'var(--bg-footer)',
+          padding: '10px 16px',
+          borderTop: isDeathNote
+            ? '1px solid rgba(163, 38, 45, 0.45)'
+            : isEldenRing
+              ? '1px solid rgba(234, 196, 119, 0.35)'
+              : isOnePiece
+                ? '1px solid rgba(245, 158, 11, 0.35)'
+                : isAether
+                  ? '1px solid rgba(140, 96, 56, 0.45)'
+                  : isCandy
+                    ? '1px solid #ffccd5'
+                    : '1px solid var(--border-subtle)',
+          background: isDeathNote
+            ? 'rgba(14, 10, 10, 0.96)'
+            : isEldenRing
+              ? 'rgba(10, 12, 10, 0.96)'
+              : isOnePiece
+                ? 'rgba(16, 22, 30, 0.96)'
+                : isAether
+                  ? 'rgba(16, 28, 42, 0.96)'
+                  : isCandy
+                    ? 'rgba(255, 240, 245, 0.96)'
+                    : 'var(--bg-footer)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -530,9 +907,15 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span
             style={{
-              fontSize: '10.5px',
-              color: 'var(--text-secondary)',
-              fontWeight: 500,
+              fontSize: '11px',
+              color: isDeathNote
+                ? '#fca5a5'
+                : isEldenRing
+                  ? '#EAC477'
+                  : isOnePiece
+                    ? '#f59e0b'
+                    : 'var(--text-secondary)',
+              fontWeight: 600,
               fontVariantNumeric: 'tabular-nums'
             }}
           >
@@ -547,13 +930,53 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
         <button
           type="button"
           onClick={onClose}
-          className="btn-primary"
           style={{
-            padding: '5px 14px',
+            padding: '6px 16px',
             fontSize: '11.5px',
             fontWeight: 600,
-            borderRadius: '6px',
-            cursor: 'pointer'
+            borderRadius: isCandy ? '14px' : '6px',
+            cursor: 'pointer',
+            background: isDeathNote
+              ? '#c41e24'
+              : isEldenRing
+                ? '#c5a059'
+                : isOnePiece
+                  ? '#f59e0b'
+                  : isCandy
+                    ? '#f472b6'
+                    : 'var(--btn-primary-bg, #3b82f6)',
+            color: isEldenRing || isOnePiece ? '#141414' : '#ffffff',
+            border: isDeathNote
+              ? '1px solid #e05a61'
+              : isEldenRing
+                ? '1px solid #EAC477'
+                : isOnePiece
+                  ? '1px solid #fbbf24'
+                  : isCandy
+                    ? '1px solid #f9a8d4'
+                    : '1px solid transparent',
+            fontFamily: isDeathNote
+              ? 'var(--font-gothic)'
+              : isEldenRing || isOnePiece
+                ? 'var(--font-fantasy)'
+                : undefined,
+            letterSpacing: isDeathNote || isOnePiece ? '0.6px' : '0.2px',
+            boxShadow: isDeathNote
+              ? '0 2px 10px rgba(196, 30, 36, 0.4)'
+              : isEldenRing
+                ? '0 2px 10px rgba(197, 160, 89, 0.35)'
+                : isOnePiece
+                  ? '0 2px 10px rgba(245, 158, 11, 0.35)'
+                  : '0 2px 8px rgba(0, 0, 0, 0.25)',
+            transition: 'all 0.15s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-1px)';
+            e.currentTarget.style.filter = 'brightness(1.1)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'none';
+            e.currentTarget.style.filter = 'none';
           }}
         >
           Done

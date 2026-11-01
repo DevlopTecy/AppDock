@@ -198,6 +198,7 @@ export const CustomThemePanel: React.FC<CustomThemePanelProps> = ({ settings, on
   const hideALMS = settings.customThemeHideALMS || false;
   const almsDensity = settings.customThemeALMSDensity || 'auto';
   const hideAppCount = settings.customThemeHideAppCount || false;
+  const hideQuickIcons = settings.customThemeHideQuickIcons || settings.hideQuickIcons || false;
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -245,7 +246,9 @@ export const CustomThemePanel: React.FC<CustomThemePanelProps> = ({ settings, on
       customThemeKeepSidebarModule: 'music',
       customThemeHideALMS: false,
       customThemeALMSDensity: 'auto',
-      customThemeHideAppCount: false
+      customThemeHideAppCount: false,
+      customThemeHideQuickIcons: false,
+      hideQuickIcons: false
     });
   };
 
@@ -358,6 +361,7 @@ export const CustomThemePanel: React.FC<CustomThemePanelProps> = ({ settings, on
       )}
 
       <Toggle label="Hide App Count badge" checked={hideAppCount} onChange={(v) => onUpdateSettings({ customThemeHideAppCount: v })} />
+      <Toggle label="Hide Quick Icons" checked={hideQuickIcons} onChange={(v) => onUpdateSettings({ customThemeHideQuickIcons: v, hideQuickIcons: v })} />
       <Toggle label="Background Rotation" checked={bgRotation} onChange={(v) => onUpdateSettings({ customThemeBgRotation: v })} />
       {bgRotation && (
         <div

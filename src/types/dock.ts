@@ -83,6 +83,8 @@ export interface DockSettings {
   customThemeHideALMS?: boolean;               // Hides A, L, M, S density selector
   customThemeALMSDensity?: 'auto' | 'large' | 'medium' | 'compact'; // Density selected before hiding
   customThemeHideAppCount?: boolean;           // Hides app count badge in grid and sidebar
+  customThemeHideQuickIcons?: boolean;         // Hides Quick Icons bar in companion sidebar
+  hideQuickIcons?: boolean;                    // Hides Quick Icons bar in companion sidebar
   quickIcons?: AppItem[];                      // Pinned quick-launch icons displayed in footer beside Settings
 }
 

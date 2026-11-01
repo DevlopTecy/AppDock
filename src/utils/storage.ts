@@ -22,6 +22,8 @@ export const DEFAULT_SETTINGS: DockSettings = {
   autoCheckUpdates: true,
   githubRepo: 'DevlopTecy/AppDock',
   autoStartWithWindows: true,
+  hideQuickIcons: false,
+  customThemeHideQuickIcons: false,
   quickIcons: []
 };
 
