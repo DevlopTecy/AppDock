@@ -348,7 +348,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   }, [isOpen, fetchAudioDevices]);
 
   const handleSelectAudioDevice = async (dev: { id: string; name: string; type: string }) => {
-    soundEngine.previewPackSample(settings.soundPack || 'theme', settings.theme);
+    if (settings.soundEnabled) soundEngine.previewPackSample(settings.soundPack || 'theme', settings.theme);
     setActiveAudioDeviceId(dev.id);
     setIsDeviceDropdownOpen(false);
     if (typeof window !== 'undefined' && (window as any).appDock?.setAudioDevice) {
@@ -357,7 +357,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   };
 
   const handleToggleAudioMute = async () => {
-    soundEngine.previewPackSample(settings.soundPack || 'theme', settings.theme);
+    if (settings.soundEnabled) soundEngine.previewPackSample(settings.soundPack || 'theme', settings.theme);
     if (typeof window !== 'undefined' && (window as any).appDock?.toggleAudioMute) {
       const res = await (window as any).appDock.toggleAudioMute();
       if (res && typeof res.isMuted === 'boolean') {
@@ -2071,7 +2071,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  soundEngine.previewPackSample(settings.soundPack || 'theme', settings.theme);
+                  if (settings.soundEnabled) soundEngine.previewPackSample(settings.soundPack || 'theme', settings.theme);
                 }}
                 style={{
                   background: isEldenRing ? 'rgba(234, 196, 119, 0.12)' : (isDeathNote ? '#101012' : 'var(--bg-surface-active)'),
@@ -2486,7 +2486,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                       onClick={() => {
                         onUpdateSettings({ soundPack: p.id as any });
                         soundEngine.setSoundPack(p.id as any);
-                        soundEngine.previewPackSample(p.id as any, settings.theme);
+                        if (settings.soundEnabled) soundEngine.previewPackSample(p.id as any, settings.theme);
                       }}
                       style={{
                         padding: '4px 3px',

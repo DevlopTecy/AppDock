@@ -58,3 +58,14 @@ test('Phase 1 - Sound FX: App.tsx and components trigger acoustic feedback on do
   assert.ok(dockContent.includes("playSound('click', theme)"), 'DockFrame must trigger click sounds');
 });
 
+test('Phase 1 - Sound FX: micro-sounds eliminated and AudioContext suspended when acoustic feedback is off', () => {
+  const soundEngineContent = fs.readFileSync(path.join(projectRoot, 'src', 'utils', 'soundEngine.ts'), 'utf8');
+  assert.ok(soundEngineContent.includes('!this.enabled || this.volume <= 0'), 'getContext must abort when disabled or volume is 0');
+  assert.ok(soundEngineContent.includes('this.ctx.suspend()'), 'soundEngine must suspend AudioContext when disabled');
+  assert.ok(soundEngineContent.includes('if (!soundEngine.isSoundEnabled()) return;'), 'playSound export must early-exit when disabled');
+  assert.ok(soundEngineContent.includes('masterGain.disconnect()'), 'soundEngine must auto-disconnect masterGain to prevent node accumulation');
+
+  const settingsContent = fs.readFileSync(path.join(projectRoot, 'src', 'components', 'SettingsView.tsx'), 'utf8');
+  assert.ok(settingsContent.includes('if (settings.soundEnabled) soundEngine.previewPackSample'), 'SettingsView must guard previewPackSample with soundEnabled check');
+});
+
