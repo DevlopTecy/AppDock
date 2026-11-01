@@ -216,7 +216,9 @@ export const DockFrame: React.FC<DockFrameProps> = ({
         setIsExiting(false);
         exitTimerRef.current = null;
         if (typeof window !== 'undefined' && (window as any).appDock?.setModuleWidth) {
-          (window as any).appDock.setModuleWidth((isCleanDock || customTheme?.hideSidebar) ? -1 : 54);
+          const isQuickIconsActive = Boolean(quickIconsContent) && !customTheme?.hideQuickIcons;
+          const shouldHideCompanionArea = isCleanDock || (Boolean(customTheme?.hideSidebar) && !isQuickIconsActive);
+          (window as any).appDock.setModuleWidth(shouldHideCompanionArea ? -1 : 54);
         }
       }, 190);
     }
@@ -225,7 +227,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
         window.clearTimeout(exitTimerRef.current);
       }
     };
-  }, [isExiting, isCleanDock, customTheme?.hideSidebar]);
+  }, [isExiting, isCleanDock, customTheme?.hideSidebar, customTheme?.hideQuickIcons, quickIconsContent]);
 
   const isLeft = dockPosition === 'left';
   const isRight = dockPosition === 'right';
@@ -316,8 +318,11 @@ export const DockFrame: React.FC<DockFrameProps> = ({
     );
   }
 
-  const isModuleActive = Boolean(renderedModule || isExiting);
-  const isSidebarHidden = isCleanDock || Boolean(customTheme?.hideSidebar);
+  const isModulesHidden = Boolean(customTheme?.hideSidebar) || Boolean(customTheme?.hideSidebarModules);
+  const isQuickIconsVisible = Boolean(quickIconsContent) && !customTheme?.hideQuickIcons;
+  const isCompanionAreaVisible = !isCleanDock && (!isModulesHidden || isQuickIconsVisible);
+  const isSidebarHidden = !isCompanionAreaVisible;
+  const isModuleActive = !isModulesHidden && Boolean(renderedModule || isExiting);
   const companionW = isSidebarHidden ? 0 : (isModuleActive ? 340 : 54);
   const _totalExpandedWidth = drawerWidth + companionW;
 
@@ -352,7 +357,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
           }}
         >
           {/* Active Companion Module (Music / Weather / Calendar) — animates in/out within the fixed 340px space */}
-          {renderedModule && companionContent && (
+          {!isModulesHidden && renderedModule && companionContent && (
             <div
               key={renderedModule}
               className={isExiting ? 'hub-module-exit-right' : 'hub-module-enter-right'}
@@ -393,15 +398,17 @@ export const DockFrame: React.FC<DockFrameProps> = ({
             }}
           >
             {/* Small Handles Hub Box sticking directly to the main UI at the top */}
-            <ConnectorHub
-              dockPosition={dockPosition}
-              isExpanded={isExpanded}
-              activeModule={activeModule}
-              onSelectModule={onSelectModule}
-              theme={theme}
-              hideSidebarModules={customTheme?.hideSidebarModules}
-              keepModule={customTheme?.keepSidebarModule}
-            />
+            {!isModulesHidden && (
+              <ConnectorHub
+                dockPosition={dockPosition}
+                isExpanded={isExpanded}
+                activeModule={activeModule}
+                onSelectModule={onSelectModule}
+                theme={theme}
+                hideSidebarModules={customTheme?.hideSidebarModules}
+                keepModule={customTheme?.keepSidebarModule}
+              />
+            )}
 
             {/* Main Handle (EdgeToggle) stays visible when opened, sticking to Drawer at vertical center */}
             <div
@@ -1565,15 +1572,17 @@ export const DockFrame: React.FC<DockFrameProps> = ({
             }}
           >
             {/* Small Handles Hub Box sticking directly to the main UI at the top */}
-            <ConnectorHub
-              dockPosition={dockPosition}
-              isExpanded={isExpanded}
-              activeModule={activeModule}
-              onSelectModule={onSelectModule}
-              theme={theme}
-              hideSidebarModules={customTheme?.hideSidebarModules}
-              keepModule={customTheme?.keepSidebarModule}
-            />
+            {!isModulesHidden && (
+              <ConnectorHub
+                dockPosition={dockPosition}
+                isExpanded={isExpanded}
+                activeModule={activeModule}
+                onSelectModule={onSelectModule}
+                theme={theme}
+                hideSidebarModules={customTheme?.hideSidebarModules}
+                keepModule={customTheme?.keepSidebarModule}
+              />
+            )}
 
             {/* Main Handle (EdgeToggle) stays visible when opened, sticking to Drawer at vertical center */}
             <div
@@ -1622,7 +1631,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
           </div>
 
           {/* Active Companion Module (Music / Weather / Calendar) — animates in/out within the fixed 340px space */}
-          {renderedModule && companionContent && (
+          {!isModulesHidden && renderedModule && companionContent && (
             <div
               key={renderedModule}
               className={isExiting ? 'hub-module-exit-left' : 'hub-module-enter-left'}
@@ -1677,15 +1686,17 @@ export const DockFrame: React.FC<DockFrameProps> = ({
       {isTop && (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '3px' }}>
-            <ConnectorHub
-              dockPosition={dockPosition}
-              isExpanded={isExpanded}
-              activeModule={activeModule}
-              onSelectModule={onSelectModule}
-              theme={theme}
-              hideSidebarModules={customTheme?.hideSidebarModules}
-              keepModule={customTheme?.keepSidebarModule}
-            />
+            {!isModulesHidden && (
+              <ConnectorHub
+                dockPosition={dockPosition}
+                isExpanded={isExpanded}
+                activeModule={activeModule}
+                onSelectModule={onSelectModule}
+                theme={theme}
+                hideSidebarModules={customTheme?.hideSidebarModules}
+                keepModule={customTheme?.keepSidebarModule}
+              />
+            )}
             <EdgeToggle
               isExpanded={true}
               dockPosition={dockPosition}
@@ -1693,7 +1704,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
               onToggle={onToggle}
             />
           </div>
-          {activeModule && companionContent && (
+          {!isModulesHidden && activeModule && companionContent && (
             <div style={{ display: 'flex', marginTop: '12px', justifyContent: 'center' }}>{companionContent}</div>
           )}
         </div>

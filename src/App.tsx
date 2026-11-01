@@ -152,18 +152,29 @@ export const App: React.FC = () => {
   useEffect(() => {
     if (typeof window !== 'undefined' && (window as any).appDock?.setModuleWidth) {
       if (isExpanded) {
-        if (isCleanDock || data.settings.customThemeHideSidebar) {
-          // Clean dock or custom theme hide sidebar: no companion area at all
+        const isQuickIconsActive = !isCleanDock && !data.settings.customThemeHideQuickIcons && !data.settings.hideQuickIcons;
+        const isModulesHidden = Boolean(data.settings.customThemeHideSidebar);
+        const shouldHideCompanionArea = isCleanDock || (isModulesHidden && !isQuickIconsActive);
+
+        if (shouldHideCompanionArea) {
+          // Clean dock or both sidebar modules & quick icons hidden: no companion area at all
           (window as any).appDock.setModuleWidth(-1);
         } else {
-          // Dynamic companion width: 340px when module active, 54px when idle to prevent ghost hitbox
-          (window as any).appDock.setModuleWidth(activeModule ? 340 : 54);
+          // Dynamic companion width: 340px when module active (and not hidden), 54px when idle (Quick Icons / ConnectorHub)
+          (window as any).appDock.setModuleWidth(!isModulesHidden ? (activeModule ? 340 : 54) : 54);
         }
       } else {
         (window as any).appDock.setModuleWidth(0);
       }
     }
-  }, [isExpanded, isCleanDock, data.settings.customThemeHideSidebar, activeModule]);
+  }, [
+    isExpanded,
+    isCleanDock,
+    data.settings.customThemeHideSidebar,
+    data.settings.customThemeHideQuickIcons,
+    data.settings.hideQuickIcons,
+    activeModule
+  ]);
 
   // Sync state changes with persistence
   const updateGroups = useCallback((newGroups: AppGroup[]) => {
@@ -386,7 +397,10 @@ export const App: React.FC = () => {
       } else {
         // Expanding: prepare window dimensions first so handle is positioned stably
         if (typeof window !== 'undefined' && (window as any).appDock?.setModuleWidth) {
-          (window as any).appDock.setModuleWidth(isCleanDock ? -1 : (activeModule ? 340 : 54));
+          const isQuickIconsActive = !isCleanDock && !data.settings.customThemeHideQuickIcons && !data.settings.hideQuickIcons;
+          const isModulesHidden = Boolean(data.settings.customThemeHideSidebar);
+          const shouldHideCompanionArea = isCleanDock || (isModulesHidden && !isQuickIconsActive);
+          (window as any).appDock.setModuleWidth(shouldHideCompanionArea ? -1 : (!isModulesHidden ? (activeModule ? 340 : 54) : 54));
         }
         if (typeof window !== 'undefined' && (window as any).appDock?.setState) {
           try {

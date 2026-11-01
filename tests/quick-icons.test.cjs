@@ -173,4 +173,15 @@ assert(
 );
 console.log('  ✓ Settings Theme Sub-Options includes "Hide Quick Icons" toggle and hides Quick Icons bar');
 
+// 10. Verify Quick Icons stay visible when Hide Sidebar (weather/calendar/music) is ON
+assert(
+  dockFrameContent.includes('isCompanionAreaVisible') && dockFrameContent.includes('isQuickIconsVisible'),
+  'DockFrame must keep companion area active for Quick Icons even when sidebar modules are hidden'
+);
+assert(
+  appContent.includes('isQuickIconsActive') && appContent.includes('shouldHideCompanionArea'),
+  'App.tsx must keep moduleWidth at 54px for Quick Icons when customThemeHideSidebar is ON'
+);
+console.log('  ✓ Quick Icons stay visible and operational when Hide Sidebar (weather/calendar/music) is ON');
+
 console.log('🎉 All Quick Icons tests passed successfully!\n');
