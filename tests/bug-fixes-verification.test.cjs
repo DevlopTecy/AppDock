@@ -296,3 +296,63 @@ test('BUG-24: Collapsed tab screen center matches expanded drawer handle center 
     );
   });
 });
+
+test('BUG-25: Custom Picture icon with Discord-style ImageCropModal and native/input image browse', () => {
+  const mainContent = fs.readFileSync(path.join(projectRoot, 'electron', 'main.cjs'), 'utf-8');
+  assert.ok(
+    mainContent.includes("ipcMain.handle('app:browse-image'") && mainContent.includes('Images (JPG, PNG, WebP, ICO, SVG)'),
+    'main.cjs must implement app:browse-image IPC handler with image filters'
+  );
+
+  const preloadContent = fs.readFileSync(path.join(projectRoot, 'electron', 'preload.cjs'), 'utf-8');
+  assert.ok(
+    preloadContent.includes('browseImage:'),
+    'preload.cjs must expose browseImage in window.appDock'
+  );
+
+  const cropModalPath = path.join(projectRoot, 'src', 'components', 'ImageCropModal.tsx');
+  assert.ok(fs.existsSync(cropModalPath), 'src/components/ImageCropModal.tsx must exist');
+
+  const cropModalContent = fs.readFileSync(cropModalPath, 'utf-8');
+  assert.ok(
+    cropModalContent.includes('handleSaveCrop') && cropModalContent.includes('canvas.toDataURL'),
+    'ImageCropModal.tsx must implement high-resolution canvas cropping to data URL'
+  );
+  assert.ok(
+    cropModalContent.includes('createPortal') && cropModalContent.includes('zIndex: 100000'),
+    'ImageCropModal.tsx must render in portal with high z-index'
+  );
+
+  const newGroupContent = fs.readFileSync(path.join(projectRoot, 'src', 'components', 'NewGroupModal.tsx'), 'utf-8');
+  assert.ok(
+    newGroupContent.includes('Custom Picture') && newGroupContent.includes('handleSelectCustomPicture'),
+    'NewGroupModal.tsx must provide Custom Picture button and selection flow'
+  );
+
+  const editGroupContent = fs.readFileSync(path.join(projectRoot, 'src', 'components', 'EditGroupModal.tsx'), 'utf-8');
+  assert.ok(
+    editGroupContent.includes('Custom Picture') && editGroupContent.includes('handleSelectCustomPicture'),
+    'EditGroupModal.tsx must provide Custom Picture button and selection flow'
+  );
+});
+
+test('BUG-26: Dynamic composite GroupGridIcon (2-4 apps) matching iOS/Android/Launchpad folders', () => {
+  const gridIconPath = path.join(projectRoot, 'src', 'components', 'GroupGridIcon.tsx');
+  assert.ok(fs.existsSync(gridIconPath), 'src/components/GroupGridIcon.tsx must exist');
+
+  const gridIconContent = fs.readFileSync(gridIconPath, 'utf-8');
+  assert.ok(
+    gridIconContent.includes('slice(0, 4)'),
+    'GroupGridIcon.tsx must take up to 4 items from group'
+  );
+  assert.ok(
+    gridIconContent.includes('count === 3') && gridIconContent.includes('count === 2'),
+    'GroupGridIcon.tsx must gracefully handle 2, 3, or 4 item layouts'
+  );
+
+  const sidebarContent = fs.readFileSync(path.join(projectRoot, 'src', 'components', 'GroupSidebar.tsx'), 'utf-8');
+  assert.ok(
+    sidebarContent.includes('group.customIcon ?') && sidebarContent.includes("group.iconName === 'grid' ?"),
+    'GroupSidebar.tsx must render customIcon or GroupGridIcon when group uses custom or grid mode'
+  );
+});

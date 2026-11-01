@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { getAssetUrl } from '../utils/assets';
 import { AppGroup, AppItem, GroupDensity, DockTheme } from '../types/dock';
 import { getGroupIcon } from './GroupSidebar';
-import { X, Check, Trash2, Plus, FolderOpen, Globe, Sparkles, Layers, Sliders } from 'lucide-react';
+import { X, Check, Trash2, Plus, FolderOpen, Globe, Sparkles, Layers, Sliders, Image as ImageIcon, LayoutGrid } from 'lucide-react';
+import { ImageCropModal } from './ImageCropModal';
+import { GroupGridIcon } from './GroupGridIcon';
 
 interface EditGroupModalProps {
   isOpen: boolean;
@@ -51,6 +53,9 @@ export const EditGroupModal: React.FC<EditGroupModalProps> = ({
 }) => {
   const [name, setName] = useState('');
   const [iconName, setIconName] = useState('Folder');
+  const [customIcon, setCustomIcon] = useState<string | null>(null);
+  const [rawImageForCrop, setRawImageForCrop] = useState<string | null>(null);
+  const [isCropModalOpen, setIsCropModalOpen] = useState(false);
   const [accentColor, setAccentColor] = useState('#3b82f6');
   const [density, setDensity] = useState<GroupDensity>('auto');
   const [items, setItems] = useState<AppItem[]>([]);
@@ -59,10 +64,13 @@ export const EditGroupModal: React.FC<EditGroupModalProps> = ({
   const [urlNameInput, setUrlNameInput] = useState('');
   const [error, setError] = useState('');
 
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
   useEffect(() => {
     if (group) {
       setName(group.name);
       setIconName(group.iconName || 'Folder');
+      setCustomIcon(group.customIcon || null);
       setAccentColor(group.accentColor || '#3b82f6');
       setDensity(group.density || 'auto');
       setItems([...(group.items || [])]);
@@ -74,6 +82,53 @@ export const EditGroupModal: React.FC<EditGroupModalProps> = ({
   }, [group, isOpen]);
 
   if (!isOpen || !group) return null;
+
+  const handleSelectCustomPicture = async () => {
+    if (typeof window !== 'undefined' && (window as any).appDock?.browseImage) {
+      try {
+        const res = await (window as any).appDock.browseImage();
+        if (res && res.dataUrl) {
+          setRawImageForCrop(res.dataUrl);
+          setIsCropModalOpen(true);
+          return;
+        }
+      } catch (err) {
+        console.warn('Native browseImage error, falling back to input:', err);
+      }
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          setRawImageForCrop(reader.result);
+          setIsCropModalOpen(true);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCropComplete = (croppedDataUrl: string) => {
+    setCustomIcon(croppedDataUrl);
+    setIconName('custom');
+  };
+
+  const handleSelectGrid = () => {
+    setIconName('grid');
+  };
+
+  const handleSelectPresetIcon = (ic: string) => {
+    setIconName(ic);
+    setCustomIcon(null);
+  };
 
   const handleRemoveItem = (itemId: string) => {
     setItems((prev) => prev.filter((it) => it.id !== itemId));
@@ -140,7 +195,8 @@ export const EditGroupModal: React.FC<EditGroupModalProps> = ({
       iconName,
       accentColor,
       density,
-      items
+      items,
+      customIcon: iconName === 'custom' && customIcon ? customIcon : undefined
     };
 
     onSaveGroup(updated);
@@ -263,18 +319,29 @@ export const EditGroupModal: React.FC<EditGroupModalProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <div
             style={{
-              width: '24px',
-              height: '24px',
+              width: '26px',
+              height: '26px',
               borderRadius: '6px',
               background: 'var(--bg-surface)',
               border: `1px solid ${accentColor}`,
               color: accentColor,
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              overflow: 'hidden'
             }}
           >
-            {getGroupIcon(iconName, 13)}
+            {iconName === 'custom' && customIcon ? (
+              <img
+                src={customIcon}
+                alt=""
+                style={{ width: '20px', height: '20px', borderRadius: '4px', objectFit: 'cover' }}
+              />
+            ) : iconName === 'grid' ? (
+              <GroupGridIcon items={items} size={20} accentColor={accentColor} />
+            ) : (
+              getGroupIcon(iconName, 14)
+            )}
           </div>
           <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>
             Edit Group
@@ -344,10 +411,153 @@ export const EditGroupModal: React.FC<EditGroupModalProps> = ({
         </div>
 
         {/* Group Logo / Icon Selection */}
-        <div>
-          <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '5px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '2px' }}>
             GROUP LOGO
           </label>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+            {/* Custom Picture Button */}
+            <button
+              type="button"
+              onClick={handleSelectCustomPicture}
+              className={`btn-custom-icon ${iconName === 'custom' ? 'is-selected' : ''}`}
+              style={{
+                height: '32px',
+                borderRadius: '6px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                background: iconName === 'custom' ? 'var(--text-primary)' : 'var(--bg-surface)',
+                border: iconName === 'custom' ? '1px solid var(--text-primary)' : '1px solid var(--btn-border)',
+                color: iconName === 'custom' ? 'var(--bg-dock)' : 'var(--text-primary)',
+                fontSize: '11px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                boxShadow: iconName === 'custom' ? '0 2px 8px rgba(0, 0, 0, 0.2)' : 'var(--btn-shadow)',
+                transition: 'all 0.18s ease'
+              }}
+              title="Upload picture in JPG, PNG, WebP format and crop like Discord"
+            >
+              {customIcon && iconName === 'custom' ? (
+                <img
+                  src={customIcon}
+                  alt=""
+                  style={{ width: '16px', height: '16px', borderRadius: '3px', objectFit: 'cover' }}
+                />
+              ) : (
+                <ImageIcon size={14} />
+              )}
+              <span>Custom Picture</span>
+            </button>
+
+            {/* Icon Grid Button */}
+            <button
+              type="button"
+              onClick={handleSelectGrid}
+              className={`btn-grid-icon ${iconName === 'grid' ? 'is-selected' : ''}`}
+              style={{
+                height: '32px',
+                borderRadius: '6px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                background: iconName === 'grid' ? 'var(--text-primary)' : 'var(--bg-surface)',
+                border: iconName === 'grid' ? '1px solid var(--text-primary)' : '1px solid var(--btn-border)',
+                color: iconName === 'grid' ? 'var(--bg-dock)' : 'var(--text-primary)',
+                fontSize: '11px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                boxShadow: iconName === 'grid' ? '0 2px 8px rgba(0, 0, 0, 0.2)' : 'var(--btn-shadow)',
+                transition: 'all 0.18s ease'
+              }}
+              title="Combine 2 to 4 apps/links into a composite folder tile"
+            >
+              <GroupGridIcon items={items} size={16} />
+              <span>Icon Grid</span>
+            </button>
+          </div>
+
+          {/* Hidden File Input fallback */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png, image/jpeg, image/jpg, image/webp, image/ico, image/svg+xml"
+            style={{ display: 'none' }}
+            onChange={handleFileInputChange}
+          />
+
+          {/* Custom Picture Details Bar */}
+          {iconName === 'custom' && customIcon && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '6px 10px',
+                borderRadius: '6px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid var(--btn-border)'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <img
+                  src={customIcon}
+                  alt="Custom icon preview"
+                  style={{ width: '22px', height: '22px', borderRadius: '5px', objectFit: 'cover' }}
+                />
+                <span style={{ fontSize: '10.5px', color: 'var(--text-secondary)' }}>Custom picture active</span>
+              </div>
+              <button
+                type="button"
+                onClick={handleSelectCustomPicture}
+                style={{
+                  fontSize: '10px',
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  border: 'none',
+                  color: 'var(--text-primary)',
+                  cursor: 'pointer'
+                }}
+              >
+                Re-crop / Change
+              </button>
+            </div>
+          )}
+
+          {/* Icon Grid Details Bar */}
+          {iconName === 'grid' && (
+            <div
+              style={{
+                padding: '6px 10px',
+                borderRadius: '6px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid var(--btn-border)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              <GroupGridIcon items={items} size={24} />
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                  Dynamic Grid: {items.length} {items.length === 1 ? 'app' : 'apps'}
+                </span>
+                <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
+                  {items.length === 0
+                    ? 'Empty grid waiting for apps to be added'
+                    : items.length < 2
+                      ? 'Add at least 2 apps for multi-tile view'
+                      : `Combining first ${Math.min(4, items.length)} apps into group icon`}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Preset Standard Icons */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '6px' }}>
             {ICONS.map((ic) => {
               const isSelected = iconName === ic;
@@ -355,7 +565,7 @@ export const EditGroupModal: React.FC<EditGroupModalProps> = ({
                 <button
                   key={ic}
                   type="button"
-                  onClick={() => setIconName(ic)}
+                  onClick={() => handleSelectPresetIcon(ic)}
                   className={`group-icon-btn ${isSelected ? 'is-selected' : ''}`}
                   title={ic}
                   style={{
@@ -675,6 +885,16 @@ export const EditGroupModal: React.FC<EditGroupModalProps> = ({
           </button>
         </div>
       </form>
+
+      {/* Discord-style Crop Modal for Custom Picture Group Icon */}
+      <ImageCropModal
+        isOpen={isCropModalOpen}
+        imageSrc={rawImageForCrop || ''}
+        onClose={() => setIsCropModalOpen(false)}
+        onCropComplete={handleCropComplete}
+        onChooseAnother={handleSelectCustomPicture}
+        theme={currentTheme}
+      />
     </div>
   );
 };

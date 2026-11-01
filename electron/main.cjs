@@ -509,6 +509,41 @@ ipcMain.handle('app:browse-file', async () => {
   return { path: filePath, name };
 });
 
+ipcMain.handle('app:browse-image', async () => {
+  if (!mainWindow) return null;
+  const result = await dialog.showOpenDialog(mainWindow, {
+    title: 'Select Picture / Icon Image',
+    properties: ['openFile'],
+    filters: [
+      { name: 'Images (JPG, PNG, WebP, ICO, SVG)', extensions: ['jpg', 'jpeg', 'png', 'webp', 'ico', 'svg', 'gif'] },
+      { name: 'All Files', extensions: ['*'] }
+    ]
+  });
+  if (result.canceled || result.filePaths.length === 0) {
+    return null;
+  }
+  const filePath = result.filePaths[0];
+  try {
+    const ext = path.extname(filePath).slice(1).toLowerCase();
+    const mimeMap = {
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+      png: 'image/png',
+      webp: 'image/webp',
+      ico: 'image/x-icon',
+      svg: 'image/svg+xml',
+      gif: 'image/gif'
+    };
+    const mime = mimeMap[ext] || 'image/png';
+    const buffer = fs.readFileSync(filePath);
+    const dataUrl = `data:${mime};base64,${buffer.toString('base64')}`;
+    return { path: filePath, dataUrl };
+  } catch (err) {
+    console.error('[browse-image] Failed to read image file:', err);
+    return null;
+  }
+});
+
 ipcMain.handle('app:show-item-in-folder', async (event, targetPath) => {
   try {
     if (!targetPath || typeof targetPath !== 'string') return false;

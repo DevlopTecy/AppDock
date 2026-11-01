@@ -19,8 +19,26 @@ import {
   ArrowUp,
   ArrowDown
 } from 'lucide-react';
+import { GroupGridIcon } from './GroupGridIcon';
 
-export const getGroupIcon = (iconName: string, size = 15) => {
+export const getGroupIcon = (iconName: string, size = 15, group?: AppGroup) => {
+  if (group?.customIcon) {
+    return (
+      <img
+        src={group.customIcon}
+        alt=""
+        style={{
+          width: `${size}px`,
+          height: `${size}px`,
+          objectFit: 'cover',
+          borderRadius: '4px'
+        }}
+      />
+    );
+  }
+  if ((iconName?.toLowerCase() === 'grid' || group?.iconName === 'grid') && group) {
+    return <GroupGridIcon items={group.items} size={size} accentColor={group.accentColor} gridItemIds={group.gridItemIds} />;
+  }
   switch (iconName?.toLowerCase()) {
     case 'gamepad2':
     case 'games':
@@ -214,7 +232,26 @@ export const GroupSidebar: React.FC<GroupSidebarProps> = ({
                     transition: 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
                   }}
                 >
-                  {isEldenRing && (group.iconName?.toLowerCase().includes('game') || group.name.toLowerCase().includes('game')) ? (
+                  {group.customIcon ? (
+                    <img
+                      src={group.customIcon}
+                      alt={group.name}
+                      style={{
+                        width: isEldenRing ? '26px' : '22px',
+                        height: isEldenRing ? '26px' : '22px',
+                        objectFit: 'cover',
+                        borderRadius: '5px',
+                        boxShadow: '0 2px 6px rgba(0, 0, 0, 0.4)'
+                      }}
+                    />
+                  ) : group.iconName === 'grid' ? (
+                    <GroupGridIcon
+                      items={group.items}
+                      size={isEldenRing ? 26 : 22}
+                      accentColor={group.accentColor}
+                      gridItemIds={group.gridItemIds}
+                    />
+                  ) : isEldenRing && (group.iconName?.toLowerCase().includes('game') || group.name.toLowerCase().includes('game')) ? (
                     <img
                       src={getAssetUrl('/eldenring/icons/gamepad.png')}
                       alt="Games"

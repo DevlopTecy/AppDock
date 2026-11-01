@@ -18,10 +18,12 @@ export type CompanionModuleType = 'music' | 'weather' | 'calendar' | null;
 export interface AppGroup {
   id: string;
   name: string;
-  iconName: string;       // Lucide icon identifier (e.g. 'Gamepad2', 'Briefcase', 'Globe', etc.)
+  iconName: string;       // Lucide icon identifier (e.g. 'Gamepad2', 'Briefcase', 'Globe', etc.) OR 'custom' OR 'grid'
   accentColor: string;    // e.g. '#8b5cf6', '#3b82f6', '#10b981'
   items: AppItem[];
   density?: GroupDensity; // Configurable density or auto-scaling based on app count
+  customIcon?: string;    // Base64 data URL or custom picture image URL
+  gridItemIds?: string[]; // Specific item IDs to show in the 2-4 icon grid (defaults to first 4)
 }
 
 export type DockTheme =

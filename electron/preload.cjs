@@ -21,6 +21,7 @@ contextBridge.exposeInMainWorld('appDock', {
   extractIcon: (filePath) => ipcRenderer.invoke('app:extract-icon', filePath),
   scanSystemShortcuts: () => ipcRenderer.invoke('app:scan-system'),
   browseFile: () => ipcRenderer.invoke('app:browse-file'),
+  browseImage: () => ipcRenderer.invoke('app:browse-image'),
   showItemInFolder: (filePath) => ipcRenderer.invoke('app:show-item-in-folder', filePath),
   saveStorage: (payload) => ipcRenderer.invoke('storage:save', payload),
   loadStorage: () => ipcRenderer.invoke('storage:load'),
