@@ -1,5 +1,6 @@
 import React from 'react';
 import { getAssetUrl } from '../utils/assets';
+import { playSound } from '../utils/soundEngine';
 import { DockPosition, CompanionModuleType, DockTheme } from '../types/dock';
 import { EdgeToggle } from './EdgeToggle';
 import { ConnectorHub } from './connectors/ConnectorHub';
@@ -1116,7 +1117,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
             }}
           >
             <button
-              onClick={onOpenSearch}
+              onClick={(e) => { playSound('click', theme); onOpenSearch(); }}
               className="btn-dock"
               title="Search (Ctrl+F)"
               aria-label="Search"
@@ -1168,6 +1169,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
             {/* Maximize / Restore button */}
             <button
               onClick={() => {
+                playSound('click', theme);
                 if (onToggleMaximize) {
                   onToggleMaximize();
                 }
@@ -1217,7 +1219,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
             </button>
 
             <button
-              onClick={onToggle}
+              onClick={() => { playSound('collapse', theme); onToggle(); }}
               className="btn-dock"
               title="Collapse (Esc)"
               aria-label="Collapse"

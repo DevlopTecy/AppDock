@@ -26,6 +26,8 @@ interface AppGridProps {
   onAddNewGroup: () => void;
   onDropFiles?: (files: FileList) => void;
   onUpdateGroupDensity?: (groupId: string, density: GroupDensity) => void;
+  runningProcesses?: string[];
+  showRunningIndicators?: boolean;
 }
 
 export const AppGrid: React.FC<AppGridProps> = ({
@@ -44,8 +46,23 @@ export const AppGrid: React.FC<AppGridProps> = ({
   onOpenAddModal,
   onAddNewGroup,
   onDropFiles,
-  onUpdateGroupDensity
+  onUpdateGroupDensity,
+  runningProcesses = [],
+  showRunningIndicators = true
 }) => {
+  const isItemRunning = (item: AppItem): boolean => {
+    if (!runningProcesses || runningProcesses.length === 0) return false;
+    if (item.target) {
+      const cleanTarget = item.target.split(/[/\\]/).pop()?.replace(/\.(exe|lnk|url|appref-ms)$/i, '').toLowerCase();
+      if (cleanTarget && runningProcesses.includes(cleanTarget)) return true;
+    }
+    if (item.name) {
+      const cleanName = item.name.toLowerCase().trim();
+      if (runningProcesses.includes(cleanName)) return true;
+    }
+    return false;
+  };
+
   const [isDragOver, setIsDragOver] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ item: AppItem; x: number; y: number } | null>(null);
   const [editingItem, setEditingItem] = useState<AppItem | null>(null);
@@ -541,6 +558,8 @@ export const AppGrid: React.FC<AppGridProps> = ({
                 item={item}
                 onLaunch={onLaunchItem}
                 onDelete={onDeleteItem}
+                isRunning={isItemRunning(item)}
+                showRunningIndicator={showRunningIndicators}
                 onContextMenu={(it, e) => setContextMenu({ item: it, x: e.clientX, y: e.clientY })}
                 draggable={true}
                 onDragStart={(e) => handleCardDragStart(e, item.id)}
@@ -777,6 +796,74 @@ export const AppGrid: React.FC<AppGridProps> = ({
             >
               {contextMenu.item.name}
             </div>
+
+            {/* Process Intelligence Controls */}
+            {isItemRunning(contextMenu.item) && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof window !== 'undefined' && (window as any).appDock?.bringAppToFront) {
+                      (window as any).appDock.bringAppToFront(contextMenu.item.target || contextMenu.item.name);
+                    }
+                    setContextMenu(null);
+                  }}
+                  className="context-menu-item"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '6px 8px',
+                    borderRadius: '5px',
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#10b981',
+                    fontSize: '11.5px',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    width: '100%',
+                    transition: 'all 0.12s ease'
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-surface-hover)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                >
+                  <ExternalLink size={12} color="#10b981" />
+                  <span>Bring to Front</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof window !== 'undefined' && (window as any).appDock?.closeAppProcess) {
+                      (window as any).appDock.closeAppProcess(contextMenu.item.target || contextMenu.item.name);
+                    }
+                    setContextMenu(null);
+                  }}
+                  className="context-menu-item"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '6px 8px',
+                    borderRadius: '5px',
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#ef4444',
+                    fontSize: '11.5px',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    width: '100%',
+                    transition: 'all 0.12s ease'
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-surface-hover)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                >
+                  <Trash2 size={12} color="#ef4444" />
+                  <span>Close Process</span>
+                </button>
+                <div style={{ height: '1px', background: 'var(--border-subtle)', margin: '4px 0' }} />
+              </>
+            )}
 
             {/* Web item specific options: Edit URL & Name, Open in Browser */}
             {contextMenu.item.type === 'url' ? (

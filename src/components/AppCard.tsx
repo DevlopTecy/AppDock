@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AppItem } from '../types/dock';
 import { AppWindow, Globe, Trash2, ArrowUpRight } from 'lucide-react';
 import { isGenericOrBrokenIcon } from '../utils/assets';
+import { playSound } from '../utils/soundEngine';
 
 interface AppCardProps {
   item: AppItem;
@@ -22,6 +23,8 @@ interface AppCardProps {
   onDragEnd?: (e: React.DragEvent) => void;
   isDragging?: boolean;
   isDragOver?: boolean;
+  isRunning?: boolean;
+  showRunningIndicator?: boolean;
 }
 
 export const AppCard: React.FC<AppCardProps> = ({
@@ -41,7 +44,9 @@ export const AppCard: React.FC<AppCardProps> = ({
   onDrop,
   onDragEnd,
   isDragging = false,
-  isDragOver = false
+  isDragOver = false,
+  isRunning = false,
+  showRunningIndicator = true
 }) => {
   const [isLaunching, setIsLaunching] = useState(false);
   const [imgError, setImgError] = useState(false);
@@ -166,6 +171,7 @@ export const AppCard: React.FC<AppCardProps> = ({
 
   return (
     <div
+      onMouseEnter={() => playSound('hover')}
       onClick={handleLaunchClick}
       onContextMenu={(e) => {
         if (onContextMenu) {
@@ -212,6 +218,23 @@ export const AppCard: React.FC<AppCardProps> = ({
         transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
       }}
     >
+      {/* Running App Status Dot Indicator */}
+      {showRunningIndicator && isRunning && (
+        <div
+          title="App is currently running"
+          style={{
+            position: 'absolute',
+            bottom: isLarge ? '5px' : '3px',
+            width: '4.5px',
+            height: '4.5px',
+            borderRadius: '50%',
+            background: '#10b981',
+            boxShadow: '0 0 6px #10b981, 0 0 10px rgba(16, 185, 129, 0.8)',
+            zIndex: 3,
+            pointerEvents: 'none'
+          }}
+        />
+      )}
       {/* Subtle Trash on Hover */}
       <button
         onClick={handleDeleteClick}

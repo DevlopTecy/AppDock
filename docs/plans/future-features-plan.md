@@ -153,28 +153,28 @@ flowchart TD
 ## 4. Step-by-Step Execution Plan
 
 ### Phase 1: Thematic Sound FX Engine
-- [ ] **Step 1.1**: Create `src/utils/soundEngine.ts` with Web Audio API synthesizer chimes and sound asset loaders.
-- [ ] **Step 1.2**: Wire sound triggers into `DockFrame` (expand/collapse), `AppGrid` (item click), and `QuickIconsBar`.
-- [ ] **Step 1.3**: Add Sound FX toggles and volume slider to `SettingsView.tsx`.
-- [ ] **Step 1.4**: Write unit tests in `tests/sound-engine.test.cjs`.
+- [x] **Step 1.1**: Create `src/utils/soundEngine.ts` with Web Audio API synthesizer chimes and sound asset loaders.
+- [x] **Step 1.2**: Wire sound triggers into `DockFrame` (expand/collapse), `AppGrid` (item click), and `QuickIconsBar`.
+- [x] **Step 1.3**: Add Sound FX toggles and volume slider to `SettingsView.tsx`.
+- [x] **Step 1.4**: Write unit tests in `tests/sound-engine.test.cjs`.
 
 ### Phase 2: Running App Indicators
-- [ ] **Step 2.1**: Implement `dock:get-running-processes` IPC in `electron/main.cjs` and expose via `electron/preload.cjs`.
-- [ ] **Step 2.2**: Connect process subscription in `App.tsx` and pass `runningProcesses` down to `AppGrid` and `QuickIconsBar`.
-- [ ] **Step 2.3**: Style luminous status dots with theme-aware accents.
-- [ ] **Step 2.4**: Add unit tests in `tests/running-indicators.test.cjs`.
+- [x] **Step 2.1**: Implement `dock:get-running-processes` IPC in `electron/main.cjs` and expose via `electron/preload.cjs`.
+- [x] **Step 2.2**: Connect process subscription in `App.tsx` and pass `runningProcesses` down to `AppGrid` and `QuickIconsBar`.
+- [x] **Step 2.3**: Style luminous status dots with theme-aware accents.
+- [x] **Step 2.4**: Add unit tests in `tests/running-indicators.test.cjs`.
 
 ### Phase 3: Active Window Dodge
-- [ ] **Step 3.1**: Implement window state detector in `electron/main.cjs` to detect maximized foreground windows.
-- [ ] **Step 3.2**: Add `smartWindowDodge` setting toggle in `SettingsView.tsx`.
-- [ ] **Step 3.3**: Verify graceful collapse and edge tab suppression when full-screen apps are active.
-- [ ] **Step 3.4**: Write test coverage in `tests/window-dodge.test.cjs`.
+- [x] **Step 3.1**: Implement window state detector in `electron/main.cjs` to detect maximized foreground windows.
+- [x] **Step 3.2**: Add `smartWindowDodge` setting toggle in `SettingsView.tsx`.
+- [x] **Step 3.3**: Verify graceful collapse and edge tab suppression when full-screen apps are active.
+- [x] **Step 3.4**: Write test coverage in `tests/window-dodge.test.cjs`.
 
 ### Phase 4: Audio Device & Volume Quick-Switcher
-- [ ] **Step 4.1**: Create `electron/audio-helper.ps1` for querying and setting default playback devices.
-- [ ] **Step 4.2**: Register IPC handlers `dock:get-audio-devices` and `dock:set-audio-device`.
-- [ ] **Step 4.3**: Build `src/components/modules/AudioModule.tsx` with device switching and volume control.
-- [ ] **Step 4.4**: Mount Audio module in `ConnectorHub.tsx` and test end-to-end.
+- [x] **Step 4.1**: Create `electron/audio-helper.ps1` for querying and setting default playback devices.
+- [x] **Step 4.2**: Register IPC handlers `dock:get-audio-devices` and `dock:set-audio-device`.
+- [x] **Step 4.3**: Build `src/components/modules/AudioModule.tsx` with device switching and volume control.
+- [x] **Step 4.4**: Mount Audio module in `ConnectorHub.tsx` and test end-to-end.
 
 ---
 

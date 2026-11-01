@@ -13,7 +13,7 @@ export interface AppItem {
 
 export type GroupDensity = 'auto' | 'large' | 'medium' | 'compact';
 
-export type CompanionModuleType = 'music' | 'weather' | 'calendar' | null;
+export type CompanionModuleType = 'music' | 'weather' | 'calendar' | 'audio' | null;
 
 export interface AppGroup {
   id: string;
@@ -42,6 +42,8 @@ export type DockTheme =
   | 'onepiece'
   | 'candy'
   | 'custom';
+
+export type SoundPackType = 'theme' | 'clean' | 'mechanical' | 'kawaii' | 'eldenring' | 'deathnote' | 'aether';
 
 export interface DockSettings {
   dockPosition: DockPosition;
@@ -86,6 +88,13 @@ export interface DockSettings {
   customThemeHideQuickIcons?: boolean;         // Hides Quick Icons bar in companion sidebar
   hideQuickIcons?: boolean;                    // Hides Quick Icons bar in companion sidebar
   quickIcons?: AppItem[];                      // Pinned quick-launch icons displayed in footer beside Settings
+  // Sound FX Engine settings
+  soundEnabled?: boolean;                      // Acoustic feedback enabled (Default: true)
+  soundVolume?: number;                        // Master sound volume 0-100 (Default: 50)
+  soundPack?: SoundPackType;                   // Sound profile pack (Default: 'theme')
+  // Process & Window Intelligence settings
+  showRunningIndicators?: boolean;            // Live illuminated status dot on running apps (Default: true)
+  smartWindowDodge?: boolean;                 // Auto-hide when foreground app is maximized/fullscreen (Default: false)
 }
 
 export interface SystemApp {

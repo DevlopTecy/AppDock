@@ -54,6 +54,22 @@ contextBridge.exposeInMainWorld('appDock', {
     ipcRenderer.on('dock:resized', handler);
     return () => ipcRenderer.removeListener('dock:resized', handler);
   },
+  // Process Intelligence & Indicators (Phase 2)
+  getRunningProcesses: () => ipcRenderer.invoke('dock:get-running-processes'),
+  bringAppToFront: (targetOrName) => ipcRenderer.invoke('dock:bring-app-to-front', targetOrName),
+  closeAppProcess: (targetOrName) => ipcRenderer.invoke('dock:close-app-process', targetOrName),
+  onRunningAppsChanged: (callback) => {
+    const handler = (event, data) => callback(data);
+    ipcRenderer.on('dock:running-apps-updated', handler);
+    return () => ipcRenderer.removeListener('dock:running-apps-updated', handler);
+  },
+  // Active Window Dodge (Phase 3)
+  setSmartDodge: (enabled) => ipcRenderer.invoke('dock:set-smart-dodge', enabled),
+  // Audio Switcher & Volume (Phase 4)
+  getAudioDevices: () => ipcRenderer.invoke('dock:get-audio-devices'),
+  setAudioDevice: (deviceId) => ipcRenderer.invoke('dock:set-audio-device', deviceId),
+  setMasterVolume: (volume) => ipcRenderer.invoke('dock:set-master-volume', volume),
+  toggleAudioMute: () => ipcRenderer.invoke('dock:toggle-audio-mute'),
   // Auto-Update APIs
   getAppVersion: () => ipcRenderer.invoke('dock:get-app-version'),
   checkForUpdates: (repo) => ipcRenderer.invoke('dock:check-for-updates', repo),

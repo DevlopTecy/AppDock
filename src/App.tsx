@@ -12,11 +12,13 @@ import { SearchBar } from './components/SearchBar';
 import { MusicModule } from './components/modules/MusicModule';
 import { WeatherModule } from './components/modules/WeatherModule';
 import { CalendarModule } from './components/modules/CalendarModule';
+import { AudioModule } from './components/modules/AudioModule';
 import { UpdateNotification } from './components/UpdateNotification';
 import { QuickIconsBar } from './components/QuickIconsBar';
 import { AddToQuickIconsModal } from './components/AddToQuickIconsModal';
 import { isGenericOrBrokenIcon } from './utils/assets';
 import { useCustomThemeVars } from './hooks/useCustomThemeVars';
+import { soundEngine, playSound } from './utils/soundEngine';
 
 const initialDockData = (() => {
   const init = loadDockData();
@@ -62,6 +64,7 @@ export const App: React.FC = () => {
 
   // Maximize dock state (460px width x full screen height)
   const [isMaximized, setIsMaximized] = useState(false);
+  const [runningProcesses, setRunningProcesses] = useState<string[]>([]);
 
   // Clean Dock computed state
   const isCleanDock = !isMaximized && !!data.settings.cleanDockEnabled;
@@ -373,6 +376,29 @@ export const App: React.FC = () => {
     }
   }, []);
 
+  // Subscribe to running Windows processes and sync Smart Window Dodge
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (window as any).appDock) {
+      if ((window as any).appDock.getRunningProcesses) {
+        (window as any).appDock.getRunningProcesses().then((procs: string[]) => {
+          if (Array.isArray(procs)) setRunningProcesses(procs);
+        });
+      }
+      if ((window as any).appDock.onRunningAppsChanged) {
+        const unsub = (window as any).appDock.onRunningAppsChanged((procs: string[]) => {
+          if (Array.isArray(procs)) setRunningProcesses(procs);
+        });
+        return unsub;
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (window as any).appDock?.setSmartDodge) {
+      (window as any).appDock.setSmartDodge(Boolean(data.settings.smartWindowDodge));
+    }
+  }, [data.settings.smartWindowDodge]);
+
   // Sync initial dimensions, vertical position, and taskbar visibility with Electron
   useEffect(() => {
     if (typeof window !== 'undefined' && (window as any).appDock) {
@@ -418,6 +444,7 @@ export const App: React.FC = () => {
       const nextState = typeof forceState === 'boolean' ? forceState : !isExpanded;
 
       if (!nextState) {
+        playSound('collapse', data.settings.theme);
         // Collapsing: update React state immediately so UI transitions synchronously
         setIsExpanded(false);
         setActiveModule(null);
@@ -432,6 +459,7 @@ export const App: React.FC = () => {
           }
         }
       } else {
+        playSound('expand', data.settings.theme);
         // Expanding: prepare window dimensions first so handle is positioned stably
         if (typeof window !== 'undefined' && (window as any).appDock?.setModuleWidth) {
           const isQuickIconsActive = !isCleanDock && !data.settings.customThemeHideQuickIcons && !data.settings.hideQuickIcons;
@@ -553,6 +581,7 @@ export const App: React.FC = () => {
 
   // Launch Item handler
   const handleLaunchItem = async (item: AppItem) => {
+    playSound('launch', data.settings.theme);
     try {
       if (typeof window !== 'undefined' && (window as any).appDock) {
         if (item.type === 'url') {
@@ -819,6 +848,9 @@ export const App: React.FC = () => {
                 onSelectCity={(city) => updateSettings({ activeWeatherCity: city })}
               />
             )}
+            {(activeModule || cachedModule) === 'audio' && (
+              <AudioModule />
+            )}
             {(activeModule || cachedModule) === 'calendar' && (
               <CalendarModule countryCode={data.settings.calendarCountry || 'US'} />
             )}
@@ -844,6 +876,8 @@ export const App: React.FC = () => {
             onOpenAddModal={() => setIsQuickIconsModalOpen(true)}
             theme={data.settings.theme}
             isRightDock={data.settings.dockPosition === 'right'}
+            runningProcesses={runningProcesses}
+            showRunningIndicators={data.settings.showRunningIndicators ?? true}
           />
         ) : undefined
       }
@@ -915,6 +949,8 @@ export const App: React.FC = () => {
             onAddNewGroup={() => setIsNewGroupModalOpen(true)}
             onDropFiles={handleDropFiles}
             onUpdateGroupDensity={handleUpdateGroupDensity}
+            runningProcesses={runningProcesses}
+            showRunningIndicators={data.settings.showRunningIndicators ?? true}
           />
         </div>
       </div>

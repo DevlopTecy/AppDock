@@ -1485,12 +1485,151 @@ ipcMain.handle('dock:open-external-url', (event, url) => {
   }
 });
 
+// ----------------- PROCESS INTELLIGENCE & INDICATORS (Phase 2) -----------------
+function queryRunningProcesses() {
+  return new Promise((resolve) => {
+    if (process.platform !== 'win32') return resolve([]);
+    exec('tasklist /FO CSV /NH', { windowsHide: true, timeout: 3500 }, (err, stdout) => {
+      if (err || !stdout) return resolve([]);
+      const lines = stdout.split(/\r?\n/);
+      const set = new Set();
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        const match = line.match(/^"([^"]+)"/);
+        if (match && match[1]) {
+          const name = match[1].toLowerCase().replace(/\.exe$/i, '');
+          set.add(name);
+        }
+      }
+      resolve(Array.from(set));
+    });
+  });
+}
+
+ipcMain.handle('dock:get-running-processes', async () => {
+  return await queryRunningProcesses();
+});
+
+ipcMain.handle('dock:bring-app-to-front', async (event, targetOrName) => {
+  if (!targetOrName || process.platform !== 'win32') return false;
+  const base = path.basename(targetOrName).replace(/\.(exe|lnk|url|appref-ms)$/i, '');
+  return new Promise((resolve) => {
+    const escaped = base.replace(/"/g, '`"');
+    exec(`powershell -NoProfile -NonInteractive -Command "$ws = New-Object -ComObject WScript.Shell; $ws.AppActivate('${escaped}')"`, (err) => {
+      resolve(!err);
+    });
+  });
+});
+
+ipcMain.handle('dock:close-app-process', async (event, targetOrName) => {
+  if (!targetOrName || process.platform !== 'win32') return false;
+  let base = path.basename(targetOrName).replace(/\.(lnk|url|appref-ms)$/i, '');
+  if (!base.toLowerCase().endsWith('.exe')) {
+    base = `${base}.exe`;
+  }
+  return new Promise((resolve) => {
+    exec(`taskkill /IM "${base}" /T /F`, (err) => {
+      resolve(!err);
+    });
+  });
+});
+
+// ----------------- ACTIVE WINDOW DODGE (Phase 3) -----------------
+let smartDodgeEnabled = false;
+let smartDodgeTimer = null;
+
+function checkSmartWindowDodge() {
+  if (!smartDodgeEnabled || !mainWindow || mainWindow.isDestroyed() || !isExpanded) return;
+  const scriptPath = path.join(__dirname, 'window-dodge-helper.ps1');
+  if (!fs.existsSync(scriptPath)) return;
+
+  exec(`powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "${scriptPath}"`, { timeout: 2000 }, (err, stdout) => {
+    if (err || !stdout) return;
+    const isMaximized = stdout.trim().toLowerCase() === 'true';
+    if (isMaximized && isExpanded && mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('dock:collapse');
+    }
+  });
+}
+
+ipcMain.handle('dock:set-smart-dodge', (event, enabled) => {
+  smartDodgeEnabled = Boolean(enabled);
+  if (smartDodgeEnabled && !smartDodgeTimer) {
+    smartDodgeTimer = setInterval(checkSmartWindowDodge, 3500);
+  } else if (!smartDodgeEnabled && smartDodgeTimer) {
+    clearInterval(smartDodgeTimer);
+    smartDodgeTimer = null;
+  }
+  return smartDodgeEnabled;
+});
+
+// ----------------- AUDIO SWITCHER & VOLUME (Phase 4) -----------------
+const audioHelperScript = path.join(__dirname, 'audio-helper.ps1');
+
+ipcMain.handle('dock:get-audio-devices', async () => {
+  return new Promise((resolve) => {
+    if (process.platform !== 'win32' || !fs.existsSync(audioHelperScript)) {
+      return resolve([]);
+    }
+    exec(`powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "${audioHelperScript}" -Action GetDevices`, { timeout: 3000 }, (err, stdout) => {
+      if (err || !stdout || !stdout.trim()) return resolve([]);
+      try {
+        const json = JSON.parse(stdout.trim());
+        resolve(Array.isArray(json) ? json : [json]);
+      } catch {
+        resolve([]);
+      }
+    });
+  });
+});
+
+ipcMain.handle('dock:set-audio-device', async (event, deviceId) => {
+  return new Promise((resolve) => {
+    if (process.platform !== 'win32' || !fs.existsSync(audioHelperScript)) return resolve(false);
+    exec(`powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "${audioHelperScript}" -Action SetDevice -DeviceId "${deviceId}"`, { timeout: 2000 }, (err) => {
+      resolve(!err);
+    });
+  });
+});
+
+ipcMain.handle('dock:set-master-volume', async (event, volume) => {
+  return new Promise((resolve) => {
+    if (process.platform !== 'win32' || !fs.existsSync(audioHelperScript)) return resolve(false);
+    exec(`powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "${audioHelperScript}" -Action SetVolume -Volume ${volume}`, { timeout: 2000 }, (err) => {
+      resolve(!err);
+    });
+  });
+});
+
+ipcMain.handle('dock:toggle-audio-mute', async () => {
+  return new Promise((resolve) => {
+    if (process.platform !== 'win32' || !fs.existsSync(audioHelperScript)) return resolve(false);
+    exec(`powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "${audioHelperScript}" -Action ToggleMute`, { timeout: 2000 }, (err) => {
+      resolve(!err);
+    });
+  });
+});
+
+// Start background process watcher after window is ready
+let runningProcessInterval = null;
+function startProcessWatcher() {
+  if (runningProcessInterval) clearInterval(runningProcessInterval);
+  runningProcessInterval = setInterval(async () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      const list = await queryRunningProcesses();
+      mainWindow.webContents.send('dock:running-apps-updated', list);
+    }
+  }, 4500);
+}
+
+
 // ----------------- APP LIFECYCLE -----------------
 
 app.whenReady().then(() => {
   createTray();
   createWindow();
   setupAutoUpdater();
+  startProcessWatcher();
 
   // Windows startup: Auto-start packaged AppDock on Windows boot, but strictly prevent dev Electron from registering
   if (process.platform === 'win32') {

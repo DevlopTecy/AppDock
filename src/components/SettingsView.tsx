@@ -4,6 +4,7 @@ import { DockSettings, DockPosition, DockTheme, AppGroup } from '../types/dock';
 import { COUNTRIES } from '../utils/holidays';
 import { getGroupIcon } from './GroupSidebar';
 import { CustomThemePanel } from './CustomThemePanel';
+import { soundEngine, playSound } from '../utils/soundEngine';
 import {
   X,
   AlignLeft,
@@ -19,6 +20,9 @@ import {
   Layout,
   Palette,
   Sliders,
+  Volume2,
+  VolumeX,
+  Activity,
   Sparkles,
   Layers,
   Droplets,
@@ -1768,6 +1772,135 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 />
               </button>
             </div>
+
+            {/* 5. Running App Indicators */}
+            <div
+              onClick={() => onUpdateSettings({ showRunningIndicators: !(settings.showRunningIndicators ?? true) })}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '9px 12px',
+                cursor: 'pointer',
+                borderBottom: '1px solid var(--border-subtle)',
+                transition: 'background 0.15s ease'
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-surface-hover)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', paddingRight: '12px' }}>
+                <span style={{ fontSize: '11.5px', color: isAether ? '#fff9e6' : 'var(--text-primary)', fontWeight: 500 }}>
+                  Running App Indicators
+                </span>
+                <span style={{ fontSize: '10px', color: 'var(--text-muted)', lineHeight: '1.3' }}>
+                  Display glowing illuminated status dots beneath active Windows processes.
+                </span>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={settings.showRunningIndicators ?? true}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onUpdateSettings({ showRunningIndicators: !(settings.showRunningIndicators ?? true) });
+                }}
+                className={`toggle-switch ${(settings.showRunningIndicators ?? true) ? 'active' : ''}`}
+                style={{
+                  width: '36px',
+                  height: '20px',
+                  borderRadius: '10px',
+                  background: (settings.showRunningIndicators ?? true)
+                    ? (currentTheme === 'deathnote' ? '#c41e24' : isAether ? '#59bcf4' : 'var(--accent-color, #3b82f6)')
+                    : 'var(--btn-border)',
+                  position: 'relative',
+                  cursor: 'pointer',
+                  border: '1px solid ' + ((settings.showRunningIndicators ?? true) ? 'rgba(255,255,255,0.18)' : 'var(--border-subtle)'),
+                  padding: 0,
+                  transition: 'background 0.18s ease, border-color 0.18s ease',
+                  flexShrink: 0
+                }}
+                aria-label="Toggle Running App Indicators"
+                title="Toggle Running App Indicators"
+              >
+                <div
+                  style={{
+                    width: '14px',
+                    height: '14px',
+                    borderRadius: '50%',
+                    background: '#ffffff',
+                    position: 'absolute',
+                    top: '2px',
+                    left: (settings.showRunningIndicators ?? true) ? '18px' : '2px',
+                    transition: 'left 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.35)'
+                  }}
+                />
+              </button>
+            </div>
+
+            {/* 6. Smart Window Dodge */}
+            <div
+              onClick={() => onUpdateSettings({ smartWindowDodge: !(settings.smartWindowDodge ?? false) })}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '9px 12px',
+                cursor: 'pointer',
+                transition: 'background 0.15s ease'
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-surface-hover)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', paddingRight: '12px' }}>
+                <span style={{ fontSize: '11.5px', color: isAether ? '#fff9e6' : 'var(--text-primary)', fontWeight: 500 }}>
+                  Smart Window Dodge
+                </span>
+                <span style={{ fontSize: '10px', color: 'var(--text-muted)', lineHeight: '1.3' }}>
+                  Auto-hide dock when a foreground window is maximized or running fullscreen.
+                </span>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={settings.smartWindowDodge ?? false}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onUpdateSettings({ smartWindowDodge: !(settings.smartWindowDodge ?? false) });
+                }}
+                className={`toggle-switch ${(settings.smartWindowDodge ?? false) ? 'active' : ''}`}
+                style={{
+                  width: '36px',
+                  height: '20px',
+                  borderRadius: '10px',
+                  background: (settings.smartWindowDodge ?? false)
+                    ? (currentTheme === 'deathnote' ? '#c41e24' : isAether ? '#59bcf4' : 'var(--accent-color, #3b82f6)')
+                    : 'var(--btn-border)',
+                  position: 'relative',
+                  cursor: 'pointer',
+                  border: '1px solid ' + ((settings.smartWindowDodge ?? false) ? 'rgba(255,255,255,0.18)' : 'var(--border-subtle)'),
+                  padding: 0,
+                  transition: 'background 0.18s ease, border-color 0.18s ease',
+                  flexShrink: 0
+                }}
+                aria-label="Toggle Smart Window Dodge"
+                title="Toggle Smart Window Dodge"
+              >
+                <div
+                  style={{
+                    width: '14px',
+                    height: '14px',
+                    borderRadius: '50%',
+                    background: '#ffffff',
+                    position: 'absolute',
+                    top: '2px',
+                    left: (settings.smartWindowDodge ?? false) ? '18px' : '2px',
+                    transition: 'left 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.35)'
+                  }}
+                />
+              </button>
+            </div>
           </div>
 
           {/* Handle Opacity */}
@@ -1808,6 +1941,202 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               formatValue={(val) => `${Math.round(val * 100)}%`}
               onChange={(val) => onUpdateSettings({ toggleOpacity: val })}
             />
+          </div>
+        </div>
+
+        {/* Priority 7: Sound FX & Haptic Audio */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Volume2 className="settings-section-icon" size={13} color={isAether ? '#ffdf59' : 'var(--text-muted)'} />
+              <span
+                className="settings-section-title"
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  color: isAether ? '#a3dbfe' : 'var(--text-secondary)',
+                  textShadow: isAether ? '0 1px 2px rgba(0, 0, 0, 0.7)' : undefined,
+                  letterSpacing: '0.2px'
+                }}
+              >
+                Sound FX & Haptics
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                playSound('launch', settings.theme);
+              }}
+              style={{
+                background: 'transparent',
+                border: '1px solid var(--btn-border)',
+                borderRadius: '5px',
+                padding: '2px 8px',
+                fontSize: '10px',
+                color: 'var(--text-primary)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+              title="Preview audio sound chime"
+            >
+              <Volume2 size={10} />
+              <span>Preview</span>
+            </button>
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--btn-border)',
+              borderRadius: '8px',
+              overflow: 'hidden'
+            }}
+          >
+            {/* Enable Sound FX Toggle */}
+            <div
+              onClick={() => {
+                const newVal = !(settings.soundEnabled ?? true);
+                onUpdateSettings({ soundEnabled: newVal });
+                soundEngine.setSoundEnabled(newVal);
+                if (newVal) playSound('click', settings.theme);
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '9px 12px',
+                cursor: 'pointer',
+                borderBottom: '1px solid var(--border-subtle)',
+                transition: 'background 0.15s ease'
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-surface-hover)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', paddingRight: '12px' }}>
+                <span style={{ fontSize: '11.5px', color: isAether ? '#fff9e6' : 'var(--text-primary)', fontWeight: 500 }}>
+                  Acoustic Feedback
+                </span>
+                <span style={{ fontSize: '10px', color: 'var(--text-muted)', lineHeight: '1.3' }}>
+                  Play sensory audio feedback on expansion, collapse, card click, and hover.
+                </span>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={settings.soundEnabled ?? true}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const newVal = !(settings.soundEnabled ?? true);
+                  onUpdateSettings({ soundEnabled: newVal });
+                  soundEngine.setSoundEnabled(newVal);
+                  if (newVal) playSound('click', settings.theme);
+                }}
+                className={`toggle-switch ${(settings.soundEnabled ?? true) ? 'active' : ''}`}
+                style={{
+                  width: '36px',
+                  height: '20px',
+                  borderRadius: '10px',
+                  background: (settings.soundEnabled ?? true)
+                    ? (currentTheme === 'deathnote' ? '#c41e24' : isAether ? '#59bcf4' : 'var(--accent-color, #3b82f6)')
+                    : 'var(--btn-border)',
+                  position: 'relative',
+                  cursor: 'pointer',
+                  border: '1px solid ' + ((settings.soundEnabled ?? true) ? 'rgba(255,255,255,0.18)' : 'var(--border-subtle)'),
+                  padding: 0,
+                  transition: 'background 0.18s ease, border-color 0.18s ease',
+                  flexShrink: 0
+                }}
+                aria-label="Toggle Acoustic Feedback"
+                title="Toggle Acoustic Feedback"
+              >
+                <div
+                  style={{
+                    width: '14px',
+                    height: '14px',
+                    borderRadius: '50%',
+                    background: '#ffffff',
+                    position: 'absolute',
+                    top: '2px',
+                    left: (settings.soundEnabled ?? true) ? '18px' : '2px',
+                    transition: 'left 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.35)'
+                  }}
+                />
+              </button>
+            </div>
+
+            {/* Sound Pack Selector */}
+            <div style={{ padding: '9px 12px', display: 'flex', flexDirection: 'column', gap: '6px', borderBottom: '1px solid var(--border-subtle)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 500 }}>Sound Profile Pack</span>
+                <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+                  {settings.soundPack === 'theme' || !settings.soundPack ? 'Theme Dynamic' : settings.soundPack}
+                </span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '4px' }}>
+                {[
+                  { id: 'theme', label: 'Dynamic' },
+                  { id: 'clean', label: 'Clean' },
+                  { id: 'mechanical', label: 'Switch' },
+                  { id: 'eldenring', label: 'Elden' },
+                  { id: 'deathnote', label: 'Gothic' },
+                  { id: 'kawaii', label: 'Kawaii' },
+                  { id: 'aether', label: 'Crystal' }
+                ].map((p) => {
+                  const isSel = (settings.soundPack || 'theme') === p.id;
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => {
+                        onUpdateSettings({ soundPack: p.id as any });
+                        soundEngine.setSoundPack(p.id as any);
+                        playSound('click', settings.theme);
+                      }}
+                      style={{
+                        padding: '4px 6px',
+                        fontSize: '9.5px',
+                        borderRadius: '4px',
+                        border: isSel ? '1px solid var(--accent)' : '1px solid var(--btn-border)',
+                        background: isSel ? 'var(--accent)' : 'transparent',
+                        color: isSel ? '#ffffff' : 'var(--text-primary)',
+                        cursor: 'pointer',
+                        textAlign: 'center',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      {p.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Volume Slider */}
+            <div style={{ padding: '9px 12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 500 }}>Feedback Volume</span>
+                <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{settings.soundVolume ?? 50}%</span>
+              </div>
+              <CustomRangeBar
+                value={(settings.soundVolume ?? 50) / 100}
+                min={0.05}
+                max={1.0}
+                step={0.05}
+                unit="%"
+                formatValue={(val) => `${Math.round(val * 100)}%`}
+                onChange={(val) => {
+                  const v = Math.round(val * 100);
+                  onUpdateSettings({ soundVolume: v });
+                  soundEngine.setSoundVolume(v);
+                }}
+              />
+            </div>
           </div>
         </div>
 

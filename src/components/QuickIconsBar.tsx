@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { AppItem, AppGroup, DockTheme } from '../types/dock';
 import { getAssetUrl, isGenericOrBrokenIcon } from '../utils/assets';
+import { playSound } from '../utils/soundEngine';
 import {
   Plus,
   Globe,
@@ -28,6 +29,8 @@ export interface QuickIconsBarProps {
   onOpenAddModal: () => void;
   theme?: DockTheme;
   isRightDock?: boolean;
+  runningProcesses?: string[];
+  showRunningIndicators?: boolean;
 }
 
 export const QuickIconsBar: React.FC<QuickIconsBarProps> = ({
@@ -38,8 +41,23 @@ export const QuickIconsBar: React.FC<QuickIconsBarProps> = ({
   onAddQuickIcon,
   onOpenAddModal,
   theme,
-  isRightDock = true
+  isRightDock = true,
+  runningProcesses = [],
+  showRunningIndicators = true
 }) => {
+    const isQuickItemRunning = (item: AppItem): boolean => {
+    if (!runningProcesses || runningProcesses.length === 0) return false;
+    if (item.target) {
+      const cleanTarget = item.target.split(/[/\\]/).pop()?.replace(/\.(exe|lnk|url|appref-ms)$/i, '').toLowerCase();
+      if (cleanTarget && runningProcesses.includes(cleanTarget)) return true;
+    }
+    if (item.name) {
+      const cleanName = item.name.toLowerCase().trim();
+      if (runningProcesses.includes(cleanName)) return true;
+    }
+    return false;
+  };
+
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [isHoveredAdd, setIsHoveredAdd] = useState(false);
   const [isDragOverBar, setIsDragOverBar] = useState(false);
@@ -673,6 +691,26 @@ export const QuickIconsBar: React.FC<QuickIconsBarProps> = ({
                         Quick Launch
                       </span>
                     </div>
+                  )}
+
+                  {/* Running App Status Dot Indicator */}
+                  {showRunningIndicators && isQuickItemRunning(item) && (
+                    <div
+                      title="App is currently running"
+                      style={{
+                        position: 'absolute',
+                        bottom: '1px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        width: '4px',
+                        height: '4px',
+                        borderRadius: '50%',
+                        background: '#10b981',
+                        boxShadow: '0 0 6px #10b981, 0 0 8px rgba(16, 185, 129, 0.8)',
+                        zIndex: 3,
+                        pointerEvents: 'none'
+                      }}
+                    />
                   )}
 
                   {/* Hover Remove (X) Badge */}

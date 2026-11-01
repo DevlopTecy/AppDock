@@ -24,7 +24,12 @@ export const DEFAULT_SETTINGS: DockSettings = {
   autoStartWithWindows: true,
   hideQuickIcons: false,
   customThemeHideQuickIcons: false,
-  quickIcons: []
+  quickIcons: [],
+  soundEnabled: true,
+  soundVolume: 50,
+  soundPack: 'theme',
+  showRunningIndicators: true,
+  smartWindowDodge: false
 };
 
 export const DEFAULT_GROUPS: AppGroup[] = [
