@@ -80,32 +80,37 @@ assert(
 );
 console.log('  ✓ AppGrid sets drag payload for drop onto QuickIconsBar');
 
-// 6. Verify GroupSidebar and DockFrame integration
+// 6. Verify Companion Sidebar Anchor Column and GroupSidebar Revert
 const sidebarPath = path.join(__dirname, '..', 'src', 'components', 'GroupSidebar.tsx');
 const sidebarContent = fs.readFileSync(sidebarPath, 'utf8');
 
 assert(
-  sidebarContent.includes('quickIcons?: AppItem[];'),
-  'GroupSidebarProps must accept quickIcons'
+  !sidebarContent.includes('<QuickIconsBar'),
+  'GroupSidebar must NOT contain QuickIconsBar (reverted cleanly from main groups sidebar)'
 );
-assert(
-  sidebarContent.includes('<QuickIconsBar'),
-  'GroupSidebar must render QuickIconsBar vertically below the groups'
-);
-console.log('  ✓ GroupSidebar integrates QuickIconsBar vertically below groups in sidebar');
+console.log('  ✓ GroupSidebar cleanly reverted (dedicated exclusively to app groups)');
 
 const dockFramePath = path.join(__dirname, '..', 'src', 'components', 'DockFrame.tsx');
 const dockFrameContent = fs.readFileSync(dockFramePath, 'utf8');
+
 assert(
-  !dockFrameContent.includes('{quickIconsContent &&'),
-  'DockFrame footer must keep clean layout without horizontal quickIcons'
+  dockFrameContent.includes('quickIconsContent?: React.ReactNode;'),
+  'DockFrameProps must accept quickIconsContent'
 );
-console.log('  ✓ DockFrame footer is clean and uncluttered');
+assert(
+  dockFrameContent.includes('Quick Icons Bar at the bottom of the Anchor Column'),
+  'DockFrame must render quickIconsContent in companion anchor column below ConnectorHub & EdgeToggle'
+);
+console.log('  ✓ DockFrame renders Quick Icons vertically at the bottom of the companion anchor column');
 
 // 7. Verify App.tsx wiring
 const appPath = path.join(__dirname, '..', 'src', 'App.tsx');
 const appContent = fs.readFileSync(appPath, 'utf8');
 
+assert(
+  appContent.includes("import { QuickIconsBar } from './components/QuickIconsBar';"),
+  'App.tsx must import QuickIconsBar'
+);
 assert(
   appContent.includes("import { AddToQuickIconsModal } from './components/AddToQuickIconsModal';"),
   'App.tsx must import AddToQuickIconsModal'
@@ -115,14 +120,13 @@ assert(
   'App.tsx must implement handleAddQuickIcon and handleRemoveQuickIcon'
 );
 assert(
-  appContent.includes('quickIcons={data.settings.quickIcons || []}'),
-  'App.tsx must pass quickIcons to GroupTabs sidebar'
+  appContent.includes('quickIconsContent={'),
+  'App.tsx must pass quickIconsContent to DockFrame'
 );
 assert(
   appContent.includes('<AddToQuickIconsModal'),
   'App.tsx must render <AddToQuickIconsModal>'
 );
-console.log('  ✓ App.tsx wires QuickIcons to GroupTabs sidebar, modal state, and storage persistence');
+console.log('  ✓ App.tsx wires QuickIconsBar into companion anchor column, modal state, and storage persistence');
 
 console.log('🎉 All Quick Icons tests passed successfully!\n');
-

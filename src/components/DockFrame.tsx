@@ -367,6 +367,23 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 onUpdateVerticalPosition={onUpdateVerticalPosition}
               />
             </div>
+          
+            {/* Quick Icons Bar at the bottom of the Anchor Column */}
+            {quickIconsContent && (
+              <div
+                style={{
+                  marginTop: 'auto',
+                  marginBottom: '10px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  zIndex: 25,
+                  maxWidth: '100%'
+                }}
+              >
+                {quickIconsContent}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -1501,6 +1518,23 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 onUpdateVerticalPosition={onUpdateVerticalPosition}
               />
             </div>
+          
+            {/* Quick Icons Bar at the bottom of the Anchor Column */}
+            {quickIconsContent && (
+              <div
+                style={{
+                  marginTop: 'auto',
+                  marginBottom: '10px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  zIndex: 25,
+                  maxWidth: '100%'
+                }}
+              >
+                {quickIconsContent}
+              </div>
+            )}
           </div>
 
           {/* Active Companion Module (Music / Weather / Calendar) — animates in/out within the fixed 340px space */}

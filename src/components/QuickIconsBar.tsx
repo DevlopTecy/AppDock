@@ -12,7 +12,6 @@ export interface QuickIconsBarProps {
   onAddQuickIcon: (item: AppItem) => void;
   onOpenAddModal: () => void;
   theme?: DockTheme;
-  orientation?: 'vertical' | 'horizontal';
   isRightDock?: boolean;
 }
 
@@ -24,8 +23,7 @@ export const QuickIconsBar: React.FC<QuickIconsBarProps> = ({
   onAddQuickIcon,
   onOpenAddModal,
   theme,
-  orientation = 'vertical',
-  isRightDock = false
+  isRightDock = true
 }) => {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [isHoveredAdd, setIsHoveredAdd] = useState(false);
@@ -39,8 +37,6 @@ export const QuickIconsBar: React.FC<QuickIconsBarProps> = ({
   const isKawaii = theme === 'kawaii';
   const isOnePiece = theme === 'onepiece';
   const isCandy = theme === 'candy';
-
-  const isVertical = orientation === 'vertical';
 
   // Render thumbnail
   const renderItemThumb = (item: AppItem) => {
@@ -109,13 +105,11 @@ export const QuickIconsBar: React.FC<QuickIconsBarProps> = ({
     e.stopPropagation();
     setIsDragOverBar(false);
 
-    // Try finding dragged item from in-memory global
     let draggedItem: AppItem | null = null;
     if (typeof window !== 'undefined' && (window as any).__appdock_dragging_item) {
       draggedItem = (window as any).__appdock_dragging_item;
     }
 
-    // Try parsing item JSON from dataTransfer
     if (!draggedItem) {
       try {
         const rawJson = e.dataTransfer.getData('application/x-appdock-item-json');
@@ -125,7 +119,6 @@ export const QuickIconsBar: React.FC<QuickIconsBarProps> = ({
       } catch {}
     }
 
-    // Try lookup by ID across groups
     if (!draggedItem) {
       const cardId =
         (typeof window !== 'undefined' ? (window as any).__appdock_dragging_card_id : null) ||
@@ -171,9 +164,32 @@ export const QuickIconsBar: React.FC<QuickIconsBarProps> = ({
     };
   }, [contextMenu]);
 
-  // Button sizes & styles
-  const btnSize = isEldenRing ? '38px' : '36px';
-  const btnRadius = isEldenRing ? '8px' : isKawaii || isCandy ? '12px' : '10px';
+  // Pill article container styling (matches ConnectorHub / uiverse-vbar-article aesthetic)
+  const containerBg = isDeathNote
+    ? 'rgba(26, 11, 13, 0.92)'
+    : isEldenRing
+      ? 'rgba(23, 24, 19, 0.95)'
+      : isAether
+        ? '#5c3e23'
+        : isKawaii || isCandy
+          ? '#fff0f5'
+          : isOnePiece
+            ? 'rgba(33, 25, 20, 0.95)'
+            : 'var(--bg-surface, #121214)';
+
+  const containerBorder = isDeathNote
+    ? '1px solid rgba(163, 38, 45, 0.55)'
+    : isEldenRing
+      ? '1px solid rgba(197, 161, 90, 0.45)'
+      : isAether
+        ? '1px solid #8c6038'
+        : isKawaii || isCandy
+          ? '1px solid #f472b6'
+          : isOnePiece
+            ? '1px solid rgba(245, 158, 11, 0.45)'
+            : '1px solid var(--border-hover, rgba(255, 255, 255, 0.16))';
+
+  const containerRadius = isEldenRing ? '8px' : '14px';
 
   return (
     <div
@@ -182,279 +198,311 @@ export const QuickIconsBar: React.FC<QuickIconsBarProps> = ({
       onDragEnter={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
+      className="uiverse-vbar-container quick-icons-container"
       style={{
         display: 'flex',
-        flexDirection: isVertical ? 'column' : 'row',
+        flexDirection: 'column',
         alignItems: 'center',
-        gap: '8px',
-        width: isVertical ? '100%' : 'auto',
-        maxWidth: '100%',
-        minWidth: 0,
-        padding: isVertical ? '2px 0' : '0 4px',
-        borderRadius: isKawaii || isCandy ? '14px' : '10px',
-        background: isDragOverBar
-          ? 'rgba(59, 130, 246, 0.22)'
-          : 'transparent',
-        border: isDragOverBar
-          ? '1.5px dashed #3b82f6'
-          : '1px solid transparent',
-        transition: 'all 0.18s ease',
+        width: '44px',
+        userSelect: 'none',
+        flexShrink: 0,
         position: 'relative'
       }}
       title="Quick Icons: Single-click to launch, or drag apps here"
     >
-      {/* Items list */}
-      {items.map((item) => {
-        const isHovered = hoveredId === item.id;
-
-        return (
-          <div
-            key={item.id}
-            style={{ position: 'relative', display: 'flex', alignItems: 'center' }}
-            onMouseEnter={() => setHoveredId(item.id)}
-            onMouseLeave={() => setHoveredId(null)}
-          >
-            <button
-              type="button"
-              onClick={() => onLaunchItem(item)}
-              onContextMenu={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setContextMenu({ item, x: e.clientX, y: e.clientY });
-              }}
-              title={`${item.name} (Quick Launch)\nRight-click to remove`}
-              aria-label={`Launch ${item.name}`}
-              style={{
-                width: btnSize,
-                height: btnSize,
-                borderRadius: btnRadius,
-                background: isHovered
-                  ? isAether
-                    ? '#ffdf59'
-                    : isDeathNote
-                      ? '#3a1215'
-                      : isEldenRing
-                        ? 'rgba(38, 36, 26, 0.95)'
-                        : isOnePiece
-                          ? 'rgba(50, 35, 25, 0.95)'
-                          : isKawaii || isCandy
-                            ? '#ffccd5'
-                            : 'var(--bg-surface-active)'
-                  : isAether
-                    ? '#5c3e23'
-                    : isDeathNote
-                      ? 'rgba(18, 18, 18, 0.85)'
-                      : isEldenRing
-                        ? 'rgba(23, 24, 19, 0.9)'
-                        : isOnePiece
-                          ? 'rgba(33, 25, 20, 0.9)'
-                          : isKawaii || isCandy
-                            ? '#fff0f5'
-                            : 'var(--bg-surface)',
-                border: isHovered
-                  ? isAether
-                    ? '1px solid #ffe885'
-                    : isDeathNote
-                      ? '1px solid #c41e24'
-                      : isEldenRing
-                        ? '1px solid #eac477'
-                        : isOnePiece
-                          ? '1px solid #f59e0b'
-                          : isKawaii || isCandy
-                            ? '1px solid #f472b6'
-                            : '1px solid var(--btn-border-hover)'
-                  : isAether
-                    ? '1.5px solid #8c6038'
-                    : isDeathNote
-                      ? '1px solid rgba(163, 38, 45, 0.4)'
-                      : isEldenRing
-                        ? '1px solid rgba(197, 161, 90, 0.35)'
-                        : isOnePiece
-                          ? '1px solid rgba(245, 158, 11, 0.35)'
-                          : isKawaii || isCandy
-                            ? '1px solid #ffccd5'
-                            : '1px solid var(--btn-border)',
-                boxShadow: isHovered
-                  ? isDeathNote
-                    ? '0 0 10px rgba(196, 30, 36, 0.6)'
+      <article
+        className="uiverse-vbar-article quick-icons-article"
+        style={{
+          width: '100%',
+          borderRadius: containerRadius,
+          background: isDragOverBar ? 'rgba(59, 130, 246, 0.22)' : containerBg,
+          border: isDragOverBar ? '1.5px dashed #3b82f6' : containerBorder,
+          boxShadow: isDragOverBar
+            ? '0 0 16px rgba(59, 130, 246, 0.45)'
+            : '0 8px 24px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.08)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '3px',
+          padding: '3px',
+          boxSizing: 'border-box',
+          transition: 'all 250ms ease-in-out'
+        }}
+      >
+        {/* Plus (+) Add Quick Icon Button at the TOP of the box */}
+        <div style={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'center' }}>
+          <button
+            type="button"
+            onClick={onOpenAddModal}
+            onMouseEnter={() => setIsHoveredAdd(true)}
+            onMouseLeave={() => setIsHoveredAdd(false)}
+            title="Add Quick Icon from your apps"
+            aria-label="Add Quick Icon"
+            style={{
+              width: '38px',
+              height: '38px',
+              borderRadius: isEldenRing ? '6px' : '10px',
+              background: isHoveredAdd
+                ? isAether
+                  ? '#ffdf59'
+                  : isDeathNote
+                    ? '#3a1215'
                     : isEldenRing
-                      ? '0 0 10px rgba(234, 196, 119, 0.5)'
-                      : isOnePiece
-                        ? '0 0 8px rgba(245, 158, 11, 0.5)'
-                        : 'var(--btn-shadow-hover)'
-                  : 'var(--btn-shadow)',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: 0,
-                transform: isHovered ? (isVertical ? 'translateY(-2px) scale(1.05)' : 'scale(1.06)') : 'none',
-                transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
-                flexShrink: 0
-              }}
-            >
-              {renderItemThumb(item)}
-            </button>
-
-            {/* Floating Tooltip Pill on Hover */}
-            {isHovered && (
-              <div
-                style={{
-                  position: 'absolute',
-                  left: isRightDock ? undefined : '54px',
-                  right: isRightDock ? '54px' : undefined,
-                  zIndex: 1000,
-                  padding: '4px 8px',
-                  borderRadius: '6px',
-                  background: 'var(--bg-dock)',
-                  border: '1px solid var(--btn-border-hover)',
-                  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
-                  color: 'var(--text-primary)',
-                  fontSize: '11px',
-                  fontWeight: 500,
-                  whiteSpace: 'nowrap',
-                  pointerEvents: 'none',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  animation: 'fadeIn 0.12s ease'
-                }}
-              >
-                <span>{item.name}</span>
-                <span style={{ color: 'var(--text-muted)', fontSize: '9.5px', opacity: 0.85 }}>
-                  Quick Launch
-                </span>
-              </div>
-            )}
-
-            {/* Hover Remove (X) Badge */}
-            {isHovered && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onRemoveQuickIcon(item.id);
-                }}
-                title={`Remove ${item.name} from Quick Icons`}
-                aria-label={`Remove ${item.name}`}
-                style={{
-                  position: 'absolute',
-                  top: '-3px',
-                  right: '1px',
-                  width: '15px',
-                  height: '15px',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: 'var(--bg-surface)',
-                  border: '1px solid var(--border-subtle)',
-                  boxShadow: 'var(--btn-shadow)',
-                  color: 'var(--text-muted)',
-                  cursor: 'pointer',
-                  zIndex: 25,
-                  transition: 'all 0.12s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = '#ef4444';
-                  e.currentTarget.style.background = 'var(--bg-surface-hover)';
-                  e.currentTarget.style.borderColor = '#ef4444';
-                  e.currentTarget.style.transform = 'scale(1.15)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = 'var(--text-muted)';
-                  e.currentTarget.style.background = 'var(--bg-surface)';
-                  e.currentTarget.style.borderColor = 'var(--border-subtle)';
-                  e.currentTarget.style.transform = 'scale(1)';
-                }}
-              >
-                <X size={9} strokeWidth={2.5} />
-              </button>
-            )}
-          </div>
-        );
-      })}
-
-      {/* Plus (+) Add Quick Icon Button */}
-      <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-        <button
-          type="button"
-          onClick={onOpenAddModal}
-          onMouseEnter={() => setIsHoveredAdd(true)}
-          onMouseLeave={() => setIsHoveredAdd(false)}
-          title="Add Quick Icon"
-          aria-label="Add Quick Icon"
-          style={{
-            width: btnSize,
-            height: btnSize,
-            borderRadius: btnRadius,
-            background: isEldenRing
-              ? 'rgba(23, 24, 19, 0.9)'
-              : isDeathNote
-                ? 'rgba(18, 18, 18, 0.85)'
+                      ? 'rgba(38, 36, 26, 0.95)'
+                      : 'var(--bg-surface-active)'
                 : isAether
-                  ? '#5c3e23'
-                  : 'var(--bg-surface)',
-            border: isEldenRing
-              ? '1px dashed rgba(197, 161, 90, 0.6)'
-              : isDeathNote
-                ? '1px dashed #a3262d'
+                  ? '#4a321b'
+                  : isDeathNote
+                    ? 'rgba(18, 18, 18, 0.85)'
+                    : isEldenRing
+                      ? 'rgba(23, 24, 19, 0.85)'
+                      : 'transparent',
+              border: isHoveredAdd
+                ? isAether
+                  ? '1px solid #ffe885'
+                  : isDeathNote
+                    ? '1px solid #c41e24'
+                    : isEldenRing
+                      ? '1px solid #eac477'
+                      : '1px solid var(--btn-border-hover)'
                 : isAether
                   ? '1px dashed #8c6038'
-                  : '1px dashed var(--btn-border)',
-            color: isEldenRing
-              ? '#EAC477'
-              : isDeathNote
-                ? '#e05a61'
+                  : isDeathNote
+                    ? '1px dashed #a3262d'
+                    : isEldenRing
+                      ? '1px dashed rgba(197, 161, 90, 0.6)'
+                      : '1px dashed var(--btn-border)',
+              color: isHoveredAdd
+                ? isDeathNote
+                  ? '#ffffff'
+                  : 'var(--text-primary)'
                 : isAether
                   ? '#ffdf59'
-                  : 'var(--text-muted)',
-            boxShadow: 'var(--btn-shadow)',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 0,
-            flexShrink: 0,
-            transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
-          }}
-        >
-          {isEldenRing ? (
-            <img
-              src={getAssetUrl('/eldenring/icons/add.png')}
-              alt="Add"
-              style={{ width: '18px', height: '18px', objectFit: 'contain', filter: 'drop-shadow(0 0 5px rgba(234, 196, 119, 0.7))' }}
-            />
-          ) : (
-            <Plus size={15} strokeWidth={2.2} />
-          )}
-        </button>
-
-        {/* Floating Tooltip Pill for Add Button */}
-        {isHoveredAdd && (
-          <div
-            style={{
-              position: 'absolute',
-              left: isRightDock ? undefined : '54px',
-              right: isRightDock ? '54px' : undefined,
-              zIndex: 1000,
-              padding: '4px 8px',
-              borderRadius: '6px',
-              background: 'var(--bg-dock)',
-              border: '1px solid var(--btn-border-hover)',
-              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
-              color: 'var(--text-primary)',
-              fontSize: '11px',
-              fontWeight: 500,
-              whiteSpace: 'nowrap',
-              pointerEvents: 'none',
-              animation: 'fadeIn 0.12s ease'
+                  : isDeathNote
+                    ? '#e05a61'
+                    : isEldenRing
+                      ? '#EAC477'
+                      : 'var(--text-muted)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 0,
+              boxSizing: 'border-box',
+              transform: isHoveredAdd ? 'scale(1.06)' : 'none',
+              transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
             }}
           >
-            <span>Add Quick Icon</span>
+            {isEldenRing ? (
+              <img
+                src={getAssetUrl('/eldenring/icons/add.png')}
+                alt="Add"
+                style={{ width: '18px', height: '18px', objectFit: 'contain', filter: 'drop-shadow(0 0 5px rgba(234, 196, 119, 0.7))' }}
+              />
+            ) : (
+              <Plus size={16} strokeWidth={2.4} />
+            )}
+          </button>
+
+          {/* Floating Tooltip for Add Button */}
+          {isHoveredAdd && (
+            <div
+              style={{
+                position: 'absolute',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                left: isRightDock ? undefined : '50px',
+                right: isRightDock ? '50px' : undefined,
+                zIndex: 1000,
+                padding: '4px 8px',
+                borderRadius: '6px',
+                background: 'var(--bg-dock)',
+                border: '1px solid var(--btn-border-hover)',
+                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45)',
+                color: 'var(--text-primary)',
+                fontSize: '11px',
+                fontWeight: 600,
+                whiteSpace: 'nowrap',
+                pointerEvents: 'none',
+                animation: 'fadeIn 0.12s ease'
+              }}
+            >
+              <span>Add Quick Icon</span>
+            </div>
+          )}
+        </div>
+
+        {/* Divider line if items exist */}
+        {items.length > 0 && (
+          <div
+            style={{
+              width: '24px',
+              height: '1px',
+              background: 'var(--border-subtle)',
+              margin: '2px 0',
+              opacity: 0.8
+            }}
+          />
+        )}
+
+        {/* Scrollable column of Quick Icon buttons */}
+        {items.length > 0 && (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '3px',
+              width: '100%',
+              maxHeight: '260px',
+              overflowY: 'auto',
+              scrollbarWidth: 'none'
+            }}
+          >
+            {items.map((item) => {
+              const isHovered = hoveredId === item.id;
+
+              return (
+                <div
+                  key={item.id}
+                  style={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'center' }}
+                  onMouseEnter={() => setHoveredId(item.id)}
+                  onMouseLeave={() => setHoveredId(null)}
+                >
+                  <button
+                    type="button"
+                    onClick={() => onLaunchItem(item)}
+                    onContextMenu={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setContextMenu({ item, x: e.clientX, y: e.clientY });
+                    }}
+                    title={`${item.name} (Quick Launch)\nRight-click to remove`}
+                    aria-label={`Launch ${item.name}`}
+                    style={{
+                      width: '38px',
+                      height: '38px',
+                      borderRadius: isEldenRing ? '6px' : '10px',
+                      background: isHovered
+                        ? isAether
+                          ? '#ffdf59'
+                          : isDeathNote
+                            ? '#3a1215'
+                            : isEldenRing
+                              ? 'rgba(38, 36, 26, 0.95)'
+                              : isOnePiece
+                                ? 'rgba(50, 35, 25, 0.95)'
+                                : 'var(--bg-surface-active)'
+                        : 'transparent',
+                      border: isHovered
+                        ? isAether
+                          ? '1px solid #ffe885'
+                          : isDeathNote
+                            ? '1px solid #c41e24'
+                            : isEldenRing
+                              ? '1px solid #eac477'
+                              : isOnePiece
+                                ? '1px solid #f59e0b'
+                                : '1px solid var(--btn-border-hover)'
+                        : '1px solid transparent',
+                      boxShadow: isHovered
+                        ? isDeathNote
+                          ? '0 0 10px rgba(196, 30, 36, 0.6)'
+                          : isEldenRing
+                            ? '0 0 10px rgba(234, 196, 119, 0.5)'
+                            : 'var(--btn-shadow-hover)'
+                        : 'none',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: 0,
+                      transform: isHovered ? 'scale(1.08)' : 'none',
+                      transition: 'all 0.16s ease',
+                      flexShrink: 0
+                    }}
+                  >
+                    {renderItemThumb(item)}
+                  </button>
+
+                  {/* Floating Tooltip Pill on Hover */}
+                  {isHovered && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        left: isRightDock ? undefined : '50px',
+                        right: isRightDock ? '50px' : undefined,
+                        zIndex: 1000,
+                        padding: '4px 8px',
+                        borderRadius: '6px',
+                        background: 'var(--bg-dock)',
+                        border: '1px solid var(--btn-border-hover)',
+                        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45)',
+                        color: 'var(--text-primary)',
+                        fontSize: '11px',
+                        fontWeight: 500,
+                        whiteSpace: 'nowrap',
+                        pointerEvents: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        animation: 'fadeIn 0.12s ease'
+                      }}
+                    >
+                      <span>{item.name}</span>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '9.5px', opacity: 0.85 }}>
+                        Quick Launch
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Hover Remove (X) Badge */}
+                  {isHovered && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onRemoveQuickIcon(item.id);
+                      }}
+                      title={`Remove ${item.name} from Quick Icons`}
+                      aria-label={`Remove ${item.name}`}
+                      style={{
+                        position: 'absolute',
+                        top: '-2px',
+                        right: '1px',
+                        width: '14px',
+                        height: '14px',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: '#dc2626',
+                        border: '1px solid #ffffff',
+                        boxShadow: '0 1px 4px rgba(0,0,0,0.5)',
+                        color: '#ffffff',
+                        cursor: 'pointer',
+                        zIndex: 25,
+                        padding: 0,
+                        transition: 'transform 0.12s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'scale(1.2)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'scale(1)';
+                      }}
+                    >
+                      <X size={8} strokeWidth={3} />
+                    </button>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
-      </div>
+      </article>
 
       {/* Right-Click Context Menu (Portaled to document.body) */}
       {contextMenu &&
