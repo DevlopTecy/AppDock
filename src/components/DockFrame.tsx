@@ -16,6 +16,7 @@ interface DockFrameProps {
   activeModule?: CompanionModuleType;
   onSelectModule?: (mod: CompanionModuleType) => void;
   companionContent?: React.ReactNode;
+  quickIconsContent?: React.ReactNode;
   onToggle: () => void;
   onOpenSearch: () => void;
   onOpenAdd?: () => void;
@@ -75,6 +76,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
   isMaximized = false,
   onToggleMaximize,
   companionContent,
+  quickIconsContent,
   onToggle,
   onOpenSearch,
   onOpenAdd: _onOpenAdd,
@@ -475,8 +477,9 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat',
                 opacity: (customTheme?.bgOpacity ?? 100) / 100,
-                filter: customTheme?.bgBlur ? 'blur(28px) scale(1.08)' : undefined,
-                transition: 'background-image 0.5s ease-in-out, opacity 0.3s ease, filter 0.3s ease, transform 0.3s ease'
+                filter: customTheme?.bgBlur ? 'blur(45px)' : undefined,
+                transform: customTheme?.bgBlur ? 'scale(1.15)' : 'none',
+                transition: 'background-image 0.5s ease-in-out, opacity 0.3s ease, filter 0.35s ease, transform 0.35s ease'
               }}
             />
           </div>
@@ -503,8 +506,9 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 backgroundSize: 'cover',
                 backgroundPosition: 'center 12%',
                 backgroundRepeat: 'no-repeat',
-                filter: customTheme?.bgBlur ? 'blur(28px) scale(1.08) brightness(1.02)' : 'brightness(1.02) contrast(1.08)',
-                transition: 'filter 0.3s ease, transform 0.3s ease'
+                filter: customTheme?.bgBlur ? 'blur(45px) brightness(1.02)' : 'brightness(1.02) contrast(1.08)',
+                transform: customTheme?.bgBlur ? 'scale(1.15)' : 'none',
+                transition: 'filter 0.35s ease, transform 0.35s ease'
               }}
             />
             {/* Subtle atmospheric dark gradient for icon & footer legibility */}
@@ -541,8 +545,9 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 backgroundSize: 'cover',
                 backgroundPosition: 'center 20%',
                 backgroundRepeat: 'no-repeat',
-                filter: customTheme?.bgBlur ? 'blur(28px) scale(1.08)' : 'contrast(1.02) saturate(1.04)',
-                transition: 'filter 0.3s ease, transform 0.3s ease'
+                filter: customTheme?.bgBlur ? 'blur(45px)' : 'contrast(1.02) saturate(1.04)',
+                transform: customTheme?.bgBlur ? 'scale(1.15)' : 'none',
+                transition: 'filter 0.35s ease, transform 0.35s ease'
               }}
             />
             {/* Soft dreamy vignette to preserve pastel tones while aiding text contrast */}
@@ -580,8 +585,9 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 backgroundPosition: 'center top',
                 backgroundRepeat: 'no-repeat',
                 opacity: 0.98,
-                filter: customTheme?.bgBlur ? 'blur(28px) scale(1.08)' : 'contrast(1.02) saturate(1.05)',
-                transition: 'filter 0.3s ease, transform 0.3s ease'
+                filter: customTheme?.bgBlur ? 'blur(45px)' : 'contrast(1.02) saturate(1.05)',
+                transform: customTheme?.bgBlur ? 'scale(1.15)' : 'none',
+                transition: 'filter 0.35s ease, transform 0.35s ease'
               }}
             />
             {/* Luminous Heavenly Sky Ambient Gradient */}
@@ -620,10 +626,11 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   backgroundRepeat: 'no-repeat',
-                  filter: customTheme?.bgBlur ? 'blur(28px) scale(1.08) contrast(1.04)' : 'contrast(1.04) brightness(0.97) saturate(1.08)',
+                  filter: customTheme?.bgBlur ? 'blur(45px) contrast(1.04)' : 'contrast(1.04) brightness(0.97) saturate(1.08)',
+                  transform: customTheme?.bgBlur ? 'scale(1.15)' : 'none',
                   imageRendering: '-webkit-optimize-contrast',
                   opacity: eldenBgIndex === idx ? 1 : 0,
-                  transition: 'opacity 1.5s ease-in-out, filter 0.3s ease, transform 0.3s ease',
+                  transition: 'opacity 1.5s ease-in-out, filter 0.35s ease, transform 0.35s ease',
                   zIndex: 0
                 }}
               />
@@ -702,9 +709,10 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   backgroundRepeat: 'no-repeat',
-                  filter: customTheme?.bgBlur ? 'blur(28px) scale(1.08) contrast(1.02)' : 'contrast(1.02) brightness(0.98) saturate(1.06)',
+                  filter: customTheme?.bgBlur ? 'blur(45px) contrast(1.02)' : 'contrast(1.02) brightness(0.98) saturate(1.06)',
+                  transform: customTheme?.bgBlur ? 'scale(1.15)' : 'none',
                   opacity: onePieceBgIndex === idx ? 1 : 0,
-                  transition: 'opacity 1.5s ease-in-out, filter 0.3s ease, transform 0.3s ease',
+                  transition: 'opacity 1.5s ease-in-out, filter 0.35s ease, transform 0.35s ease',
                   zIndex: 0
                 }}
               />
@@ -771,9 +779,10 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   backgroundRepeat: 'no-repeat',
-                  filter: customTheme?.bgBlur ? 'blur(28px) scale(1.08) contrast(1.05)' : 'contrast(1.05) brightness(0.98) saturate(1.15)',
+                  filter: customTheme?.bgBlur ? 'blur(45px) contrast(1.05)' : 'contrast(1.05) brightness(0.98) saturate(1.15)',
+                  transform: customTheme?.bgBlur ? 'scale(1.15)' : 'none',
                   opacity: candyBgIndex === idx ? 1 : 0,
-                  transition: 'opacity 1.5s ease-in-out, filter 0.3s ease, transform 0.3s ease',
+                  transition: 'opacity 1.5s ease-in-out, filter 0.35s ease, transform 0.35s ease',
                   zIndex: 0
                 }}
               />
@@ -1208,16 +1217,18 @@ export const DockFrame: React.FC<DockFrameProps> = ({
         ) : (
         <footer
           style={{
-            padding: '6px 12px',
+            padding: '4px 10px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             borderTop: '1px solid var(--border-subtle)',
             background: 'var(--bg-footer)',
-            height: '38px',
+            minHeight: '38px',
+            height: '42px',
             flexShrink: 0,
             position: 'relative',
-            zIndex: 2
+            zIndex: 2,
+            gap: '8px'
           }}
         >
           {theme === 'eldenring' ? (
@@ -1236,6 +1247,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                flexShrink: 0,
                 transition: 'transform 0.2s ease, filter 0.2s ease'
               }}
             >
@@ -1305,7 +1317,8 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                       : theme === 'onepiece'
                         ? '0 2px 8px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(245, 158, 11, 0.2)'
                         : undefined,
-                textShadow: theme === 'aether' ? '1px 1px 0 #181005' : theme === 'onepiece' ? '0 0 6px rgba(245, 158, 11, 0.4)' : theme === 'candy' ? '0 0 6px rgba(244, 114, 182, 0.45)' : undefined
+                textShadow: theme === 'aether' ? '1px 1px 0 #181005' : theme === 'onepiece' ? '0 0 6px rgba(245, 158, 11, 0.4)' : theme === 'candy' ? '0 0 6px rgba(244, 114, 182, 0.45)' : undefined,
+                flexShrink: 0
               }}
             >
               {theme === 'kawaii' ? (
@@ -1337,6 +1350,20 @@ export const DockFrame: React.FC<DockFrameProps> = ({
               )}
               <span>Settings {(theme === 'kawaii' || theme === 'candy') && '🌸'}</span>
             </button>
+          )}
+
+          {quickIconsContent && (
+            <div
+              style={{
+                flex: 1,
+                minWidth: 0,
+                display: 'flex',
+                alignItems: 'center',
+                overflow: 'hidden'
+              }}
+            >
+              {quickIconsContent}
+            </div>
           )}
 
           {theme === 'kawaii' && (

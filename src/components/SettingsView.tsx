@@ -452,9 +452,10 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               backgroundImage: `url('${settings.customThemeBgImages![0]}')`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
-              filter: settings.customThemeBgBlur ? 'blur(28px) scale(1.08)' : undefined,
+              filter: settings.customThemeBgBlur ? 'blur(45px)' : undefined,
+              transform: settings.customThemeBgBlur ? 'scale(1.15)' : 'none',
               opacity: (settings.customThemeBgOpacity ?? 100) / 250,
-              transition: 'filter 0.3s ease, transform 0.3s ease'
+              transition: 'filter 0.35s ease, transform 0.35s ease'
             }}
           />
         </div>
@@ -480,10 +481,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               backgroundSize: 'cover',
               backgroundPosition: 'center 20%',
               filter: settings.customThemeBgBlur
-                ? 'blur(28px) scale(1.08) brightness(0.65)'
+                ? 'blur(45px) brightness(0.65)'
                 : 'brightness(0.65) contrast(1.15)',
+              transform: settings.customThemeBgBlur ? 'scale(1.15)' : 'none',
               opacity: 0.45,
-              transition: 'filter 0.3s ease, transform 0.3s ease'
+              transition: 'filter 0.35s ease, transform 0.35s ease'
             }}
           />
           <div

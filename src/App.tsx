@@ -13,6 +13,8 @@ import { MusicModule } from './components/modules/MusicModule';
 import { WeatherModule } from './components/modules/WeatherModule';
 import { CalendarModule } from './components/modules/CalendarModule';
 import { UpdateNotification } from './components/UpdateNotification';
+import { QuickIconsBar } from './components/QuickIconsBar';
+import { AddToQuickIconsModal } from './components/AddToQuickIconsModal';
 import { isGenericOrBrokenIcon } from './utils/assets';
 import { useCustomThemeVars } from './hooks/useCustomThemeVars';
 
@@ -108,6 +110,8 @@ export const App: React.FC = () => {
     }
     return false;
   });
+
+  const [isQuickIconsModalOpen, setIsQuickIconsModalOpen] = useState(false);
 
   const [activeModule, setActiveModule] = useState<CompanionModuleType>(() => {
     if (typeof window !== 'undefined') {
@@ -636,6 +640,24 @@ export const App: React.FC = () => {
     [data.groups, updateGroups]
   );
 
+  // Quick Icons handlers
+  const handleAddQuickIcon = useCallback(
+    (item: AppItem) => {
+      const current = data.settings.quickIcons || [];
+      if (current.some((it) => it.id === item.id)) return;
+      updateSettings({ quickIcons: [...current, item] });
+    },
+    [data.settings.quickIcons, updateSettings]
+  );
+
+  const handleRemoveQuickIcon = useCallback(
+    (itemId: string) => {
+      const current = data.settings.quickIcons || [];
+      updateSettings({ quickIcons: current.filter((it) => it.id !== itemId) });
+    },
+    [data.settings.quickIcons, updateSettings]
+  );
+
   // Drop Files handler
   const handleDropFiles = async (files: FileList) => {
     if (!activeGroup) return;
@@ -758,6 +780,19 @@ export const App: React.FC = () => {
       verticalPosition={data.settings.verticalPosition ?? 0.5}
       onUpdateVerticalPosition={(pos) => updateSettings({ verticalPosition: pos })}
       theme={data.settings.theme}
+      quickIconsContent={
+        !isCleanDock ? (
+          <QuickIconsBar
+            items={data.settings.quickIcons || []}
+            groups={data.groups}
+            onLaunchItem={handleLaunchItem}
+            onRemoveQuickIcon={handleRemoveQuickIcon}
+            onAddQuickIcon={handleAddQuickIcon}
+            onOpenAddModal={() => setIsQuickIconsModalOpen(true)}
+            theme={data.settings.theme}
+          />
+        ) : undefined
+      }
       customTheme={{
         bgImages: data.settings.customThemeBgImages,
         bgBlur: data.settings.customThemeBgBlur,
@@ -886,6 +921,17 @@ export const App: React.FC = () => {
           onClose={() => setIsSearchOpen(false)}
           onLaunchItem={handleLaunchItem}
           onDeleteItem={handleDeleteItem}
+          theme={data.settings.theme}
+        />
+      )}
+
+      {!isCleanDock && (
+        <AddToQuickIconsModal
+          isOpen={isQuickIconsModalOpen}
+          onClose={() => setIsQuickIconsModalOpen(false)}
+          groups={data.groups}
+          existingQuickItemIds={(data.settings.quickIcons || []).map((it) => it.id)}
+          onAddQuickIcon={handleAddQuickIcon}
           theme={data.settings.theme}
         />
       )}
