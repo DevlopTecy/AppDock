@@ -42,6 +42,7 @@ interface DockFrameProps {
     hideALMS?: boolean;
     almsDensity?: 'auto' | 'large' | 'medium' | 'compact';
     hideAppCount?: boolean;
+    hideQuickIcons?: boolean;
   };
 }
 
@@ -369,7 +370,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
             </div>
           
             {/* Quick Icons Bar at the bottom of the Anchor Column */}
-            {quickIconsContent && (
+            {quickIconsContent && !customTheme?.hideQuickIcons && (
               <div
                 style={{
                   marginTop: 'auto',
@@ -1520,7 +1521,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
             </div>
           
             {/* Quick Icons Bar at the bottom of the Anchor Column */}
-            {quickIconsContent && (
+            {quickIconsContent && !customTheme?.hideQuickIcons && (
               <div
                 style={{
                   marginTop: 'auto',

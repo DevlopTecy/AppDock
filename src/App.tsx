@@ -781,7 +781,7 @@ export const App: React.FC = () => {
       onUpdateVerticalPosition={(pos) => updateSettings({ verticalPosition: pos })}
       theme={data.settings.theme}
       quickIconsContent={
-        !isCleanDock ? (
+        !isCleanDock && !data.settings.customThemeHideQuickIcons && !data.settings.hideQuickIcons ? (
           <QuickIconsBar
             items={data.settings.quickIcons || []}
             groups={data.groups}
@@ -806,7 +806,8 @@ export const App: React.FC = () => {
         keepSidebarModule: data.settings.customThemeKeepSidebarModule,
         hideALMS: data.settings.customThemeHideALMS,
         almsDensity: data.settings.customThemeALMSDensity,
-        hideAppCount: data.settings.customThemeHideAppCount
+        hideAppCount: data.settings.customThemeHideAppCount,
+        hideQuickIcons: data.settings.customThemeHideQuickIcons || data.settings.hideQuickIcons
       }}
     >
       {/* Main Content Area: Vertical Group Sidebar + App Grid */}
