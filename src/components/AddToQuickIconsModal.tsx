@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { AppGroup, AppItem, DockTheme } from '../types/dock';
 import { getAssetUrl, isGenericOrBrokenIcon } from '../utils/assets';
 import { X, Search, Plus, Check, Globe, AppWindow, Zap } from 'lucide-react';
@@ -6,8 +6,8 @@ import { X, Search, Plus, Check, Globe, AppWindow, Zap } from 'lucide-react';
 interface AddToQuickIconsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  groups: AppGroup[];
-  existingQuickItemIds: string[];
+  groups?: AppGroup[];
+  existingQuickItemIds?: string[];
   onAddQuickIcon: (item: AppItem) => void;
   theme?: DockTheme;
 }
@@ -15,7 +15,7 @@ interface AddToQuickIconsModalProps {
 export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
   isOpen,
   onClose,
-  groups,
+  groups = [],
   existingQuickItemIds = [],
   onAddQuickIcon,
   theme
@@ -23,8 +23,7 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [justAddedIds, setJustAddedIds] = useState<Set<string>>(new Set());
 
-  if (!isOpen) return null;
-
+  // ALL HOOKS MUST RUN UNCONDITIONALLY AT THE TOP BEFORE ANY EARLY RETURN
   const isDeathNote = theme === 'deathnote';
   const isAether = theme === 'aether';
   const isEldenRing = theme === 'eldenring';
@@ -33,39 +32,59 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
   const isCandy = theme === 'candy';
 
   const pinnedSet = useMemo(() => {
-    return new Set([...existingQuickItemIds, ...Array.from(justAddedIds)]);
+    const ids = Array.isArray(existingQuickItemIds) ? existingQuickItemIds.filter(Boolean) : [];
+    return new Set([...ids, ...Array.from(justAddedIds)]);
   }, [existingQuickItemIds, justAddedIds]);
 
-  const query = searchQuery.trim().toLowerCase();
+  const query = (searchQuery || '').trim().toLowerCase();
 
   const filteredGroups = useMemo(() => {
+    if (!Array.isArray(groups)) return [];
     return groups
       .map((grp) => {
-        const matchingItems = grp.items.filter((item) => {
+        if (!grp) return null;
+        const items = Array.isArray(grp.items) ? grp.items.filter(Boolean) : [];
+        const matchingItems = items.filter((item) => {
+          if (!item) return false;
           if (!query) return true;
-          return (
-            item.name.toLowerCase().includes(query) ||
-            item.target.toLowerCase().includes(query)
-          );
+          const name = String(item.name || '').toLowerCase();
+          const target = String(item.target || '').toLowerCase();
+          return name.includes(query) || target.includes(query);
         });
         return {
           ...grp,
           items: matchingItems
         };
       })
-      .filter((grp) => grp.items.length > 0);
+      .filter((grp): grp is AppGroup => Boolean(grp && grp.items && grp.items.length > 0));
   }, [groups, query]);
 
+  // Escape key listener to close modal
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  // Safe early return only AFTER all hooks have executed
+  if (!isOpen) return null;
+
   const handleItemClick = (item: AppItem) => {
+    if (!item || !item.id) return;
     if (pinnedSet.has(item.id)) return;
     onAddQuickIcon(item);
     setJustAddedIds((prev) => new Set(prev).add(item.id));
   };
 
   const renderIconThumb = (item: AppItem) => {
+    if (!item) return <AppWindow size={18} color="var(--text-primary)" />;
     const isUrl = item.type === 'url';
-    const googleFavicon = isUrl
-      ? `https://www.google.com/s2/favicons?domain=${encodeURIComponent(item.target)}&sz=128`
+    const target = item.target || '';
+    const googleFavicon = isUrl && target
+      ? `https://www.google.com/s2/favicons?domain=${encodeURIComponent(target)}&sz=128`
       : undefined;
 
     const hasCustomIcon = item.icon && !isGenericOrBrokenIcon(item.icon);
@@ -472,4 +491,3 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
     </div>
   );
 };
-

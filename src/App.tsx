@@ -926,12 +926,12 @@ export const App: React.FC = () => {
         />
       )}
 
-      {!isCleanDock && (
+      {!isCleanDock && isQuickIconsModalOpen && (
         <AddToQuickIconsModal
           isOpen={isQuickIconsModalOpen}
           onClose={() => setIsQuickIconsModalOpen(false)}
-          groups={data.groups}
-          existingQuickItemIds={(data.settings.quickIcons || []).map((it) => it.id)}
+          groups={data.groups || []}
+          existingQuickItemIds={(data.settings.quickIcons || []).filter(Boolean).map((it) => it?.id).filter(Boolean)}
           onAddQuickIcon={handleAddQuickIcon}
           theme={data.settings.theme}
         />
