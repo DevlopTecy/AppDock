@@ -370,3 +370,22 @@ test('BUG-27: Expanded dock handle EdgeToggle is placed on inner edge facing des
   assert.ok(leftHiddenMatch, 'DockFrame.tsx must position handle on right inner edge (right: 0px) for left dock when sidebar is hidden');
 });
 
+test('BUG-28: Background blur uses valid CSS filter (no invalid scale() in filter) and applies full 45px blur with transform scale', () => {
+  const dockFramePath = path.join(projectRoot, 'src', 'components', 'DockFrame.tsx');
+  const dockFrameContent = fs.readFileSync(dockFramePath, 'utf-8');
+
+  // Verify scale(...) is never placed inside filter: in DockFrame
+  const badFilterMatch = dockFrameContent.match(/filter:\s*[^;\n]*scale\(/);
+  assert.ok(!badFilterMatch, 'DockFrame.tsx must never contain scale() inside filter: CSS declaration');
+
+  // Verify DockFrame applies blur(45px) and transform: scale(1.15) for full blur
+  assert.ok(dockFrameContent.includes("blur(45px)"), 'DockFrame.tsx must apply full 45px blur');
+  assert.ok(dockFrameContent.includes("scale(1.15)"), 'DockFrame.tsx must scale blurred image via transform to eliminate feathered borders');
+
+  const settingsViewPath = path.join(projectRoot, 'src', 'components', 'SettingsView.tsx');
+  const settingsViewContent = fs.readFileSync(settingsViewPath, 'utf-8');
+  const badSettingsFilterMatch = settingsViewContent.match(/filter:\s*[^;\n]*scale\(/);
+  assert.ok(!badSettingsFilterMatch, 'SettingsView.tsx must never contain scale() inside filter: CSS declaration');
+});
+
+
