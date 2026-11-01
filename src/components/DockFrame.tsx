@@ -232,6 +232,8 @@ export const DockFrame: React.FC<DockFrameProps> = ({
   const isLeft = dockPosition === 'left';
   const isRight = dockPosition === 'right';
   const isTop = dockPosition === 'top';
+  const isSmallUi = drawerWidth < 300;
+  const isCompactUi = drawerWidth < 260;
 
   const handleMouseDownResize = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -933,12 +935,15 @@ export const DockFrame: React.FC<DockFrameProps> = ({
           style={{
             position: 'relative',
             zIndex: 15,
-            padding: '10px 14px',
+            padding: isCompactUi ? '6px 8px' : isSmallUi ? '8px 10px' : '10px 14px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
+            gap: isCompactUi ? '4px' : isSmallUi ? '6px' : '8px',
             borderBottom: '1px solid var(--border-subtle)',
-            background: 'var(--bg-header)'
+            background: 'var(--bg-header)',
+            minWidth: 0,
+            overflow: 'hidden'
           }}
         >
           {/* Active Category Title */}
@@ -947,8 +952,8 @@ export const DockFrame: React.FC<DockFrameProps> = ({
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
-                height: '34px',
+                gap: isSmallUi ? '4px' : '8px',
+                height: isSmallUi ? '28px' : '34px',
                 minWidth: 0,
                 flex: '1 1 auto',
                 overflow: 'hidden'
@@ -958,36 +963,41 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '6px',
-                  height: '32px',
-                  padding: '0 12px 0 6px',
+                  gap: isCompactUi ? '3px' : isSmallUi ? '4px' : '6px',
+                  height: isSmallUi ? '26px' : '32px',
+                  padding: isCompactUi ? '0 5px 0 3px' : isSmallUi ? '0 8px 0 4px' : '0 12px 0 6px',
                   background: 'rgba(23, 24, 19, 0.85)',
                   borderRadius: '4px',
                   border: '1px solid rgba(197, 161, 90, 0.45)',
-                  boxShadow: '0 2px 6px rgba(0, 0, 0, 0.6)'
+                  boxShadow: '0 2px 6px rgba(0, 0, 0, 0.6)',
+                  minWidth: 0,
+                  maxWidth: '100%',
+                  overflow: 'hidden'
                 }}
               >
                 <img
                   src={getAssetUrl('/eldenring/misc/runestone_icon.png')}
                   alt="Rune Stone"
                   style={{
-                    width: '26px',
-                    height: '26px',
+                    width: isCompactUi ? '18px' : isSmallUi ? '20px' : '26px',
+                    height: isCompactUi ? '18px' : isSmallUi ? '20px' : '26px',
                     objectFit: 'contain',
+                    flexShrink: 0,
                     filter: 'drop-shadow(0 0 8px rgba(234, 196, 119, 0.95))'
                   }}
                 />
                 <span
                   style={{
-                    fontSize: '13px',
+                    fontSize: isCompactUi ? '10px' : isSmallUi ? '11px' : '13px',
                     fontWeight: 700,
                     color: '#EAC477',
-                    letterSpacing: '1px',
+                    letterSpacing: isSmallUi ? '0.5px' : '1px',
                     fontFamily: 'var(--font-fantasy)',
                     textShadow: '0 0 10px rgba(197, 161, 90, 0.65)',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap'
+                    whiteSpace: 'nowrap',
+                    minWidth: 0
                   }}
                 >
                   {activeGroupName}
@@ -995,14 +1005,14 @@ export const DockFrame: React.FC<DockFrameProps> = ({
               </div>
             </div>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0, flex: '1 1 auto', overflow: 'hidden' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: isSmallUi ? '4px' : '6px', minWidth: 0, flex: '1 1 auto', overflow: 'hidden' }}>
               {theme === 'candy' && (
                 <img
                   src={getAssetUrl('/candy/decorations/cute_cat_header.png')}
                   alt="Candy Cat"
                   style={{
-                    width: '24px',
-                    height: '21px',
+                    width: isCompactUi ? '18px' : isSmallUi ? '20px' : '24px',
+                    height: isCompactUi ? '16px' : isSmallUi ? '18px' : '21px',
                     objectFit: 'contain',
                     flexShrink: 0,
                     filter: 'drop-shadow(0 2px 4px rgba(244, 114, 182, 0.4))'
@@ -1012,16 +1022,19 @@ export const DockFrame: React.FC<DockFrameProps> = ({
               )}
               <span
                 style={{
-                  fontSize: theme === 'onepiece' ? '20px' : '13px',
+                  fontSize: theme === 'onepiece'
+                    ? (isCompactUi ? '14px' : isSmallUi ? '16px' : '20px')
+                    : (isCompactUi ? '11px' : isSmallUi ? '12px' : '13px'),
                   fontWeight: theme === 'onepiece' || theme === 'candy' ? 700 : 600,
                   color: theme === 'onepiece' ? '#f59e0b' : theme === 'candy' ? '#db2777' : 'var(--text-primary)',
-                  letterSpacing: theme === 'deathnote' ? '0.5px' : theme === 'onepiece' ? '1.5px' : '-0.2px',
+                  letterSpacing: theme === 'deathnote' ? '0.5px' : theme === 'onepiece' ? (isSmallUi ? '0.8px' : '1.5px') : '-0.2px',
                   fontFamily: theme === 'deathnote' ? 'var(--font-gothic)' : theme === 'onepiece' ? 'var(--font-onepiece)' : undefined,
                   textShadow: theme === 'onepiece' ? '0 0 10px rgba(245, 158, 11, 0.55)' : theme === 'candy' ? '0 1px 3px rgba(255, 255, 255, 0.9), 0 0 10px rgba(244, 114, 182, 0.6)' : undefined,
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
-                  maxWidth: theme === 'deathnote' ? 'calc(50% - 85px)' : theme === 'onepiece' ? '220px' : '190px'
+                  minWidth: 0,
+                  maxWidth: theme === 'deathnote' ? 'calc(50% - 70px)' : '100%'
                 }}
               >
                 {activeGroupName}
@@ -1030,7 +1043,13 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 <img
                   src={getAssetUrl('/stickers/rocket_ship.png')}
                   alt="Rocket"
-                  style={{ width: '20px', height: '20px', objectFit: 'contain', animation: 'kawaiiStickerDrift 3s ease-in-out infinite' }}
+                  style={{
+                    width: isCompactUi ? '16px' : isSmallUi ? '18px' : '20px',
+                    height: isCompactUi ? '16px' : isSmallUi ? '18px' : '20px',
+                    objectFit: 'contain',
+                    flexShrink: 0,
+                    animation: 'kawaiiStickerDrift 3s ease-in-out infinite'
+                  }}
                   title="Antigravity Rocket"
                 />
               )}
@@ -1038,7 +1057,14 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 <img
                   src={getAssetUrl('/aether/sword.png')}
                   alt="Sword"
-                  style={{ width: '18px', height: '18px', objectFit: 'contain', imageRendering: 'pixelated', transform: 'rotate(15deg)' }}
+                  style={{
+                    width: isCompactUi ? '14px' : isSmallUi ? '16px' : '18px',
+                    height: isCompactUi ? '14px' : isSmallUi ? '16px' : '18px',
+                    objectFit: 'contain',
+                    flexShrink: 0,
+                    imageRendering: 'pixelated',
+                    transform: 'rotate(15deg)'
+                  }}
                   title="Aether Sword"
                 />
               )}
@@ -1064,7 +1090,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 src={getAssetUrl('/deathnote/icons/title_deathnote_white.png')}
                 alt="Death Note"
                 style={{
-                  height: drawerWidth < 310 ? '24px' : '28px',
+                  height: isCompactUi ? '18px' : isSmallUi ? '21px' : drawerWidth < 310 ? '24px' : '28px',
                   objectFit: 'contain',
                   filter: 'drop-shadow(0 0 10px rgba(163, 38, 45, 0.85)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.95))',
                   userSelect: 'none'
@@ -1078,9 +1104,10 @@ export const DockFrame: React.FC<DockFrameProps> = ({
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: theme === 'eldenring' ? '3px' : '5px',
+              flexShrink: 0,
+              gap: theme === 'eldenring' ? (isCompactUi ? '2px' : '3px') : (isCompactUi ? '3px' : '5px'),
               ...(theme === 'eldenring' ? {
-                padding: '2px 3px',
+                padding: isCompactUi ? '1px 2px' : '2px 3px',
                 borderRadius: '4px',
                 background: 'rgba(17, 19, 16, 0.75)',
                 border: '1px solid rgba(197, 161, 90, 0.35)',
@@ -1094,8 +1121,8 @@ export const DockFrame: React.FC<DockFrameProps> = ({
               title="Search (Ctrl+F)"
               aria-label="Search"
               style={{
-                width: theme === 'eldenring' ? '33px' : '28px',
-                height: theme === 'eldenring' ? '31px' : '28px',
+                width: theme === 'eldenring' ? (isCompactUi ? '24px' : isSmallUi ? '27px' : '33px') : (isCompactUi ? '22px' : isSmallUi ? '25px' : '28px'),
+                height: theme === 'eldenring' ? (isCompactUi ? '24px' : isSmallUi ? '27px' : '31px') : (isCompactUi ? '22px' : isSmallUi ? '25px' : '28px'),
                 padding: 0,
                 display: 'flex',
                 alignItems: 'center',
@@ -1119,7 +1146,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 <img
                   src={getAssetUrl('/aether/search_gold.png')}
                   alt="Search"
-                  style={{ width: '20px', height: '20px', objectFit: 'contain', imageRendering: 'pixelated' }}
+                  style={{ width: isCompactUi ? '14px' : isSmallUi ? '16px' : '20px', height: isCompactUi ? '14px' : isSmallUi ? '16px' : '20px', objectFit: 'contain', imageRendering: 'pixelated' }}
                 />
               ) : theme === 'eldenring' ? (
                 <img
@@ -1131,10 +1158,10 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 <img
                   src={getAssetUrl('/onepiece/icons/search.png')}
                   alt="Search"
-                  style={{ width: '26px', height: '26px', objectFit: 'contain' }}
+                  style={{ width: isCompactUi ? '18px' : isSmallUi ? '21px' : '26px', height: isCompactUi ? '18px' : isSmallUi ? '21px' : '26px', objectFit: 'contain' }}
                 />
               ) : (
-                <Search size={14} color={theme === 'candy' ? '#db2777' : undefined} />
+                <Search size={isCompactUi ? 11 : isSmallUi ? 12 : 14} color={theme === 'candy' ? '#db2777' : undefined} />
               )}
             </button>
 
@@ -1149,8 +1176,8 @@ export const DockFrame: React.FC<DockFrameProps> = ({
               title={isMaximized ? "Restore Dock Size" : "Maximize Dock (460px x Full Height)"}
               aria-label={isMaximized ? "Restore Dock" : "Maximize Dock"}
               style={{
-                width: theme === 'eldenring' ? '33px' : '28px',
-                height: theme === 'eldenring' ? '31px' : '28px',
+                width: theme === 'eldenring' ? (isCompactUi ? '24px' : isSmallUi ? '27px' : '33px') : (isCompactUi ? '22px' : isSmallUi ? '25px' : '28px'),
+                height: theme === 'eldenring' ? (isCompactUi ? '24px' : isSmallUi ? '27px' : '31px') : (isCompactUi ? '22px' : isSmallUi ? '25px' : '28px'),
                 padding: 0,
                 display: 'flex',
                 alignItems: 'center',
@@ -1180,12 +1207,12 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 <img
                   src={getAssetUrl('/onepiece/icons/expand.png')}
                   alt="Expand"
-                  style={{ width: '26px', height: '26px', objectFit: 'contain' }}
+                  style={{ width: isCompactUi ? '18px' : isSmallUi ? '21px' : '26px', height: isCompactUi ? '18px' : isSmallUi ? '21px' : '26px', objectFit: 'contain' }}
                 />
               ) : isMaximized ? (
-                <Minimize2 size={13} color={theme === 'candy' ? '#db2777' : undefined} />
+                <Minimize2 size={isCompactUi ? 10 : isSmallUi ? 11 : 13} color={theme === 'candy' ? '#db2777' : undefined} />
               ) : (
-                <Maximize2 size={13} color={theme === 'candy' ? '#db2777' : undefined} />
+                <Maximize2 size={isCompactUi ? 10 : isSmallUi ? 11 : 13} color={theme === 'candy' ? '#db2777' : undefined} />
               )}
             </button>
 
@@ -1195,8 +1222,8 @@ export const DockFrame: React.FC<DockFrameProps> = ({
               title="Collapse (Esc)"
               aria-label="Collapse"
               style={{
-                width: theme === 'eldenring' ? '33px' : '28px',
-                height: theme === 'eldenring' ? '31px' : '28px',
+                width: theme === 'eldenring' ? (isCompactUi ? '24px' : isSmallUi ? '27px' : '33px') : (isCompactUi ? '22px' : isSmallUi ? '25px' : '28px'),
+                height: theme === 'eldenring' ? (isCompactUi ? '24px' : isSmallUi ? '27px' : '31px') : (isCompactUi ? '22px' : isSmallUi ? '25px' : '28px'),
                 padding: 0,
                 display: 'flex',
                 alignItems: 'center',
@@ -1220,7 +1247,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 <img
                   src={getAssetUrl('/aether/close_red.png')}
                   alt="Close"
-                  style={{ width: '20px', height: '20px', objectFit: 'contain', imageRendering: 'pixelated' }}
+                  style={{ width: isCompactUi ? '14px' : isSmallUi ? '16px' : '20px', height: isCompactUi ? '14px' : isSmallUi ? '16px' : '20px', objectFit: 'contain', imageRendering: 'pixelated' }}
                 />
               ) : theme === 'eldenring' ? (
                 <img
@@ -1232,10 +1259,10 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 <img
                   src={getAssetUrl('/onepiece/icons/close.png')}
                   alt="Close"
-                  style={{ width: '26px', height: '26px', objectFit: 'contain' }}
+                  style={{ width: isCompactUi ? '18px' : isSmallUi ? '21px' : '26px', height: isCompactUi ? '18px' : isSmallUi ? '21px' : '26px', objectFit: 'contain' }}
                 />
               ) : (
-                <X size={15} color={theme === 'candy' ? '#db2777' : undefined} />
+                <X size={isCompactUi ? 11 : isSmallUi ? 12 : 15} color={theme === 'candy' ? '#db2777' : undefined} />
               )}
             </button>
           </div>
