@@ -420,7 +420,11 @@ export const DockFrame: React.FC<DockFrameProps> = ({
               : '0 8px 28px rgba(0, 0, 0, 0.45)',
           overflow: 'hidden',
           position: 'relative',
-          background: 'var(--bg-dock)',
+          background: customTheme?.bgBlur && !['deathnote', 'kawaii', 'aether', 'eldenring', 'onepiece', 'candy', 'custom'].includes(theme || '')
+            ? (theme === 'light' ? 'rgba(255, 255, 255, 0.65)' : 'rgba(12, 12, 16, 0.68)')
+            : 'var(--bg-dock)',
+          backdropFilter: customTheme?.bgBlur ? 'blur(28px) saturate(190%)' : undefined,
+          WebkitBackdropFilter: customTheme?.bgBlur ? 'blur(28px) saturate(190%)' : undefined,
           flexShrink: 0
         }}
       >
@@ -471,8 +475,8 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat',
                 opacity: (customTheme?.bgOpacity ?? 100) / 100,
-                filter: customTheme?.bgBlur ? 'blur(12px) scale(1.06)' : undefined,
-                transition: 'background-image 0.5s ease-in-out, opacity 0.3s ease'
+                filter: customTheme?.bgBlur ? 'blur(28px) scale(1.08)' : undefined,
+                transition: 'background-image 0.5s ease-in-out, opacity 0.3s ease, filter 0.3s ease, transform 0.3s ease'
               }}
             />
           </div>
@@ -499,7 +503,8 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 backgroundSize: 'cover',
                 backgroundPosition: 'center 12%',
                 backgroundRepeat: 'no-repeat',
-                filter: customTheme?.bgBlur ? 'blur(12px) scale(1.06) brightness(1.02)' : 'brightness(1.02) contrast(1.08)'
+                filter: customTheme?.bgBlur ? 'blur(28px) scale(1.08) brightness(1.02)' : 'brightness(1.02) contrast(1.08)',
+                transition: 'filter 0.3s ease, transform 0.3s ease'
               }}
             />
             {/* Subtle atmospheric dark gradient for icon & footer legibility */}
@@ -536,7 +541,8 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 backgroundSize: 'cover',
                 backgroundPosition: 'center 20%',
                 backgroundRepeat: 'no-repeat',
-                filter: customTheme?.bgBlur ? 'blur(12px) scale(1.06)' : 'contrast(1.02) saturate(1.04)'
+                filter: customTheme?.bgBlur ? 'blur(28px) scale(1.08)' : 'contrast(1.02) saturate(1.04)',
+                transition: 'filter 0.3s ease, transform 0.3s ease'
               }}
             />
             {/* Soft dreamy vignette to preserve pastel tones while aiding text contrast */}
@@ -574,7 +580,8 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 backgroundPosition: 'center top',
                 backgroundRepeat: 'no-repeat',
                 opacity: 0.98,
-                filter: customTheme?.bgBlur ? 'blur(12px) scale(1.06)' : 'contrast(1.02) saturate(1.05)'
+                filter: customTheme?.bgBlur ? 'blur(28px) scale(1.08)' : 'contrast(1.02) saturate(1.05)',
+                transition: 'filter 0.3s ease, transform 0.3s ease'
               }}
             />
             {/* Luminous Heavenly Sky Ambient Gradient */}
@@ -613,10 +620,10 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   backgroundRepeat: 'no-repeat',
-                  filter: customTheme?.bgBlur ? 'blur(12px) scale(1.06) contrast(1.04)' : 'contrast(1.04) brightness(0.97) saturate(1.08)',
+                  filter: customTheme?.bgBlur ? 'blur(28px) scale(1.08) contrast(1.04)' : 'contrast(1.04) brightness(0.97) saturate(1.08)',
                   imageRendering: '-webkit-optimize-contrast',
                   opacity: eldenBgIndex === idx ? 1 : 0,
-                  transition: 'opacity 1.5s ease-in-out',
+                  transition: 'opacity 1.5s ease-in-out, filter 0.3s ease, transform 0.3s ease',
                   zIndex: 0
                 }}
               />
@@ -695,9 +702,9 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   backgroundRepeat: 'no-repeat',
-                  filter: customTheme?.bgBlur ? 'blur(12px) scale(1.06) contrast(1.02)' : 'contrast(1.02) brightness(0.98) saturate(1.06)',
+                  filter: customTheme?.bgBlur ? 'blur(28px) scale(1.08) contrast(1.02)' : 'contrast(1.02) brightness(0.98) saturate(1.06)',
                   opacity: onePieceBgIndex === idx ? 1 : 0,
-                  transition: 'opacity 1.5s ease-in-out',
+                  transition: 'opacity 1.5s ease-in-out, filter 0.3s ease, transform 0.3s ease',
                   zIndex: 0
                 }}
               />
@@ -764,9 +771,9 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   backgroundRepeat: 'no-repeat',
-                  filter: customTheme?.bgBlur ? 'blur(12px) scale(1.06) contrast(1.05)' : 'contrast(1.05) brightness(0.98) saturate(1.15)',
+                  filter: customTheme?.bgBlur ? 'blur(28px) scale(1.08) contrast(1.05)' : 'contrast(1.05) brightness(0.98) saturate(1.15)',
                   opacity: candyBgIndex === idx ? 1 : 0,
-                  transition: 'opacity 1.5s ease-in-out',
+                  transition: 'opacity 1.5s ease-in-out, filter 0.3s ease, transform 0.3s ease',
                   zIndex: 0
                 }}
               />

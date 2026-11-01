@@ -15,26 +15,44 @@ const Toggle: React.FC<{
   onChange: (v: boolean) => void;
 }> = ({ label, checked, onChange }) => (
   <div
+    onClick={() => onChange(!checked)}
     style={{
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      padding: '6px 0'
+      padding: '7px 8px',
+      margin: '2px -8px',
+      borderRadius: '6px',
+      cursor: 'pointer',
+      userSelect: 'none',
+      transition: 'background 0.15s ease'
+    }}
+    onMouseEnter={(e) => {
+      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)';
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.style.background = 'transparent';
     }}
   >
-    <span style={{ fontSize: '11.5px', color: 'var(--text-secondary)', flex: 1 }}>{label}</span>
+    <span style={{ fontSize: '11.5px', color: checked ? 'var(--text-primary)' : 'var(--text-secondary)', flex: 1, cursor: 'pointer' }}>
+      {label}
+    </span>
     <button
       type="button"
-      onClick={() => onChange(!checked)}
+      onClick={(e) => {
+        e.stopPropagation();
+        onChange(!checked);
+      }}
       style={{
         width: '38px',
         height: '20px',
         borderRadius: '10px',
-        background: checked ? 'var(--accent, #7c3aed)' : 'var(--bg-surface)',
-        border: '1px solid var(--btn-border)',
+        background: checked ? '#3b82f6' : 'var(--bg-surface)',
+        border: checked ? '1px solid #60a5fa' : '1px solid var(--btn-border)',
+        boxShadow: checked ? '0 0 10px rgba(59, 130, 246, 0.5)' : 'none',
         cursor: 'pointer',
         position: 'relative',
-        transition: 'background 0.2s ease',
+        transition: 'all 0.2s ease',
         flexShrink: 0
       }}
       aria-pressed={checked}
@@ -49,7 +67,8 @@ const Toggle: React.FC<{
           borderRadius: '50%',
           background: '#fff',
           boxShadow: '0 1px 3px rgba(0,0,0,0.4)',
-          transition: 'left 0.2s ease'
+          transition: 'left 0.2s ease',
+          pointerEvents: 'none'
         }}
       />
     </button>

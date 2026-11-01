@@ -425,13 +425,41 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         position: 'absolute',
         inset: 0,
         background: isAether ? '#142334' : 'var(--modal-bg)',
-        backdropFilter: 'blur(20px)',
+        backdropFilter: settings.customThemeBgBlur ? 'blur(28px)' : 'blur(20px)',
+        WebkitBackdropFilter: settings.customThemeBgBlur ? 'blur(28px)' : 'blur(20px)',
         zIndex: 60,
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden'
       }}
     >
+      {/* Custom Theme Thematic Background Artwork in Settings */}
+      {currentTheme === 'custom' && !settings.customThemeBgHide && (settings.customThemeBgImages || []).length > 0 && (
+        <div
+          className="custom-settings-bg"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 0,
+            pointerEvents: 'none',
+            overflow: 'hidden'
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: `url('${settings.customThemeBgImages![0]}')`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              filter: settings.customThemeBgBlur ? 'blur(28px) scale(1.08)' : undefined,
+              opacity: (settings.customThemeBgOpacity ?? 100) / 250,
+              transition: 'filter 0.3s ease, transform 0.3s ease'
+            }}
+          />
+        </div>
+      )}
+
       {/* Death Note Thematic Background Artwork */}
       {currentTheme === 'deathnote' && (
         <div
@@ -451,8 +479,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               backgroundImage: `url('${getAssetUrl('/deathnote/backgrounds/wallpaper_main_3.jpg')}')`,
               backgroundSize: 'cover',
               backgroundPosition: 'center 20%',
-              filter: 'brightness(0.65) contrast(1.15)',
-              opacity: 0.45
+              filter: settings.customThemeBgBlur
+                ? 'blur(28px) scale(1.08) brightness(0.65)'
+                : 'brightness(0.65) contrast(1.15)',
+              opacity: 0.45,
+              transition: 'filter 0.3s ease, transform 0.3s ease'
             }}
           />
           <div
