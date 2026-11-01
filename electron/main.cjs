@@ -1592,20 +1592,49 @@ ipcMain.handle('dock:set-audio-device', async (event, deviceId) => {
   });
 });
 
+ipcMain.handle('dock:get-master-volume', async () => {
+  return new Promise((resolve) => {
+    if (process.platform !== 'win32' || !fs.existsSync(audioHelperScript)) {
+      return resolve({ volume: 50, isMuted: false });
+    }
+    exec(`powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "${audioHelperScript}" -Action GetVolume`, { timeout: 2500 }, (err, stdout) => {
+      if (err || !stdout || !stdout.trim()) return resolve({ volume: 50, isMuted: false });
+      try {
+        const json = JSON.parse(stdout.trim());
+        resolve({ volume: typeof json.volume === 'number' ? json.volume : 50, isMuted: !!json.isMuted });
+      } catch {
+        resolve({ volume: 50, isMuted: false });
+      }
+    });
+  });
+});
+
 ipcMain.handle('dock:set-master-volume', async (event, volume) => {
   return new Promise((resolve) => {
-    if (process.platform !== 'win32' || !fs.existsSync(audioHelperScript)) return resolve(false);
-    exec(`powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "${audioHelperScript}" -Action SetVolume -Volume ${volume}`, { timeout: 2000 }, (err) => {
-      resolve(!err);
+    if (process.platform !== 'win32' || !fs.existsSync(audioHelperScript)) return resolve({ volume, isMuted: false });
+    exec(`powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "${audioHelperScript}" -Action SetVolume -Volume ${volume}`, { timeout: 2500 }, (err, stdout) => {
+      if (!err && stdout && stdout.trim()) {
+        try {
+          const json = JSON.parse(stdout.trim());
+          return resolve({ volume: typeof json.volume === 'number' ? json.volume : volume, isMuted: !!json.isMuted });
+        } catch {}
+      }
+      resolve({ volume, isMuted: false });
     });
   });
 });
 
 ipcMain.handle('dock:toggle-audio-mute', async () => {
   return new Promise((resolve) => {
-    if (process.platform !== 'win32' || !fs.existsSync(audioHelperScript)) return resolve(false);
-    exec(`powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "${audioHelperScript}" -Action ToggleMute`, { timeout: 2000 }, (err) => {
-      resolve(!err);
+    if (process.platform !== 'win32' || !fs.existsSync(audioHelperScript)) return resolve({ volume: 50, isMuted: false });
+    exec(`powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "${audioHelperScript}" -Action ToggleMute`, { timeout: 2500 }, (err, stdout) => {
+      if (!err && stdout && stdout.trim()) {
+        try {
+          const json = JSON.parse(stdout.trim());
+          return resolve({ volume: typeof json.volume === 'number' ? json.volume : 50, isMuted: !!json.isMuted });
+        } catch {}
+      }
+      resolve({ volume: 50, isMuted: false });
     });
   });
 });

@@ -196,7 +196,7 @@ export const CustomThemePanel: React.FC<CustomThemePanelProps> = ({ settings, on
   const bgBlur = settings.customThemeBgBlur || false;
   const bgHide = settings.customThemeBgHide || false;
   const bgOpacity = settings.customThemeBgOpacity ?? 100;
-  const bgRotation = settings.customThemeBgRotation || false;
+  const bgRotation = settings.customThemeBgRotation ?? true;
   const bgRotSecs = settings.customThemeBgRotationSecs || 30;
   const hideSidebar = settings.customThemeHideSidebar || false;
   const hideMods = settings.customThemeHideSidebarModules || false;
@@ -260,7 +260,7 @@ export const CustomThemePanel: React.FC<CustomThemePanelProps> = ({ settings, on
       customThemeBgBlur: false,
       customThemeBgHide: false,
       customThemeBgOpacity: 100,
-      customThemeBgRotation: false,
+      customThemeBgRotation: true,
       customThemeBgRotationSecs: 30,
       customThemeHeaderColor: undefined,
       customThemeBaseColor: undefined,

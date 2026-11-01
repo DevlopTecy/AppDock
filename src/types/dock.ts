@@ -65,13 +65,13 @@ export interface DockSettings {
   autoCheckUpdates?: boolean;   // Automatically check for GitHub updates
   githubRepo?: string;          // GitHub repository (e.g. "owner/repo")
   hideFromTaskbar?: boolean;    // Hide from Windows taskbar, running quietly in tray while staying on screen
-  autoStartWithWindows?: boolean;// Automatically run and set up when Windows boots (Default: false)
+  autoStartWithWindows?: boolean;// Automatically run and set up when Windows boots (Default: true)
   // Custom Theme Studio settings
   customThemeBgImages?: string[];              // Up to 5 base64 JPEG data URLs
   customThemeBgBlur?: boolean;                 // Blur the background image
   customThemeBgHide?: boolean;                 // Hide background (solid color only)
   customThemeBgOpacity?: number;               // 0–100, default 100
-  customThemeBgRotation?: boolean;             // Auto-rotate through images
+  customThemeBgRotation?: boolean;             // Auto-rotate through images (Default: true)
   customThemeBgRotationSecs?: 20 | 30 | 40 | 50 | 60;
   customThemeHeaderColor?: string;             // CSS color string
   customThemeBaseColor?: string;
@@ -89,7 +89,7 @@ export interface DockSettings {
   hideQuickIcons?: boolean;                    // Hides Quick Icons bar in companion sidebar
   quickIcons?: AppItem[];                      // Pinned quick-launch icons displayed in footer beside Settings
   // Sound FX Engine settings
-  soundEnabled?: boolean;                      // Acoustic feedback enabled (Default: true)
+  soundEnabled?: boolean;                      // Acoustic feedback enabled (Default: false)
   soundVolume?: number;                        // Master sound volume 0-100 (Default: 50)
   soundPack?: SoundPackType;                   // Sound profile pack (Default: 'theme')
   // Process & Window Intelligence settings

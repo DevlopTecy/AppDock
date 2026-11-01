@@ -310,7 +310,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     { id: 'default-headphones', name: 'Headphones / Headset', type: 'headphones', status: 'OK' }
   ]);
   const [activeAudioDeviceId, setActiveAudioDeviceId] = useState<string>('default-speaker');
-  const [masterAudioVolume, setMasterAudioVolume] = useState<number>(75);
+  const [isDeviceDropdownOpen, setIsDeviceDropdownOpen] = useState<boolean>(false);
+  const [masterAudioVolume, setMasterAudioVolume] = useState<number>(50);
   const [isAudioMuted, setIsAudioMuted] = useState<boolean>(false);
   const [isAudioLoading, setIsAudioLoading] = useState<boolean>(false);
 
@@ -324,6 +325,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           if (!list.some((d: any) => d.id === activeAudioDeviceId)) {
             setActiveAudioDeviceId(list[0].id);
           }
+        }
+      }
+      if (typeof window !== 'undefined' && (window as any).appDock?.getMasterVolume) {
+        const volInfo = await (window as any).appDock.getMasterVolume();
+        if (volInfo && typeof volInfo.volume === 'number') {
+          setMasterAudioVolume(volInfo.volume);
+          setIsAudioMuted(!!volInfo.isMuted);
         }
       }
     } catch {}
@@ -341,6 +349,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   const handleSelectAudioDevice = async (dev: { id: string; name: string; type: string }) => {
     soundEngine.previewPackSample(settings.soundPack || 'theme', settings.theme);
     setActiveAudioDeviceId(dev.id);
+    setIsDeviceDropdownOpen(false);
     if (typeof window !== 'undefined' && (window as any).appDock?.setAudioDevice) {
       await (window as any).appDock.setAudioDevice(dev.id);
     }
@@ -348,9 +357,27 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
   const handleToggleAudioMute = async () => {
     soundEngine.previewPackSample(settings.soundPack || 'theme', settings.theme);
-    setIsAudioMuted((prev) => !prev);
     if (typeof window !== 'undefined' && (window as any).appDock?.toggleAudioMute) {
-      await (window as any).appDock.toggleAudioMute();
+      const res = await (window as any).appDock.toggleAudioMute();
+      if (res && typeof res.isMuted === 'boolean') {
+        setIsAudioMuted(res.isMuted);
+        if (typeof res.volume === 'number') setMasterAudioVolume(res.volume);
+        return;
+      }
+    }
+    setIsAudioMuted((prev) => !prev);
+  };
+
+  const handleMasterVolumeChange = async (newVal: number) => {
+    const clamped = Math.max(0, Math.min(100, Math.round(newVal)));
+    setMasterAudioVolume(clamped);
+    if (isAudioMuted && clamped > 0) setIsAudioMuted(false);
+    if (typeof window !== 'undefined' && (window as any).appDock?.setMasterVolume) {
+      const res = await (window as any).appDock.setMasterVolume(clamped);
+      if (res && typeof res.volume === 'number') {
+        setMasterAudioVolume(res.volume);
+        setIsAudioMuted(!!res.isMuted);
+      }
     }
   };
 
@@ -516,6 +543,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   const currentTheme = settings.theme || 'dark';
   const isAether = currentTheme === 'aether';
   const isEldenRing = currentTheme === 'eldenring';
+  const activeDev = audioDevices.find((d) => d.id === activeAudioDeviceId) || audioDevices[0];
+  const isHeadphones = activeDev?.type === 'headphones';
   const weatherCities = settings.weatherCities && settings.weatherCities.length > 0
     ? settings.weatherCities
     : ['London', 'New York', 'Tokyo'];
@@ -1754,7 +1783,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             {/* 4. Start with Windows (Auto Setup on Windows Boot) */}
             <div
               onClick={() => {
-                const newVal = !(settings.autoStartWithWindows ?? false);
+                const newVal = !(settings.autoStartWithWindows ?? true);
                 onUpdateSettings({ autoStartWithWindows: newVal });
                 if (typeof window !== 'undefined' && (window as any).appDock?.setAutoLaunch) {
                   (window as any).appDock.setAutoLaunch(newVal);
@@ -1782,26 +1811,26 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               <button
                 type="button"
                 role="switch"
-                aria-checked={settings.autoStartWithWindows ?? false}
+                aria-checked={settings.autoStartWithWindows ?? true}
                 onClick={(e) => {
                   e.stopPropagation();
-                  const newVal = !(settings.autoStartWithWindows ?? false);
+                  const newVal = !(settings.autoStartWithWindows ?? true);
                   onUpdateSettings({ autoStartWithWindows: newVal });
                   if (typeof window !== 'undefined' && (window as any).appDock?.setAutoLaunch) {
                     (window as any).appDock.setAutoLaunch(newVal);
                   }
                 }}
-                className={`toggle-switch ${(settings.autoStartWithWindows ?? false) ? 'active' : ''}`}
+                className={`toggle-switch ${(settings.autoStartWithWindows ?? true) ? 'active' : ''}`}
                 style={{
                   width: '36px',
                   height: '20px',
                   borderRadius: '10px',
-                  background: (settings.autoStartWithWindows ?? false)
+                  background: (settings.autoStartWithWindows ?? true)
                     ? (currentTheme === 'deathnote' ? '#c41e24' : isAether ? '#59bcf4' : 'var(--accent-color, #3b82f6)')
                     : 'var(--btn-border)',
                   position: 'relative',
                   cursor: 'pointer',
-                  border: '1px solid ' + ((settings.autoStartWithWindows ?? false) ? 'rgba(255,255,255,0.18)' : 'var(--border-subtle)'),
+                  border: '1px solid ' + ((settings.autoStartWithWindows ?? true) ? 'rgba(255,255,255,0.18)' : 'var(--border-subtle)'),
                   padding: 0,
                   transition: 'background 0.18s ease, border-color 0.18s ease',
                   flexShrink: 0
@@ -1817,7 +1846,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                     background: '#ffffff',
                     position: 'absolute',
                     top: '2px',
-                    left: (settings.autoStartWithWindows ?? false) ? '18px' : '2px',
+                    left: (settings.autoStartWithWindows ?? true) ? '18px' : '2px',
                     transition: 'left 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
                     boxShadow: '0 1px 3px rgba(0, 0, 0, 0.35)'
                   }}
@@ -2041,7 +2070,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             </button>
           </div>
 
-          {/* Card A: Audio Output Endpoint Switcher (Flexible UI) */}
+          {/* Card A: Audio Output Endpoint Switcher (Compact Dropdown + Master Volume) */}
           <div
             style={{
               display: 'flex',
@@ -2049,9 +2078,10 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               background: 'var(--bg-surface)',
               border: isEldenRing ? '1px solid rgba(197, 161, 90, 0.35)' : '1px solid var(--btn-border)',
               borderRadius: '8px',
-              overflow: 'hidden',
+              overflow: 'visible',
               boxSizing: 'border-box',
-              width: '100%'
+              width: '100%',
+              position: 'relative'
             }}
           >
             <div
@@ -2059,17 +2089,14 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: '9px 12px',
+                padding: '7px 10px',
                 borderBottom: '1px solid var(--border-subtle)',
                 background: 'rgba(0, 0, 0, 0.08)'
               }}
             >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                <span style={{ fontSize: '11.5px', color: isEldenRing ? '#EAC477' : 'var(--text-primary)', fontWeight: 600 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '11px', color: isEldenRing ? '#EAC477' : 'var(--text-primary)', fontWeight: 600 }}>
                   Audio Playback Device
-                </span>
-                <span style={{ fontSize: '9.5px', color: 'var(--text-muted)' }}>
-                  1-Click toggle between Headphones and Desktop Speakers
                 </span>
               </div>
               <button
@@ -2081,7 +2108,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                   border: 'none',
                   color: 'var(--text-muted)',
                   cursor: 'pointer',
-                  padding: '4px',
+                  padding: '3px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -2089,110 +2116,171 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 }}
                 title="Refresh audio endpoints"
               >
-                <RefreshCw size={12} style={{ animation: isAudioLoading ? 'spin 1s linear infinite' : 'none' }} />
+                <RefreshCw size={11} style={{ animation: isAudioLoading ? 'spin 1s linear infinite' : 'none' }} />
               </button>
             </div>
 
-            {/* Flexible Endpoint Buttons List */}
-            <div style={{ padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: '5px', boxSizing: 'border-box' }}>
-              {audioDevices.map((dev) => {
-                const isSelected = activeAudioDeviceId === dev.id;
-                const isHeadphones = dev.type === 'headphones';
-                return (
+            {/* Compact Dropdown Selector */}
+            <div style={{ padding: '7px 10px', position: 'relative' }}>
+              <button
+                type="button"
+                onClick={() => setIsDeviceDropdownOpen(!isDeviceDropdownOpen)}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '6px 8px',
+                  borderRadius: '6px',
+                  background: 'var(--bg-surface-active)',
+                  border: isEldenRing ? '1px solid rgba(234, 196, 119, 0.4)' : '1px solid var(--border-subtle)',
+                  cursor: 'pointer',
+                  boxSizing: 'border-box',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1, paddingRight: '4px' }}>
                   <div
-                    key={dev.id}
-                    onClick={() => handleSelectAudioDevice(dev)}
                     style={{
+                      width: '22px',
+                      height: '22px',
+                      borderRadius: '5px',
+                      background: isEldenRing ? '#EAC477' : 'var(--accent, #3b82f6)',
+                      color: isEldenRing ? '#171813' : '#ffffff',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '7px 9px',
-                      borderRadius: '6px',
-                      background: isSelected
-                        ? (isEldenRing ? 'rgba(234, 196, 119, 0.16)' : 'rgba(59, 130, 246, 0.14)')
-                        : 'var(--bg-surface-active)',
-                      border: isSelected
-                        ? (isEldenRing ? '1.5px solid #EAC477' : '1.5px solid var(--accent, #3b82f6)')
-                        : '1px solid var(--border-subtle)',
-                      cursor: 'pointer',
-                      transition: 'all 0.14s ease',
-                      boxSizing: 'border-box',
-                      width: '100%',
-                      overflow: 'hidden'
+                      justifyContent: 'center',
+                      flexShrink: 0
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1, paddingRight: '6px' }}>
-                      <div
-                        style={{
-                          width: '24px',
-                          height: '24px',
-                          borderRadius: '5px',
-                          background: isSelected
-                            ? (isEldenRing ? '#EAC477' : 'var(--accent, #3b82f6)')
-                            : 'rgba(0,0,0,0.2)',
-                          color: isSelected
-                            ? (isEldenRing ? '#171813' : '#ffffff')
-                            : 'var(--text-secondary)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          flexShrink: 0
-                        }}
-                      >
-                        {isHeadphones ? <Headphones size={13} /> : <Speaker size={13} />}
-                      </div>
-
-                      <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
-                        <span
-                          style={{
-                            fontSize: '11px',
-                            fontWeight: isSelected ? 600 : 500,
-                            color: isSelected
-                              ? (isEldenRing ? '#EAC477' : 'var(--text-primary)')
-                              : 'var(--text-secondary)',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap'
-                          }}
-                        >
-                          {dev.name}
-                        </span>
-                        <span style={{ fontSize: '9px', color: 'var(--text-muted)' }}>
-                          {isHeadphones ? 'Headset / Earphones' : 'Desktop Speakers'}
-                        </span>
-                      </div>
-                    </div>
-
-                    {isSelected && (
-                      <div
-                        style={{
-                          width: '16px',
-                          height: '16px',
-                          borderRadius: '50%',
-                          background: isEldenRing ? '#EAC477' : 'var(--accent, #3b82f6)',
-                          color: isEldenRing ? '#171813' : '#ffffff',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          flexShrink: 0
-                        }}
-                      >
-                        <Check size={10} strokeWidth={3} />
-                      </div>
-                    )}
+                    {isHeadphones ? <Headphones size={12} /> : <Speaker size={12} />}
                   </div>
-                );
-              })}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', minWidth: 0, flex: 1 }}>
+                    <span
+                      style={{
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        color: isEldenRing ? '#EAC477' : 'var(--text-primary)',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        maxWidth: '100%',
+                        textAlign: 'left'
+                      }}
+                    >
+                      {activeDev?.name || 'Default Output Device'}
+                    </span>
+                    <span style={{ fontSize: '9px', color: 'var(--text-muted)' }}>
+                      {isHeadphones ? 'Headset / Earphones' : 'Desktop Speakers'}
+                    </span>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+                  <span
+                    style={{
+                      fontSize: '8.5px',
+                      padding: '1px 5px',
+                      borderRadius: '4px',
+                      background: 'rgba(0,0,0,0.2)',
+                      color: 'var(--text-muted)'
+                    }}
+                  >
+                    {audioDevices.length}
+                  </span>
+                  <ChevronDown
+                    size={14}
+                    style={{
+                      color: 'var(--text-muted)',
+                      transform: isDeviceDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                      transition: 'transform 0.18s ease'
+                    }}
+                  />
+                </div>
+              </button>
+
+              {/* Collapsible Dropdown Options */}
+              {isDeviceDropdownOpen && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: 'calc(100% - 2px)',
+                    left: '10px',
+                    right: '10px',
+                    zIndex: 50,
+                    background: isEldenRing ? '#1a1815' : 'var(--bg-surface)',
+                    border: isEldenRing ? '1px solid #EAC477' : '1px solid var(--btn-border)',
+                    borderRadius: '6px',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+                    maxHeight: '135px',
+                    overflowY: 'auto',
+                    padding: '4px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '2px',
+                    boxSizing: 'border-box'
+                  }}
+                >
+                  {audioDevices.map((dev) => {
+                    const isSelected = activeAudioDeviceId === dev.id;
+                    const isHead = dev.type === 'headphones';
+                    return (
+                      <div
+                        key={dev.id}
+                        onClick={() => handleSelectAudioDevice(dev)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '5px 8px',
+                          borderRadius: '4px',
+                          background: isSelected
+                            ? (isEldenRing ? 'rgba(234, 196, 119, 0.2)' : 'rgba(59, 130, 246, 0.18)')
+                            : 'transparent',
+                          cursor: 'pointer',
+                          transition: 'background 0.12s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isSelected) e.currentTarget.style.background = 'var(--bg-surface-hover)';
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isSelected) e.currentTarget.style.background = 'transparent';
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '7px', minWidth: 0, flex: 1, paddingRight: '6px' }}>
+                          <div style={{ color: isSelected ? (isEldenRing ? '#EAC477' : 'var(--accent, #3b82f6)') : 'var(--text-muted)', flexShrink: 0 }}>
+                            {isHead ? <Headphones size={12} /> : <Speaker size={12} />}
+                          </div>
+                          <span
+                            style={{
+                              fontSize: '10.5px',
+                              fontWeight: isSelected ? 600 : 400,
+                              color: isSelected ? (isEldenRing ? '#EAC477' : 'var(--text-primary)') : 'var(--text-secondary)',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap'
+                            }}
+                          >
+                            {dev.name}
+                          </span>
+                        </div>
+                        {isSelected && (
+                          <Check size={11} strokeWidth={2.5} style={{ color: isEldenRing ? '#EAC477' : 'var(--accent, #3b82f6)', flexShrink: 0 }} />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
-            {/* Master Volume */}
+            {/* Master Volume: Accurate to Windows */}
             <div
               style={{
-                padding: '8px 12px 10px 12px',
+                padding: '7px 10px 9px 10px',
                 borderTop: '1px solid var(--border-subtle)',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '6px',
+                gap: '5px',
                 boxSizing: 'border-box'
               }}
             >
@@ -2208,7 +2296,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                   {isAudioMuted ? 'MUTED' : `${masterAudioVolume}%`}
                 </span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', boxSizing: 'border-box' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', width: '100%', boxSizing: 'border-box' }}>
                 <button
                   type="button"
                   onClick={handleToggleAudioMute}
@@ -2231,19 +2319,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 </button>
                 <CustomRangeBar
                   value={masterAudioVolume / 100}
-                  min={0.05}
+                  min={0}
                   max={1.0}
-                  step={0.05}
+                  step={0.02}
                   unit="%"
                   formatValue={(val) => `${Math.round(val * 100)}%`}
-                  onChange={(val) => {
-                    const v = Math.round(val * 100);
-                    setMasterAudioVolume(v);
-                    if (isAudioMuted && v > 0) setIsAudioMuted(false);
-                    if (typeof window !== 'undefined' && (window as any).appDock?.setMasterVolume) {
-                      (window as any).appDock.setMasterVolume(v);
-                    }
-                  }}
+                  onChange={(val) => handleMasterVolumeChange(val * 100)}
                 />
               </div>
             </div>
@@ -2274,7 +2355,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: '9px 12px',
+                padding: '7px 10px',
                 cursor: 'pointer',
                 borderBottom: '1px solid var(--border-subtle)',
                 transition: 'background 0.15s ease'
@@ -2282,12 +2363,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-surface-hover)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
             >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', paddingRight: '12px' }}>
-                <span style={{ fontSize: '11.5px', color: isEldenRing ? '#EAC477' : 'var(--text-primary)', fontWeight: 600 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', paddingRight: '10px' }}>
+                <span style={{ fontSize: '11px', color: isEldenRing ? '#EAC477' : 'var(--text-primary)', fontWeight: 600 }}>
                   Acoustic Feedback
                 </span>
-                <span style={{ fontSize: '9.5px', color: 'var(--text-muted)', lineHeight: '1.3' }}>
-                  Tactile acoustic bites on dock expand, collapse, card click, and hover.
+                <span style={{ fontSize: '9px', color: 'var(--text-muted)', lineHeight: '1.2' }}>
+                  Sensory sound bites on click, hover & toggle
                 </span>
               </div>
               <button
@@ -2303,8 +2384,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 }}
                 className={`toggle-switch ${(settings.soundEnabled ?? true) ? 'active' : ''}`}
                 style={{
-                  width: '36px',
-                  height: '20px',
+                  width: '34px',
+                  height: '19px',
                   borderRadius: '10px',
                   background: (settings.soundEnabled ?? true)
                     ? (isEldenRing ? '#EAC477' : currentTheme === 'deathnote' ? '#c41e24' : isAether ? '#59bcf4' : 'var(--accent, #3b82f6)')
@@ -2321,13 +2402,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               >
                 <div
                   style={{
-                    width: '14px',
-                    height: '14px',
+                    width: '13px',
+                    height: '13px',
                     borderRadius: '50%',
                     background: (settings.soundEnabled ?? true) && isEldenRing ? '#171813' : '#ffffff',
                     position: 'absolute',
                     top: '2px',
-                    left: (settings.soundEnabled ?? true) ? '18px' : '2px',
+                    left: (settings.soundEnabled ?? true) ? '17px' : '2px',
                     transition: 'left 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
                     boxShadow: '0 1px 3px rgba(0, 0, 0, 0.35)'
                   }}
@@ -2336,12 +2417,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             </div>
 
             {/* Sound Profile Pack Selector with Distinct Sound Previews */}
-            <div style={{ padding: '9px 12px', display: 'flex', flexDirection: 'column', gap: '7px', borderBottom: '1px solid var(--border-subtle)', boxSizing: 'border-box' }}>
+            <div style={{ padding: '7px 10px', display: 'flex', flexDirection: 'column', gap: '5px', borderBottom: '1px solid var(--border-subtle)', boxSizing: 'border-box' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '10.5px', color: 'var(--text-secondary)', fontWeight: 600 }}>Sound Profile Pack</span>
                 <span
                   style={{
-                    fontSize: '10px',
+                    fontSize: '9.5px',
                     color: isEldenRing ? '#EAC477' : 'var(--accent, #3b82f6)',
                     fontWeight: 700,
                     textTransform: 'capitalize'
@@ -2373,10 +2454,10 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                         soundEngine.previewPackSample(p.id as any, settings.theme);
                       }}
                       style={{
-                        padding: '6px 4px',
-                        fontSize: '10px',
+                        padding: '4px 3px',
+                        fontSize: '9.5px',
                         fontWeight: isSel ? 700 : 500,
-                        borderRadius: '5px',
+                        borderRadius: '4px',
                         border: isSel
                           ? (isEldenRing ? '1px solid #EAC477' : '1px solid var(--accent, #3b82f6)')
                           : '1px solid var(--btn-border)',
@@ -2390,7 +2471,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                         textAlign: 'center',
                         transition: 'all 0.15s ease',
                         boxShadow: isSel
-                          ? (isEldenRing ? '0 0 8px rgba(234, 196, 119, 0.45)' : '0 1px 4px rgba(59, 130, 246, 0.4)')
+                          ? (isEldenRing ? '0 0 6px rgba(234, 196, 119, 0.4)' : '0 1px 3px rgba(59, 130, 246, 0.35)')
                           : 'none',
                         boxSizing: 'border-box'
                       }}
@@ -2403,10 +2484,10 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             </div>
 
             {/* Feedback Volume Slider */}
-            <div style={{ padding: '8px 12px 10px 12px', display: 'flex', flexDirection: 'column', gap: '6px', boxSizing: 'border-box' }}>
+            <div style={{ padding: '6px 10px 8px 10px', display: 'flex', flexDirection: 'column', gap: '5px', boxSizing: 'border-box' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '10.5px', color: 'var(--text-secondary)', fontWeight: 600 }}>Feedback Volume</span>
-                <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{settings.soundVolume ?? 50}%</span>
+                <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 600 }}>Feedback Volume</span>
+                <span style={{ fontSize: '9.5px', color: 'var(--text-muted)' }}>{settings.soundVolume ?? 50}%</span>
               </div>
               <CustomRangeBar
                 value={(settings.soundVolume ?? 50) / 100}

@@ -15,7 +15,7 @@ test('Phase 1 - Sound FX: types/dock.ts includes SoundPackType and sound setting
 
 test('Phase 1 - Sound FX: storage.ts sets default sound enabled, volume, and pack', () => {
   const content = fs.readFileSync(path.join(projectRoot, 'src', 'utils', 'storage.ts'), 'utf8');
-  assert.ok(content.includes('soundEnabled: true'), 'DEFAULT_SETTINGS must have soundEnabled: true');
+  assert.ok(content.includes('soundEnabled: false'), 'DEFAULT_SETTINGS must have soundEnabled: false');
   assert.ok(content.includes('soundVolume: 50'), 'DEFAULT_SETTINGS must have soundVolume: 50');
   assert.ok(content.includes("soundPack: 'theme'"), "DEFAULT_SETTINGS must have soundPack: 'theme'");
 });

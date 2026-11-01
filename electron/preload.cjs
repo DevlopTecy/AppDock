@@ -68,6 +68,7 @@ contextBridge.exposeInMainWorld('appDock', {
   // Audio Switcher & Volume (Phase 4)
   getAudioDevices: () => ipcRenderer.invoke('dock:get-audio-devices'),
   setAudioDevice: (deviceId) => ipcRenderer.invoke('dock:set-audio-device', deviceId),
+  getMasterVolume: () => ipcRenderer.invoke('dock:get-master-volume'),
   setMasterVolume: (volume) => ipcRenderer.invoke('dock:set-master-volume', volume),
   toggleAudioMute: () => ipcRenderer.invoke('dock:toggle-audio-mute'),
   // Auto-Update APIs

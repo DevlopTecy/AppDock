@@ -25,7 +25,8 @@ export const DEFAULT_SETTINGS: DockSettings = {
   hideQuickIcons: false,
   customThemeHideQuickIcons: false,
   quickIcons: [],
-  soundEnabled: true,
+  customThemeBgRotation: true,
+  soundEnabled: false,
   soundVolume: 50,
   soundPack: 'theme',
   showRunningIndicators: true,
@@ -127,20 +128,42 @@ export function normalizeUrl(url: string): string {
   return 'https://' + trimmed;
 }
 
+const MIGRATION_KEY = 'appdock_defaults_v1_0_7_applied';
+
 export function loadDockData(): { groups: AppGroup[]; settings: DockSettings } {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed && Array.isArray(parsed.groups) && parsed.groups.length > 0) {
+        const mergedSettings: DockSettings = { ...DEFAULT_SETTINGS, ...(parsed.settings || {}) };
+
+        // One-time update preset migration: enforce required defaults when user downloads or updates
+        if (typeof window !== 'undefined' && !localStorage.getItem(MIGRATION_KEY)) {
+          mergedSettings.customThemeBgRotation = true;
+          mergedSettings.autoStartWithWindows = true;
+          mergedSettings.smartWindowDodge = false;
+          mergedSettings.soundEnabled = false;
+          try {
+            localStorage.setItem(MIGRATION_KEY, 'true');
+            saveDockData(parsed.groups, mergedSettings);
+          } catch {}
+        }
+
         return {
           groups: parsed.groups,
-          settings: { ...DEFAULT_SETTINGS, ...(parsed.settings || {}) }
+          settings: mergedSettings
         };
       }
     }
   } catch (err) {
     console.warn('Failed to parse dock data from localStorage:', err);
+  }
+
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem(MIGRATION_KEY, 'true');
+    } catch {}
   }
 
   return {

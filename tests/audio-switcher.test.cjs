@@ -19,6 +19,7 @@ test('Phase 4 - Audio Switcher: electron/main.cjs registers IPC handlers for aud
   const mainContent = fs.readFileSync(path.join(projectRoot, 'electron', 'main.cjs'), 'utf8');
   assert.ok(mainContent.includes("ipcMain.handle('dock:get-audio-devices'"), 'main.cjs must handle dock:get-audio-devices');
   assert.ok(mainContent.includes("ipcMain.handle('dock:set-audio-device'"), 'main.cjs must handle dock:set-audio-device');
+  assert.ok(mainContent.includes("ipcMain.handle('dock:get-master-volume'"), 'main.cjs must handle dock:get-master-volume');
   assert.ok(mainContent.includes("ipcMain.handle('dock:set-master-volume'"), 'main.cjs must handle dock:set-master-volume');
   assert.ok(mainContent.includes("ipcMain.handle('dock:toggle-audio-mute'"), 'main.cjs must handle dock:toggle-audio-mute');
 });
@@ -27,6 +28,7 @@ test('Phase 4 - Audio Switcher: electron/preload.cjs exposes audio management AP
   const preloadContent = fs.readFileSync(path.join(projectRoot, 'electron', 'preload.cjs'), 'utf8');
   assert.ok(preloadContent.includes('getAudioDevices:'), 'preload.cjs must expose getAudioDevices');
   assert.ok(preloadContent.includes('setAudioDevice:'), 'preload.cjs must expose setAudioDevice');
+  assert.ok(preloadContent.includes('getMasterVolume:'), 'preload.cjs must expose getMasterVolume');
   assert.ok(preloadContent.includes('setMasterVolume:'), 'preload.cjs must expose setMasterVolume');
   assert.ok(preloadContent.includes('toggleAudioMute:'), 'preload.cjs must expose toggleAudioMute');
 });
@@ -52,6 +54,8 @@ test('Phase 4 - Audio Switcher: Sound button removed from ConnectorHub and integ
 
   const settingsContent = fs.readFileSync(path.join(projectRoot, 'src', 'components', 'SettingsView.tsx'), 'utf8');
   assert.ok(settingsContent.includes('Audio Playback Device'), 'SettingsView must render Audio Playback Device switcher');
+  assert.ok(settingsContent.includes('isDeviceDropdownOpen'), 'SettingsView must support compact dropdown for audio devices');
+  assert.ok(settingsContent.includes('getMasterVolume'), 'SettingsView must query real master volume from Windows');
   assert.ok(settingsContent.includes('getAudioDevices'), 'SettingsView must interact with audio endpoints');
 });
 

@@ -4,7 +4,7 @@ export type SoundEvent = 'expand' | 'collapse' | 'hover' | 'launch' | 'click' | 
 
 class SoundEngine {
   private ctx: AudioContext | null = null;
-  private enabled: boolean = true;
+  private enabled: boolean = false;
   private volume: number = 0.5; // 0.0 to 1.0
   private soundPack: SoundPackType = 'theme';
   private lastHoverTime: number = 0;
