@@ -111,6 +111,14 @@
   - Quick Icons companion rail and search modal.
   - High-resolution previews for Fancy Themes (Death Note, Kawaii, Aether, Elden Ring, One Piece, Candy).
 
+#### E. Elden Ring Sidebar Proportion & Size Refinement
+- **Optimization**: Decreased the dimensions of the Elden Ring companion module sidebar and banners to feel harmonious, compact, and balanced with the rest of the dock.
+- **Adjustments**:
+  - Reduced container width from 50px to 42px.
+  - Reduced button height from 72px to 54px.
+  - Reduced banner image height from 68px to 50px (maxWidth 34px), preserving full texture detail and aspect ratio without taking excessive vertical screen space.
+- **Key Files**: [`src/components/connectors/ConnectorHub.tsx`](file:///d:/Projects/projects/Project%205_AppDock/src/components/connectors/ConnectorHub.tsx), [`src/index.css`](file:///d:/Projects/projects/Project%205_AppDock/src/index.css).
+
 ---
 
 ## 🧪 Automated Verification & Test Coverage

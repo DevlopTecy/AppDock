@@ -223,8 +223,8 @@ export const QuickIconsBar: React.FC<QuickIconsBarProps> = ({
           src={getAssetUrl('/eldenring/icons/add.png')}
           alt="Add"
           style={{
-            width: '18px',
-            height: '18px',
+            width: '100%',
+            height: '100%',
             objectFit: 'contain',
             filter: 'drop-shadow(0 0 6px rgba(234, 196, 119, 0.85))'
           }}

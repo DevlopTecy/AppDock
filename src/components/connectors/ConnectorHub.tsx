@@ -52,15 +52,16 @@ export const ConnectorHub: React.FC<ConnectorHubProps> = ({
             onClick={(e) => handleToggle('music', e)}
             title="Music Player"
             aria-label="Music Player"
-            style={isEldenRing ? { height: '58px', padding: 0 } : undefined}
+            style={isEldenRing ? { height: '54px', padding: 0 } : undefined}
           >
             {isEldenRing ? (
               <img
                 src={getAssetUrl('/eldenring/sidebar/music_sidebar.png')}
                 alt="Music"
                 style={{
-                  height: '54px',
+                  height: '50px',
                   width: 'auto',
+                  maxWidth: '34px',
                   objectFit: 'contain',
                   filter: activeModule === 'music'
                     ? 'drop-shadow(0 0 10px rgba(234, 196, 119, 0.95)) brightness(1.2)'
@@ -86,15 +87,16 @@ export const ConnectorHub: React.FC<ConnectorHubProps> = ({
             onClick={(e) => handleToggle('weather', e)}
             title="Weather"
             aria-label="Weather"
-            style={isEldenRing ? { height: '58px', padding: 0 } : undefined}
+            style={isEldenRing ? { height: '54px', padding: 0 } : undefined}
           >
             {isEldenRing ? (
               <img
                 src={getAssetUrl('/eldenring/sidebar/cloud_sidebar.png')}
                 alt="Weather"
                 style={{
-                  height: '54px',
+                  height: '50px',
                   width: 'auto',
+                  maxWidth: '34px',
                   objectFit: 'contain',
                   filter: activeModule === 'weather'
                     ? 'drop-shadow(0 0 10px rgba(234, 196, 119, 0.95)) brightness(1.2)'
@@ -120,15 +122,16 @@ export const ConnectorHub: React.FC<ConnectorHubProps> = ({
             onClick={(e) => handleToggle('calendar', e)}
             title="Calendar"
             aria-label="Calendar"
-            style={isEldenRing ? { height: '58px', padding: 0 } : undefined}
+            style={isEldenRing ? { height: '54px', padding: 0 } : undefined}
           >
             {isEldenRing ? (
               <img
                 src={getAssetUrl('/eldenring/sidebar/calendar_sidebar.png')}
                 alt="Calendar"
                 style={{
-                  height: '54px',
+                  height: '50px',
                   width: 'auto',
+                  maxWidth: '34px',
                   objectFit: 'contain',
                   filter: activeModule === 'calendar'
                     ? 'drop-shadow(0 0 10px rgba(234, 196, 119, 0.95)) brightness(1.2)'

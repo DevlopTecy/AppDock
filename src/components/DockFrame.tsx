@@ -959,8 +959,8 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px',
-                  height: '30px',
-                  padding: '0 10px 0 6px',
+                  height: '32px',
+                  padding: '0 12px 0 6px',
                   background: 'rgba(23, 24, 19, 0.85)',
                   borderRadius: '4px',
                   border: '1px solid rgba(197, 161, 90, 0.45)',
@@ -971,10 +971,10 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                   src={getAssetUrl('/eldenring/misc/runestone_icon.png')}
                   alt="Rune Stone"
                   style={{
-                    width: '18px',
-                    height: '18px',
+                    width: '26px',
+                    height: '26px',
                     objectFit: 'contain',
-                    filter: 'drop-shadow(0 0 6px rgba(234, 196, 119, 0.8))'
+                    filter: 'drop-shadow(0 0 8px rgba(234, 196, 119, 0.95))'
                   }}
                 />
                 <span
@@ -1078,9 +1078,9 @@ export const DockFrame: React.FC<DockFrameProps> = ({
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '5px',
+              gap: theme === 'eldenring' ? '3px' : '5px',
               ...(theme === 'eldenring' ? {
-                padding: '2px 4px',
+                padding: '2px 3px',
                 borderRadius: '4px',
                 background: 'rgba(17, 19, 16, 0.75)',
                 border: '1px solid rgba(197, 161, 90, 0.35)',
@@ -1094,8 +1094,8 @@ export const DockFrame: React.FC<DockFrameProps> = ({
               title="Search (Ctrl+F)"
               aria-label="Search"
               style={{
-                width: '28px',
-                height: '28px',
+                width: theme === 'eldenring' ? '33px' : '28px',
+                height: theme === 'eldenring' ? '31px' : '28px',
                 padding: 0,
                 display: 'flex',
                 alignItems: 'center',
@@ -1125,7 +1125,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 <img
                   src={getAssetUrl('/eldenring/header/header_control_search.png')}
                   alt="Search"
-                  style={{ width: '26px', height: '26px', objectFit: 'contain' }}
+                  style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                 />
               ) : theme === 'onepiece' ? (
                 <img
@@ -1149,8 +1149,8 @@ export const DockFrame: React.FC<DockFrameProps> = ({
               title={isMaximized ? "Restore Dock Size" : "Maximize Dock (460px x Full Height)"}
               aria-label={isMaximized ? "Restore Dock" : "Maximize Dock"}
               style={{
-                width: '28px',
-                height: '28px',
+                width: theme === 'eldenring' ? '33px' : '28px',
+                height: theme === 'eldenring' ? '31px' : '28px',
                 padding: 0,
                 display: 'flex',
                 alignItems: 'center',
@@ -1174,7 +1174,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 <img
                   src={getAssetUrl('/eldenring/header/header_control_expand.png')}
                   alt="Expand"
-                  style={{ width: '26px', height: '26px', objectFit: 'contain' }}
+                  style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                 />
               ) : theme === 'onepiece' ? (
                 <img
@@ -1195,8 +1195,8 @@ export const DockFrame: React.FC<DockFrameProps> = ({
               title="Collapse (Esc)"
               aria-label="Collapse"
               style={{
-                width: '28px',
-                height: '28px',
+                width: theme === 'eldenring' ? '33px' : '28px',
+                height: theme === 'eldenring' ? '31px' : '28px',
                 padding: 0,
                 display: 'flex',
                 alignItems: 'center',
@@ -1226,7 +1226,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 <img
                   src={getAssetUrl('/eldenring/header/header_control_close.png')}
                   alt="Close"
-                  style={{ width: '26px', height: '26px', objectFit: 'contain' }}
+                  style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                 />
               ) : theme === 'onepiece' ? (
                 <img

@@ -1027,7 +1027,7 @@
 
 /* Elden Ring Connector Hub Bar */
 [data-theme="eldenring"] .uiverse-vbar-container {
-  width: 48px !important;
+  width: 42px !important;
 }
 
 [data-theme="eldenring"] .uiverse-vbar-article {
@@ -1035,8 +1035,8 @@
   background-size: 140px auto !important;
   border: 1px solid rgba(197, 161, 90, 0.45) !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.9), 0 0 12px rgba(197, 161, 90, 0.2) !important;
-  padding: 4px 3px !important;
-  gap: 4px !important;
+  padding: 3px 2px !important;
+  gap: 3px !important;
 }
 
 [data-theme="eldenring"] .uiverse-vbar-item {

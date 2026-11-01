@@ -410,25 +410,35 @@ export const GroupSidebar: React.FC<GroupSidebarProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: isEldenRing ? 'rgba(23, 24, 19, 0.9)' : 'var(--bg-surface)',
+            background: isEldenRing ? 'transparent' : 'var(--bg-surface)',
             color: isEldenRing ? '#EAC477' : 'var(--text-muted)',
-            border: isEldenRing ? '1px dashed rgba(197, 161, 90, 0.6)' : '1px dashed var(--btn-border)',
-            boxShadow: 'var(--btn-shadow)',
+            border: isEldenRing ? 'none' : '1px dashed var(--btn-border)',
+            boxShadow: isEldenRing ? '0 2px 8px rgba(0, 0, 0, 0.6)' : 'var(--btn-shadow)',
             cursor: 'pointer',
+            padding: 0,
+            overflow: 'hidden',
             transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.color = 'var(--text-primary)';
-            e.currentTarget.style.borderColor = 'var(--btn-border-hover)';
-            e.currentTarget.style.boxShadow = 'var(--btn-shadow-hover)';
-            e.currentTarget.style.background = 'var(--bg-surface-hover)';
+            if (!isEldenRing) {
+              e.currentTarget.style.color = 'var(--text-primary)';
+              e.currentTarget.style.borderColor = 'var(--btn-border-hover)';
+              e.currentTarget.style.boxShadow = 'var(--btn-shadow-hover)';
+              e.currentTarget.style.background = 'var(--bg-surface-hover)';
+            } else {
+              e.currentTarget.style.boxShadow = '0 0 12px rgba(234, 196, 119, 0.75)';
+            }
             e.currentTarget.style.transform = 'translateY(-2px) scale(1.05)';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.color = isEldenRing ? '#EAC477' : 'var(--text-muted)';
-            e.currentTarget.style.borderColor = isEldenRing ? 'rgba(197, 161, 90, 0.6)' : 'var(--btn-border)';
-            e.currentTarget.style.boxShadow = 'var(--btn-shadow)';
-            e.currentTarget.style.background = isEldenRing ? 'rgba(23, 24, 19, 0.9)' : 'var(--bg-surface)';
+            if (!isEldenRing) {
+              e.currentTarget.style.color = 'var(--text-muted)';
+              e.currentTarget.style.borderColor = 'var(--btn-border)';
+              e.currentTarget.style.boxShadow = 'var(--btn-shadow)';
+              e.currentTarget.style.background = 'var(--bg-surface)';
+            } else {
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.6)';
+            }
             e.currentTarget.style.transform = 'translateY(0) scale(1)';
           }}
         >
@@ -436,7 +446,12 @@ export const GroupSidebar: React.FC<GroupSidebarProps> = ({
             <img
               src={getAssetUrl('/eldenring/icons/add.png')}
               alt="Add"
-              style={{ width: '20px', height: '20px', objectFit: 'contain', filter: 'drop-shadow(0 0 5px rgba(234, 196, 119, 0.7))' }}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                filter: 'drop-shadow(0 0 6px rgba(234, 196, 119, 0.85))'
+              }}
             />
           ) : (
             <Plus size={15} strokeWidth={2.2} />
