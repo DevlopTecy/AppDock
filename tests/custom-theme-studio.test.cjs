@@ -113,5 +113,15 @@ test('Custom Theme Studio & Sub-Options Verification', async (t) => {
     assert.ok(frameContent.includes('setEldenBgIndex(0)'), 'DockFrame must reset background indices when bgRotation is toggled off');
     assert.ok(frameContent.includes('customTheme?.bgRotationSecs || 30'), 'DockFrame must use customTheme.bgRotationSecs for rotation interval');
   });
+
+  await t.test('10. Reset custom theme triggers high-end confirmation modal and reverts to dark theme', () => {
+    const file = path.join(ROOT, 'src', 'components', 'CustomThemePanel.tsx');
+    const content = fs.readFileSync(file, 'utf8');
+    assert.ok(content.includes('showResetConfirm'), 'CustomThemePanel must track showResetConfirm modal state');
+    assert.ok(content.includes('createPortal'), 'Confirmation modal must render via createPortal to prevent clipping');
+    assert.ok(content.includes("theme: 'dark'"), 'Resetting custom theme must revert to dark theme');
+    assert.ok(content.includes('AlertTriangle'), 'Confirmation modal must display AlertTriangle warning icon');
+    assert.ok(/reset & revert/i.test(content), 'Modal must have confirm action button to revert to dark theme');
+  });
 });
 

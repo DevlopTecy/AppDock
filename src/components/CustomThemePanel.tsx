@@ -1,4 +1,5 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { DockSettings } from '../types/dock';
 import { compressImageToBase64 } from '../utils/imageUtils';
 import {
@@ -9,7 +10,8 @@ import {
   RotateCcw,
   Sliders,
   Image as ImageIcon,
-  Palette
+  Palette,
+  AlertTriangle
 } from 'lucide-react';
 
 interface CustomThemePanelProps {
@@ -227,8 +229,22 @@ export const CustomThemePanel: React.FC<CustomThemePanelProps> = ({ settings, on
     onUpdateSettings({ customThemeBgImages: arr });
   };
 
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+
+  useEffect(() => {
+    if (!showResetConfirm) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowResetConfirm(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showResetConfirm]);
+
   const handleReset = () => {
     onUpdateSettings({
+      theme: 'dark',
       customThemeBgImages: [],
       customThemeBgBlur: false,
       customThemeBgHide: false,
@@ -250,6 +266,7 @@ export const CustomThemePanel: React.FC<CustomThemePanelProps> = ({ settings, on
       customThemeHideQuickIcons: false,
       hideQuickIcons: false
     });
+    setShowResetConfirm(false);
   };
 
   const displayOptions = (
@@ -617,39 +634,173 @@ export const CustomThemePanel: React.FC<CustomThemePanelProps> = ({ settings, on
       {displayOptions}
 
       {/* Section D: Reset */}
-      <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px solid var(--border-subtle)' }}>
+      <div style={{ marginTop: '16px', paddingTop: '14px', borderTop: '1px solid var(--border-subtle)' }}>
         <button
           type="button"
-          onClick={handleReset}
+          onClick={() => setShowResetConfirm(true)}
           style={{
             width: '100%',
-            padding: '8px 12px',
-            borderRadius: '6px',
+            padding: '9px 12px',
+            borderRadius: '8px',
             background: 'rgba(239, 68, 68, 0.08)',
             color: '#f87171',
-            border: '1px solid rgba(239, 68, 68, 0.25)',
+            border: '1px solid rgba(239, 68, 68, 0.22)',
             cursor: 'pointer',
             fontSize: '11.5px',
             fontWeight: 600,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '6px',
-            transition: 'all 0.15s ease'
+            gap: '7px',
+            transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)';
-            e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+            e.currentTarget.style.background = 'rgba(239, 68, 68, 0.16)';
+            e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.45)';
+            e.currentTarget.style.color = '#ffffff';
+            e.currentTarget.style.transform = 'translateY(-1px)';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.background = 'rgba(239, 68, 68, 0.08)';
-            e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.25)';
+            e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.22)';
+            e.currentTarget.style.color = '#f87171';
+            e.currentTarget.style.transform = 'translateY(0)';
           }}
         >
-          <RotateCcw size={12} />
+          <RotateCcw size={12.5} />
           <span>Reset custom theme</span>
         </button>
+        <div style={{ fontSize: '10.5px', color: 'var(--text-muted)', textAlign: 'center', marginTop: '6px', lineHeight: 1.35 }}>
+          Reverts all custom theme styling and switches back to Dark Theme
+        </div>
       </div>
+
+      {showResetConfirm &&
+        createPortal(
+          <div
+            onClick={() => setShowResetConfirm(false)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0, 0, 0, 0.72)',
+              backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)',
+              zIndex: 100000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '16px',
+              animation: 'fadeIn 0.15s ease'
+            }}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: '320px',
+                maxWidth: 'calc(100vw - 32px)',
+                background: 'var(--modal-bg, #18181b)',
+                border: '1px solid var(--border-hover, rgba(255, 255, 255, 0.14))',
+                borderRadius: '14px',
+                padding: '22px 20px 20px',
+                boxShadow: '0 24px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '12px',
+                textAlign: 'center',
+                animation: 'scaleIn 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
+              }}
+            >
+              {/* Glowing Warning Badge */}
+              <div
+                style={{
+                  width: '46px',
+                  height: '46px',
+                  borderRadius: '50%',
+                  background: 'rgba(239, 68, 68, 0.14)',
+                  color: '#ef4444',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 0 24px rgba(239, 68, 68, 0.25)'
+                }}
+              >
+                <AlertTriangle size={24} />
+              </div>
+
+              {/* Title & Explanation */}
+              <div>
+                <div style={{ fontSize: '14.5px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
+                  Reset Custom Theme?
+                </div>
+                <div style={{ fontSize: '11.5px', color: 'var(--text-secondary)', marginTop: '6px', lineHeight: 1.45 }}>
+                  This will remove all custom wallpapers, colors, and layout customizations, and revert back to the default <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Dark Theme</span>.
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ display: 'flex', gap: '8px', width: '100%', marginTop: '6px' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowResetConfirm(false)}
+                  style={{
+                    flex: 1,
+                    padding: '8.5px 12px',
+                    borderRadius: '8px',
+                    background: 'var(--bg-surface)',
+                    color: 'var(--text-secondary)',
+                    border: '1px solid var(--btn-border)',
+                    fontSize: '12px',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'var(--bg-surface-hover)';
+                    e.currentTarget.style.color = 'var(--text-primary)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'var(--bg-surface)';
+                    e.currentTarget.style.color = 'var(--text-secondary)';
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  style={{
+                    flex: 1.3,
+                    padding: '8.5px 12px',
+                    borderRadius: '8px',
+                    background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                    color: '#ffffff',
+                    border: '1px solid rgba(239, 68, 68, 0.6)',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 10px rgba(239, 68, 68, 0.35)',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.filter = 'brightness(1.1)';
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                    e.currentTarget.style.boxShadow = '0 4px 14px rgba(239, 68, 68, 0.45)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.filter = 'none';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 2px 10px rgba(239, 68, 68, 0.35)';
+                  }}
+                >
+                  Reset & Revert
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 };
