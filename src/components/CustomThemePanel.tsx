@@ -256,7 +256,7 @@ export const CustomThemePanel: React.FC<CustomThemePanelProps> = ({ settings, on
         <span>Display options</span>
       </div>
 
-      <Toggle label="Background blur" checked={bgBlur} onChange={(v) => onUpdateSettings({ customThemeBgBlur: v })} />
+      <Toggle label="Background Blur" checked={bgBlur} onChange={(v) => onUpdateSettings({ customThemeBgBlur: v })} />
       <Toggle label="Hide background (solid color)" checked={bgHide} onChange={(v) => onUpdateSettings({ customThemeBgHide: v })} />
       <Toggle label="Hide sidebar (weather / calendar / music)" checked={hideSidebar} onChange={(v) => onUpdateSettings({ customThemeHideSidebar: v })} />
 

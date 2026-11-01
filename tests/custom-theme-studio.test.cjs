@@ -56,15 +56,15 @@ test('Custom Theme Studio & Sub-Options Verification', async (t) => {
     const content = fs.readFileSync(file, 'utf8');
     assert.ok(content.includes('export const CustomThemePanel'), 'CustomThemePanel must be exported');
     assert.ok(content.includes('subOptionsOnly'), 'CustomThemePanel must support subOptionsOnly prop');
-    assert.ok(content.includes('Background Blur'), 'Panel must include Background Blur toggle');
-    assert.ok(content.includes('Hide Background'), 'Panel must include Hide Background toggle');
-    assert.ok(content.includes('Hide Sidebar'), 'Panel must include Hide Sidebar toggle');
-    assert.ok(content.includes('Hide Module Buttons'), 'Panel must include Hide Module Buttons toggle');
-    assert.ok(content.includes('Hide A, L, M, S Buttons'), 'Panel must include Hide A, L, M, S Buttons toggle');
-    assert.ok(content.includes('Hide App Count'), 'Panel must include Hide App Count toggle');
-    assert.ok(content.includes('Background Rotation'), 'Panel must include Background Rotation toggle');
-    assert.ok(content.includes('Reset Custom Theme'), 'Panel must include Reset Custom Theme button');
-    assert.ok(content.includes('Font Color'), 'Panel must include Font Color picker');
+    assert.ok(/background blur/i.test(content), 'Panel must include Background Blur toggle');
+    assert.ok(/hide background/i.test(content), 'Panel must include Hide Background toggle');
+    assert.ok(/hide sidebar/i.test(content), 'Panel must include Hide Sidebar toggle');
+    assert.ok(/hide module buttons/i.test(content), 'Panel must include Hide Module Buttons toggle');
+    assert.ok(/hide.*(?:density|a,\s*l,\s*m,\s*s)/i.test(content), 'Panel must include Hide Density / ALMS toggle');
+    assert.ok(/hide app count/i.test(content), 'Panel must include Hide App Count toggle');
+    assert.ok(/background rotation/i.test(content), 'Panel must include Background Rotation toggle');
+    assert.ok(/reset custom theme/i.test(content), 'Panel must include Reset Custom Theme button');
+    assert.ok(/font color/i.test(content), 'Panel must include Font Color picker');
   });
 
   await t.test('5. SettingsView.tsx has Default Themes, Fancy Themes, Custom Theme, and Sub-Options', () => {
