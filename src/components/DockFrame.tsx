@@ -46,6 +46,14 @@ interface DockFrameProps {
   };
 }
 
+const DEATH_NOTE_BACKGROUNDS = [
+  '/deathnote/backgrounds/wallpaper_kira_l_divided.png',
+  '/deathnote/backgrounds/wallpaper_main_1.jpg',
+  '/deathnote/backgrounds/wallpaper_main_2.jpg',
+  '/deathnote/backgrounds/wallpaper_main_3.jpg',
+  '/deathnote/backgrounds/wallpaper_main_4.jpg'
+];
+
 const ELDEN_RING_BACKGROUNDS = [
   '/eldenring/backgrounds/weary_knight_beneath_the_golden_tree.png',
   '/eldenring/backgrounds/vertical_golden_tree_wallpaper.png',
@@ -96,40 +104,60 @@ export const DockFrame: React.FC<DockFrameProps> = ({
   const [onePieceBgIndex, setOnePieceBgIndex] = React.useState(0);
   const [candyBgIndex, setCandyBgIndex] = React.useState(0);
   const [customBgIndex, setCustomBgIndex] = React.useState(0);
+  const [deathNoteBgIndex, setDeathNoteBgIndex] = React.useState(0);
   const exitTimerRef = React.useRef<number | null>(null);
 
   const customBgImages = customTheme?.bgImages || [];
 
-  // Rotation timer for custom theme background pictures
+  // Reset all background rotation indices to 0 whenever rotation is toggled off
   React.useEffect(() => {
-    if (theme === 'custom' && customTheme?.bgRotation && customBgImages.length > 1) {
-      const intervalMs = (customTheme.bgRotationSecs || 30) * 1000;
+    if (!customTheme?.bgRotation) {
+      setCustomBgIndex(0);
+      setEldenBgIndex(0);
+      setOnePieceBgIndex(0);
+      setCandyBgIndex(0);
+      setDeathNoteBgIndex(0);
+    }
+  }, [customTheme?.bgRotation]);
+
+  // Background Rotation timer: ONLY active when customTheme?.bgRotation is explicitly enabled
+  React.useEffect(() => {
+    if (!customTheme?.bgRotation) return;
+
+    const intervalMs = (customTheme?.bgRotationSecs || 30) * 1000;
+
+    if (theme === 'custom' && customBgImages.length > 1) {
       const timer = window.setInterval(() => {
         setCustomBgIndex((prev) => (prev + 1) % customBgImages.length);
       }, intervalMs);
       return () => window.clearInterval(timer);
-    }
-  }, [theme, customTheme?.bgRotation, customTheme?.bgRotationSecs, customBgImages.length]);
-
-  // 30-second rotating background timer for atmospheric themes
-  React.useEffect(() => {
-    if (theme === 'eldenring') {
+    } else if (theme === 'eldenring' && ELDEN_RING_BACKGROUNDS.length > 1) {
       const timer = window.setInterval(() => {
         setEldenBgIndex((prev) => (prev + 1) % ELDEN_RING_BACKGROUNDS.length);
-      }, 30000);
+      }, intervalMs);
       return () => window.clearInterval(timer);
-    } else if (theme === 'onepiece') {
+    } else if (theme === 'onepiece' && ONE_PIECE_BACKGROUNDS.length > 1) {
       const timer = window.setInterval(() => {
         setOnePieceBgIndex((prev) => (prev + 1) % ONE_PIECE_BACKGROUNDS.length);
-      }, 30000);
+      }, intervalMs);
       return () => window.clearInterval(timer);
-    } else if (theme === 'candy') {
+    } else if (theme === 'candy' && CANDY_BACKGROUNDS.length > 1) {
       const timer = window.setInterval(() => {
         setCandyBgIndex((prev) => (prev + 1) % CANDY_BACKGROUNDS.length);
-      }, 30000);
+      }, intervalMs);
+      return () => window.clearInterval(timer);
+    } else if (theme === 'deathnote' && DEATH_NOTE_BACKGROUNDS.length > 1) {
+      const timer = window.setInterval(() => {
+        setDeathNoteBgIndex((prev) => (prev + 1) % DEATH_NOTE_BACKGROUNDS.length);
+      }, intervalMs);
       return () => window.clearInterval(timer);
     }
-  }, [theme]);
+  }, [
+    theme,
+    customTheme?.bgRotation,
+    customTheme?.bgRotationSecs,
+    customBgImages.length
+  ]);
 
   // Synchronize enter/exit transitions immediately without 1-frame width dip / stutter
   if (activeModule !== prevActive) {
@@ -521,19 +549,24 @@ export const DockFrame: React.FC<DockFrameProps> = ({
             }}
           >
             {/* Main High-Res Wallpaper (Kira & L Divided with Chained Apple) */}
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                backgroundImage: `url('${getAssetUrl('/deathnote/backgrounds/wallpaper_kira_l_divided.png')}')`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center 12%',
-                backgroundRepeat: 'no-repeat',
-                filter: customTheme?.bgBlur ? 'blur(45px) brightness(1.02)' : 'brightness(1.02) contrast(1.08)',
-                transform: customTheme?.bgBlur ? 'scale(1.15)' : 'none',
-                transition: 'filter 0.35s ease, transform 0.35s ease'
-              }}
-            />
+            {DEATH_NOTE_BACKGROUNDS.map((bgUrl, idx) => (
+              <div
+                key={bgUrl}
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  backgroundImage: `url('${getAssetUrl(bgUrl)}')`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: idx === 0 ? 'center 12%' : 'center',
+                  backgroundRepeat: 'no-repeat',
+                  filter: customTheme?.bgBlur ? 'blur(45px) brightness(1.02)' : 'brightness(1.02) contrast(1.08)',
+                  transform: customTheme?.bgBlur ? 'scale(1.15)' : 'none',
+                  opacity: deathNoteBgIndex === idx ? 1 : 0,
+                  transition: 'opacity 1.5s ease-in-out, filter 0.35s ease, transform 0.35s ease',
+                  zIndex: 0
+                }}
+              />
+            ))}
             {/* Subtle atmospheric dark gradient for icon & footer legibility */}
             <div
               style={{

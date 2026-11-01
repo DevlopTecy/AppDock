@@ -105,5 +105,13 @@ test('Custom Theme Studio & Sub-Options Verification', async (t) => {
     assert.ok(gridContent.includes('hideAppCount'), 'AppGrid must support hideAppCount');
     assert.ok(gridContent.includes('hideALMS'), 'AppGrid must support hideALMS');
   });
+
+  await t.test('9. DockFrame.tsx background rotation only runs when customTheme.bgRotation is true and resets when off', () => {
+    const frameFile = path.join(ROOT, 'src', 'components', 'DockFrame.tsx');
+    const frameContent = fs.readFileSync(frameFile, 'utf8');
+    assert.ok(frameContent.includes('if (!customTheme?.bgRotation) return;'), 'DockFrame must not rotate backgrounds when bgRotation is off');
+    assert.ok(frameContent.includes('setEldenBgIndex(0)'), 'DockFrame must reset background indices when bgRotation is toggled off');
+    assert.ok(frameContent.includes('customTheme?.bgRotationSecs || 30'), 'DockFrame must use customTheme.bgRotationSecs for rotation interval');
+  });
 });
 
