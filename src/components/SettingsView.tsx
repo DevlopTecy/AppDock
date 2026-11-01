@@ -1031,21 +1031,31 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           </div>
 
           {/* Sub-Options & Studio */}
-          <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px dashed var(--border-subtle)' }}>
+          <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--border-subtle)' }}>
             <div
               style={{
-                fontSize: '10.5px',
-                fontWeight: 700,
+                fontSize: '11px',
+                fontWeight: 600,
                 color: isAether ? '#ffdf59' : 'var(--text-primary)',
                 letterSpacing: '0.2px',
-                marginBottom: '6px',
+                marginBottom: '8px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between'
               }}
             >
               <span>{currentTheme === 'custom' ? 'Custom Theme Studio' : 'Theme Sub-Options'}</span>
-              <span style={{ fontSize: '9.5px', color: 'var(--text-muted)', fontWeight: 500 }}>
+              <span
+                style={{
+                  fontSize: '9.5px',
+                  color: 'var(--text-muted)',
+                  fontWeight: 600,
+                  background: 'var(--bg-surface)',
+                  padding: '2px 7px',
+                  borderRadius: '999px',
+                  border: '1px solid var(--border-subtle)'
+                }}
+              >
                 Active: {currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1)}
               </span>
             </div>
@@ -1076,42 +1086,63 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 Weather Cities (Up to 5)
               </span>
             </div>
-            <span style={{ fontSize: '10px', color: isAether ? '#c2e5fc' : 'var(--text-muted)', fontWeight: 600 }}>
+            <span
+              style={{
+                fontSize: '10px',
+                color: isAether ? '#c2e5fc' : 'var(--text-muted)',
+                fontWeight: 600,
+                fontVariantNumeric: 'tabular-nums',
+                background: 'var(--bg-surface)',
+                padding: '2px 7px',
+                borderRadius: '999px',
+                border: '1px solid var(--border-subtle)'
+              }}
+            >
               {weatherCities.length} / 5
             </span>
           </div>
 
           {/* Add City Input Form */}
-          <form onSubmit={handleAddCity} style={{ display: 'flex', gap: '6px', marginBottom: '10px' }}>
+          <form onSubmit={handleAddCity} style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
             <input
               type="text"
-              placeholder={weatherCities.length >= 5 ? 'Max 5 cities reached' : 'Add city name (e.g. Paris)...'}
+              placeholder={weatherCities.length >= 5 ? 'Max 5 cities reached' : 'Add city name (e.g. Paris, Tokyo)...'}
               value={cityInput}
               disabled={weatherCities.length >= 5}
               onChange={(e) => setCityInput(e.target.value)}
               style={{
                 flex: 1,
-                padding: '7px 9px',
+                height: '34px',
+                padding: '0 11px',
                 borderRadius: '6px',
                 background: 'var(--bg-surface)',
                 border: '1px solid var(--btn-border)',
                 color: 'var(--text-primary)',
                 fontSize: '11.5px',
-                outline: 'none'
+                outline: 'none',
+                transition: 'border-color 0.15s ease'
               }}
+              onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--border-hover)'; }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--btn-border)'; }}
             />
             <button
               type="submit"
               disabled={!cityInput.trim() || weatherCities.length >= 5}
               className="btn-primary"
               style={{
+                height: '34px',
                 padding: '0 14px',
                 fontSize: '11px',
+                fontWeight: 600,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
                 opacity: !cityInput.trim() || weatherCities.length >= 5 ? 0.45 : 1,
                 cursor: !cityInput.trim() || weatherCities.length >= 5 ? 'not-allowed' : 'pointer'
               }}
             >
-              Add
+              <Plus size={13} strokeWidth={2.5} />
+              <span>Add</span>
             </button>
           </form>
 
@@ -1125,7 +1156,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '5px',
+                    gap: '6px',
                     padding: '4px 9px',
                     borderRadius: '6px',
                     background: isActive ? (isAether ? '#ffdf59' : 'var(--text-primary)') : 'var(--bg-surface)',
@@ -1133,9 +1164,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                     border: isActive && isAether ? '1px solid #ffe885' : '1px solid var(--btn-border)',
                     boxShadow: isActive && isAether ? '0 0 8px rgba(255, 223, 89, 0.45)' : undefined,
                     fontSize: '11px',
-                    fontWeight: isActive ? 700 : 500
+                    fontWeight: isActive ? 700 : 500,
+                    transition: 'all 0.15s ease'
                   }}
                 >
+                  {isActive && <Check size={11} strokeWidth={2.5} />}
                   <span
                     onClick={() => onUpdateSettings({ activeWeatherCity: c })}
                     style={{ cursor: 'pointer' }}
@@ -1148,13 +1181,21 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                       type="button"
                       onClick={() => handleRemoveCity(c)}
                       title={`Remove ${c}`}
+                      aria-label={`Remove ${c}`}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         cursor: 'pointer',
-                        color: isActive ? (isAether ? '#2e1c0d' : 'var(--bg-dock)') : (isAether ? '#c2e5fc' : 'var(--text-muted)')
+                        background: 'transparent',
+                        border: 'none',
+                        padding: '1px',
+                        color: isActive ? (isAether ? '#2e1c0d' : 'var(--bg-dock)') : (isAether ? '#c2e5fc' : 'var(--text-muted)'),
+                        opacity: 0.8,
+                        transition: 'opacity 0.15s ease'
                       }}
+                      onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.opacity = '0.8'; }}
                     >
                       <X size={11} />
                     </button>
@@ -1189,7 +1230,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               onClick={() => setIsCountryOpen(!isCountryOpen)}
               style={{
                 width: '100%',
-                padding: '8px 10px',
+                height: '36px',
+                padding: '0 12px',
                 borderRadius: '6px',
                 background: 'var(--bg-surface)',
                 border: '1px solid var(--btn-border)',
@@ -1199,11 +1241,36 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 cursor: 'pointer',
-                textAlign: 'left'
+                textAlign: 'left',
+                transition: 'border-color 0.15s ease'
               }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--btn-border-hover)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--btn-border)'; }}
             >
-              <span>{selectedCountry.name} ({selectedCountry.code})</span>
-              <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>Change ▼</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontWeight: 500 }}>{selectedCountry.name}</span>
+                <span
+                  style={{
+                    fontSize: '9.5px',
+                    color: 'var(--text-muted)',
+                    padding: '1px 5px',
+                    borderRadius: '4px',
+                    background: 'var(--bg-surface-active)',
+                    border: '1px solid var(--border-subtle)',
+                    fontFamily: 'monospace'
+                  }}
+                >
+                  {selectedCountry.code}
+                </span>
+              </div>
+              <ChevronDown
+                size={14}
+                color="var(--text-muted)"
+                style={{
+                  transform: isCountryOpen ? 'rotate(180deg)' : 'none',
+                  transition: 'transform 0.18s ease'
+                }}
+              />
             </button>
 
             {isCountryOpen && (
@@ -1213,14 +1280,14 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                   top: '100%',
                   left: 0,
                   right: 0,
-                  marginTop: '4px',
+                  marginTop: '6px',
                   borderRadius: '8px',
                   background: 'var(--bg-dock)',
                   border: '1px solid var(--border-hover)',
                   boxShadow: '0 12px 28px rgba(0, 0, 0, 0.45)',
                   zIndex: 80,
                   padding: '6px',
-                  maxHeight: '160px',
+                  maxHeight: '180px',
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '4px'
@@ -1231,7 +1298,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                     display: 'flex',
                     alignItems: 'center',
                     gap: '6px',
-                    padding: '4px 6px',
+                    padding: '5px 8px',
                     borderRadius: '4px',
                     background: 'var(--bg-surface)',
                     border: '1px solid var(--border-subtle)'
@@ -1251,37 +1318,51 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                       fontSize: '11px',
                       outline: 'none'
                     }}
+                    autoFocus
                   />
                 </div>
 
                 <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                  {filteredCountries.map((c) => (
-                    <button
-                      key={c.code}
-                      type="button"
-                      onClick={() => {
-                        onUpdateSettings({ calendarCountry: c.code });
-                        setIsCountryOpen(false);
-                        setCountryQuery('');
-                      }}
-                      style={{
-                        padding: '6px 8px',
-                        borderRadius: '4px',
-                        background: c.code === selectedCountryCode ? (isAether ? '#ffdf59' : 'var(--text-primary)') : 'transparent',
-                        color: c.code === selectedCountryCode ? (isAether ? '#2e1c0d' : 'var(--bg-dock)') : (isAether ? '#fff9e6' : 'var(--text-primary)'),
-                        fontWeight: c.code === selectedCountryCode ? 700 : 500,
-                        fontSize: '11px',
-                        textAlign: 'left',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between'
-                      }}
-                    >
-                      <span>{c.name}</span>
-                      <span style={{ fontSize: '9.5px', opacity: 0.8 }}>{c.code}</span>
-                    </button>
-                  ))}
+                  {filteredCountries.map((c) => {
+                    const isSelected = c.code === selectedCountryCode;
+                    return (
+                      <button
+                        key={c.code}
+                        type="button"
+                        onClick={() => {
+                          onUpdateSettings({ calendarCountry: c.code });
+                          setIsCountryOpen(false);
+                          setCountryQuery('');
+                        }}
+                        style={{
+                          padding: '6px 8px',
+                          borderRadius: '4px',
+                          background: isSelected ? (isAether ? '#ffdf59' : 'var(--text-primary)') : 'transparent',
+                          color: isSelected ? (isAether ? '#2e1c0d' : 'var(--bg-dock)') : (isAether ? '#fff9e6' : 'var(--text-primary)'),
+                          fontWeight: isSelected ? 700 : 500,
+                          fontSize: '11px',
+                          textAlign: 'left',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          transition: 'background 0.15s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isSelected) e.currentTarget.style.background = 'var(--bg-surface-hover)';
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isSelected) e.currentTarget.style.background = 'transparent';
+                        }}
+                      >
+                        <span>{c.name}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ fontSize: '9.5px', opacity: 0.8, fontFamily: 'monospace' }}>{c.code}</span>
+                          {isSelected && <Check size={12} strokeWidth={2.5} />}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -1306,7 +1387,18 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             </span>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {/* Unified Settings Card for Toggles */}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--btn-border)',
+              borderRadius: '8px',
+              overflow: 'hidden'
+            }}
+          >
+            {/* 1. Collapse on launch */}
             <div
               onClick={() => onUpdateSettings({ autoCollapseOnLaunch: !settings.autoCollapseOnLaunch })}
               style={{
@@ -1314,50 +1406,64 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '9px 12px',
-                borderRadius: '6px',
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--btn-border)',
                 cursor: 'pointer',
-                transition: 'all 0.15s ease'
+                borderBottom: '1px solid var(--border-subtle)',
+                transition: 'background 0.15s ease'
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'var(--btn-border-hover)';
-                e.currentTarget.style.background = 'var(--bg-surface-hover)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'var(--btn-border)';
-                e.currentTarget.style.background = 'var(--bg-surface)';
-              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-surface-hover)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
             >
-              <span style={{ fontSize: '11.5px', color: isAether ? '#fff9e6' : 'var(--text-primary)', fontWeight: 500 }}>
-                Collapse on launch
-              </span>
-              <div
-                style={{
-                  width: '32px',
-                  height: '18px',
-                  borderRadius: '999px',
-                  background: settings.autoCollapseOnLaunch ? (isAether ? '#ffdf59' : 'var(--text-primary)') : 'var(--bg-surface-active)',
-                  border: '1px solid var(--btn-border)',
-                  padding: '2px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  transition: 'background 0.2s ease',
-                  justifyContent: settings.autoCollapseOnLaunch ? 'flex-end' : 'flex-start'
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', paddingRight: '12px' }}>
+                <span style={{ fontSize: '11.5px', color: isAether ? '#fff9e6' : 'var(--text-primary)', fontWeight: 500 }}>
+                  Collapse on launch
+                </span>
+                <span style={{ fontSize: '10px', color: 'var(--text-muted)', lineHeight: '1.3' }}>
+                  Automatically collapse the dock drawer to the edge handle upon startup.
+                </span>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={settings.autoCollapseOnLaunch}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onUpdateSettings({ autoCollapseOnLaunch: !settings.autoCollapseOnLaunch });
                 }}
+                className={`toggle-switch ${settings.autoCollapseOnLaunch ? 'active' : ''}`}
+                style={{
+                  width: '36px',
+                  height: '20px',
+                  borderRadius: '10px',
+                  background: settings.autoCollapseOnLaunch
+                    ? (currentTheme === 'deathnote' ? '#c41e24' : isAether ? '#59bcf4' : 'var(--accent-color, #3b82f6)')
+                    : 'var(--btn-border)',
+                  position: 'relative',
+                  cursor: 'pointer',
+                  border: '1px solid ' + (settings.autoCollapseOnLaunch ? 'rgba(255,255,255,0.18)' : 'var(--border-subtle)'),
+                  padding: 0,
+                  transition: 'background 0.18s ease, border-color 0.18s ease',
+                  flexShrink: 0
+                }}
+                aria-label="Toggle Collapse on launch"
+                title="Toggle Collapse on launch"
               >
                 <div
                   style={{
-                    width: '12px',
-                    height: '12px',
+                    width: '14px',
+                    height: '14px',
                     borderRadius: '50%',
-                    background: settings.autoCollapseOnLaunch ? (isAether ? '#2e1c0d' : 'var(--bg-dock)') : 'var(--text-muted)',
-                    transition: 'background 0.2s ease'
+                    background: '#ffffff',
+                    position: 'absolute',
+                    top: '2px',
+                    left: settings.autoCollapseOnLaunch ? '18px' : '2px',
+                    transition: 'left 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.35)'
                   }}
                 />
-              </div>
+              </button>
             </div>
 
+            {/* 2. Close on click outside */}
             <div
               onClick={() => onUpdateSettings({ closeOnBlur: !settings.closeOnBlur })}
               style={{
@@ -1365,179 +1471,210 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '9px 12px',
-                borderRadius: '6px',
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--btn-border)',
                 cursor: 'pointer',
-                transition: 'all 0.15s ease'
+                borderBottom: '1px solid var(--border-subtle)',
+                transition: 'background 0.15s ease'
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'var(--btn-border-hover)';
-                e.currentTarget.style.background = 'var(--bg-surface-hover)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'var(--btn-border)';
-                e.currentTarget.style.background = 'var(--bg-surface)';
-              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-surface-hover)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
             >
-              <span style={{ fontSize: '11.5px', color: isAether ? '#fff9e6' : 'var(--text-primary)', fontWeight: 500 }}>
-                Close on click outside
-              </span>
-              <div
-                style={{
-                  width: '32px',
-                  height: '18px',
-                  borderRadius: '999px',
-                  background: settings.closeOnBlur ? 'var(--text-primary)' : 'var(--bg-surface-active)',
-                  border: '1px solid var(--btn-border)',
-                  padding: '2px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  transition: 'background 0.2s ease',
-                  justifyContent: settings.closeOnBlur ? 'flex-end' : 'flex-start'
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', paddingRight: '12px' }}>
+                <span style={{ fontSize: '11.5px', color: isAether ? '#fff9e6' : 'var(--text-primary)', fontWeight: 500 }}>
+                  Close on click outside
+                </span>
+                <span style={{ fontSize: '10px', color: 'var(--text-muted)', lineHeight: '1.3' }}>
+                  Auto-minimize the dock when clicking anywhere outside the dock window.
+                </span>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={settings.closeOnBlur}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onUpdateSettings({ closeOnBlur: !settings.closeOnBlur });
                 }}
+                className={`toggle-switch ${settings.closeOnBlur ? 'active' : ''}`}
+                style={{
+                  width: '36px',
+                  height: '20px',
+                  borderRadius: '10px',
+                  background: settings.closeOnBlur
+                    ? (currentTheme === 'deathnote' ? '#c41e24' : isAether ? '#59bcf4' : 'var(--accent-color, #3b82f6)')
+                    : 'var(--btn-border)',
+                  position: 'relative',
+                  cursor: 'pointer',
+                  border: '1px solid ' + (settings.closeOnBlur ? 'rgba(255,255,255,0.18)' : 'var(--border-subtle)'),
+                  padding: 0,
+                  transition: 'background 0.18s ease, border-color 0.18s ease',
+                  flexShrink: 0
+                }}
+                aria-label="Toggle Close on click outside"
+                title="Toggle Close on click outside"
               >
                 <div
                   style={{
-                    width: '12px',
-                    height: '12px',
+                    width: '14px',
+                    height: '14px',
                     borderRadius: '50%',
-                    background: settings.closeOnBlur ? 'var(--bg-dock)' : 'var(--text-muted)',
-                    transition: 'background 0.2s ease'
+                    background: '#ffffff',
+                    position: 'absolute',
+                    top: '2px',
+                    left: settings.closeOnBlur ? '18px' : '2px',
+                    transition: 'left 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.35)'
                   }}
                 />
-              </div>
+              </button>
             </div>
 
+            {/* 3. Hide from Windows Taskbar */}
             <div
+              onClick={() => {
+                const newVal = !settings.hideFromTaskbar;
+                onUpdateSettings({ hideFromTaskbar: newVal });
+                if (typeof window !== 'undefined' && (window as any).appDock?.setSkipTaskbar) {
+                  (window as any).appDock.setSkipTaskbar(newVal);
+                }
+              }}
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '9px 12px',
-                borderRadius: '6px',
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--btn-border)',
-                marginTop: '2px'
+                cursor: 'pointer',
+                borderBottom: '1px solid var(--border-subtle)',
+                transition: 'background 0.15s ease'
               }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-surface-hover)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
             >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', maxWidth: '75%' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', maxWidth: '75%', paddingRight: '12px' }}>
                 <span style={{ fontSize: '11.5px', color: isAether ? '#fff9e6' : 'var(--text-primary)', fontWeight: 500 }}>
                   Hide from Windows Taskbar
                 </span>
-                <span style={{ fontSize: '10px', color: 'var(--text-muted)', lineHeight: '1.4' }}>
-                  Removes the app button from the Windows bottom taskbar while keeping the dock & handle completely visible on your screen. AppDock remains accessible in the hidden tray (`^`).
+                <span style={{ fontSize: '10px', color: 'var(--text-muted)', lineHeight: '1.3' }}>
+                  Removes the taskbar button while keeping edge dock and tray icon (`^`) available.
                 </span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const newVal = !settings.hideFromTaskbar;
-                    onUpdateSettings({ hideFromTaskbar: newVal });
-                    if (typeof window !== 'undefined' && (window as any).appDock?.setSkipTaskbar) {
-                      (window as any).appDock.setSkipTaskbar(newVal);
-                    }
-                  }}
-                  className={`toggle-switch ${settings.hideFromTaskbar ? 'active' : ''}`}
+              <button
+                type="button"
+                role="switch"
+                aria-checked={settings.hideFromTaskbar}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const newVal = !settings.hideFromTaskbar;
+                  onUpdateSettings({ hideFromTaskbar: newVal });
+                  if (typeof window !== 'undefined' && (window as any).appDock?.setSkipTaskbar) {
+                    (window as any).appDock.setSkipTaskbar(newVal);
+                  }
+                }}
+                className={`toggle-switch ${settings.hideFromTaskbar ? 'active' : ''}`}
+                style={{
+                  width: '36px',
+                  height: '20px',
+                  borderRadius: '10px',
+                  background: settings.hideFromTaskbar
+                    ? (currentTheme === 'deathnote' ? '#c41e24' : isAether ? '#59bcf4' : 'var(--accent-color, #3b82f6)')
+                    : 'var(--btn-border)',
+                  position: 'relative',
+                  cursor: 'pointer',
+                  border: '1px solid ' + (settings.hideFromTaskbar ? 'rgba(255,255,255,0.18)' : 'var(--border-subtle)'),
+                  padding: 0,
+                  transition: 'background 0.18s ease, border-color 0.18s ease',
+                  flexShrink: 0
+                }}
+                aria-label="Toggle Hide from Windows Taskbar"
+                title="Toggle Taskbar Visibility"
+              >
+                <div
                   style={{
-                    width: '36px',
-                    height: '20px',
-                    borderRadius: '10px',
-                    background: settings.hideFromTaskbar
-                      ? (currentTheme === 'deathnote' ? '#c41e24' : isAether ? '#59bcf4' : 'var(--accent-color, #3b82f6)')
-                      : 'var(--btn-border)',
-                    position: 'relative',
-                    cursor: 'pointer',
-                    border: 'none',
-                    padding: 0,
-                    transition: 'background 0.2s ease',
-                    display: 'flex',
-                    alignItems: 'center'
+                    width: '14px',
+                    height: '14px',
+                    borderRadius: '50%',
+                    background: '#ffffff',
+                    position: 'absolute',
+                    top: '2px',
+                    left: settings.hideFromTaskbar ? '18px' : '2px',
+                    transition: 'left 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.35)'
                   }}
-                  aria-label="Toggle Hide from Windows Taskbar"
-                  title="Toggle Taskbar Visibility"
-                >
-                  <div
-                    style={{
-                      width: '14px',
-                      height: '14px',
-                      borderRadius: '50%',
-                      background: '#fff',
-                      position: 'absolute',
-                      left: settings.hideFromTaskbar ? '19px' : '3px',
-                      transition: 'left 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
-                    }}
-                  />
-                </button>
-              </div>
+                />
+              </button>
             </div>
 
-            {/* Start with Windows (Auto Setup on Windows Boot) */}
+            {/* 4. Start with Windows (Auto Setup on Windows Boot) */}
             <div
+              onClick={() => {
+                const newVal = !(settings.autoStartWithWindows ?? false);
+                onUpdateSettings({ autoStartWithWindows: newVal });
+                if (typeof window !== 'undefined' && (window as any).appDock?.setAutoLaunch) {
+                  (window as any).appDock.setAutoLaunch(newVal);
+                }
+              }}
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '9px 12px',
-                borderRadius: '6px',
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--btn-border)',
-                marginTop: '2px'
+                cursor: 'pointer',
+                transition: 'background 0.15s ease'
               }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-surface-hover)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
             >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', maxWidth: '75%' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', maxWidth: '75%', paddingRight: '12px' }}>
                 <span style={{ fontSize: '11.5px', color: isAether ? '#fff9e6' : 'var(--text-primary)', fontWeight: 500 }}>
                   Start with Windows
                 </span>
-                <span style={{ fontSize: '10px', color: 'var(--text-muted)', lineHeight: '1.4' }}>
-                  Automatically launch and set up AppDock docked at screen edge whenever Windows powers on.
+                <span style={{ fontSize: '10px', color: 'var(--text-muted)', lineHeight: '1.3' }}>
+                  Automatically launch and dock AppDock at screen edge whenever Windows starts.
                 </span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const newVal = !(settings.autoStartWithWindows ?? false);
-                    onUpdateSettings({ autoStartWithWindows: newVal });
-                    if (typeof window !== 'undefined' && (window as any).appDock?.setAutoLaunch) {
-                      (window as any).appDock.setAutoLaunch(newVal);
-                    }
-                  }}
-                  className={`toggle-switch ${(settings.autoStartWithWindows ?? false) ? 'active' : ''}`}
+              <button
+                type="button"
+                role="switch"
+                aria-checked={settings.autoStartWithWindows ?? false}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const newVal = !(settings.autoStartWithWindows ?? false);
+                  onUpdateSettings({ autoStartWithWindows: newVal });
+                  if (typeof window !== 'undefined' && (window as any).appDock?.setAutoLaunch) {
+                    (window as any).appDock.setAutoLaunch(newVal);
+                  }
+                }}
+                className={`toggle-switch ${(settings.autoStartWithWindows ?? false) ? 'active' : ''}`}
+                style={{
+                  width: '36px',
+                  height: '20px',
+                  borderRadius: '10px',
+                  background: (settings.autoStartWithWindows ?? false)
+                    ? (currentTheme === 'deathnote' ? '#c41e24' : isAether ? '#59bcf4' : 'var(--accent-color, #3b82f6)')
+                    : 'var(--btn-border)',
+                  position: 'relative',
+                  cursor: 'pointer',
+                  border: '1px solid ' + ((settings.autoStartWithWindows ?? false) ? 'rgba(255,255,255,0.18)' : 'var(--border-subtle)'),
+                  padding: 0,
+                  transition: 'background 0.18s ease, border-color 0.18s ease',
+                  flexShrink: 0
+                }}
+                aria-label="Toggle Start with Windows"
+                title="Toggle Start with Windows"
+              >
+                <div
                   style={{
-                    width: '36px',
-                    height: '20px',
-                    borderRadius: '10px',
-                    background: (settings.autoStartWithWindows ?? false)
-                      ? (currentTheme === 'deathnote' ? '#c41e24' : isAether ? '#59bcf4' : 'var(--accent-color, #3b82f6)')
-                      : 'var(--btn-border)',
-                    position: 'relative',
-                    cursor: 'pointer',
-                    border: 'none',
-                    padding: 0,
-                    transition: 'background 0.2s ease',
-                    display: 'flex',
-                    alignItems: 'center'
+                    width: '14px',
+                    height: '14px',
+                    borderRadius: '50%',
+                    background: '#ffffff',
+                    position: 'absolute',
+                    top: '2px',
+                    left: (settings.autoStartWithWindows ?? false) ? '18px' : '2px',
+                    transition: 'left 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.35)'
                   }}
-                  aria-label="Toggle Start with Windows"
-                  title="Toggle Start with Windows"
-                >
-                  <div
-                    style={{
-                      width: '14px',
-                      height: '14px',
-                      borderRadius: '50%',
-                      background: '#fff',
-                      position: 'absolute',
-                      left: (settings.autoStartWithWindows ?? false) ? '19px' : '3px',
-                      transition: 'left 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
-                    }}
-                  />
-                </button>
-              </div>
+                />
+              </button>
             </div>
           </div>
 
@@ -1562,7 +1699,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                   background: 'var(--bg-surface)',
                   padding: '2px 8px',
                   borderRadius: '4px',
-                  border: '1px solid var(--border-subtle)'
+                  border: '1px solid var(--border-subtle)',
+                  fontVariantNumeric: 'tabular-nums'
                 }}
               >
                 {Math.round(settings.toggleOpacity * 100)}%
@@ -1581,93 +1719,166 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           </div>
         </div>
 
-        {/* Single Update Button */}
+        {/* About & Updates Card */}
         <div style={{ paddingBottom: '16px' }}>
-          {updateStatus === 'available' && latestReleaseInfo ? (
-            <button
-              type="button"
-              onClick={() => {
-                if (typeof window !== 'undefined' && (window as any).appDock?.openExternalUrl && latestReleaseInfo.downloadUrl) {
-                  (window as any).appDock.openExternalUrl(latestReleaseInfo.downloadUrl);
-                }
-              }}
-              className="btn-primary"
-              style={{
-                width: '100%',
-                padding: '9px 12px',
-                borderRadius: '8px',
-                fontSize: '11.5px',
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '7px',
-                cursor: 'pointer',
-                background: '#2563eb',
-                color: '#ffffff',
-                border: 'none',
-                boxShadow: 'var(--btn-shadow)',
-                transition: 'all 0.16s ease'
-              }}
-            >
-              <ArrowUpCircle size={14} />
-              <span>Update to v{latestReleaseInfo.version}</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleManualCheckUpdates}
-              disabled={updateStatus === 'checking'}
-              className="settings-opt-btn"
-              style={{
-                width: '100%',
-                padding: '9px 12px',
-                borderRadius: '8px',
-                fontSize: '11.5px',
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '7px',
-                cursor: updateStatus === 'checking' ? 'wait' : 'pointer',
-                background: isAether ? '#5c3e23' : 'var(--bg-surface)',
-                color: isAether ? '#fff9e6' : 'var(--text-primary)',
-                border: isAether ? '1.5px solid #8c6038' : '1px solid var(--btn-border)',
-                boxShadow: 'var(--btn-shadow)',
-                transition: 'all 0.16s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = isAether ? '#ffdf59' : 'var(--btn-border-hover)';
-                e.currentTarget.style.background = isAether ? '#734e2c' : 'var(--bg-surface-hover)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = isAether ? '#8c6038' : 'var(--btn-border)';
-                e.currentTarget.style.background = isAether ? '#5c3e23' : 'var(--bg-surface)';
-              }}
-            >
-              {updateStatus === 'checking' ? (
-                <>
-                  <RefreshCw size={13} className="animate-spin" />
-                  <span>Checking for Updates...</span>
-                </>
-              ) : updateStatus === 'latest' ? (
-                <>
-                  <Check size={13} color="#22c55e" strokeWidth={2.5} />
-                  <span>Up to Date (v{appVersion})</span>
-                </>
-              ) : updateStatus === 'error' ? (
-                <>
-                  <X size={13} color="#ef4444" strokeWidth={2.5} />
-                  <span>{updateErrorMessage ? `Check Failed: ${updateErrorMessage}` : 'Check Failed - Click to Retry'}</span>
-                </>
-              ) : (
-                <>
-                  <RefreshCw size={13} />
-                  <span>Check for Updates (v{appVersion})</span>
-                </>
-              )}
-            </button>
-          )}
+          <div
+            style={{
+              background: 'var(--bg-surface)',
+              border: isAether ? '1.5px solid #8c6038' : '1px solid var(--btn-border)',
+              borderRadius: '8px',
+              padding: '12px 14px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '10px'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span
+                  style={{
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    color: isAether ? '#ffdf59' : 'var(--text-primary)',
+                    letterSpacing: '0.2px'
+                  }}
+                >
+                  AppDock
+                </span>
+                <span
+                  style={{
+                    fontSize: '10px',
+                    color: isAether ? '#c2e5fc' : 'var(--text-muted)',
+                    fontWeight: 600,
+                    fontVariantNumeric: 'tabular-nums',
+                    background: isAether ? '#243a4e' : 'var(--bg-surface-active)',
+                    border: '1px solid var(--border-subtle)',
+                    padding: '1px 6px',
+                    borderRadius: '999px'
+                  }}
+                >
+                  v{appVersion}
+                </span>
+              </div>
+
+              {/* Live Status indicator */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                {updateStatus === 'checking' ? (
+                  <span style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <RefreshCw size={11} className="animate-spin" />
+                    Checking...
+                  </span>
+                ) : updateStatus === 'latest' ? (
+                  <span style={{ fontSize: '10px', color: '#22c55e', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
+                    <Check size={11} strokeWidth={2.5} />
+                    Up to date
+                  </span>
+                ) : updateStatus === 'error' ? (
+                  <span style={{ fontSize: '10px', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
+                    <X size={11} strokeWidth={2.5} />
+                    Check failed
+                  </span>
+                ) : updateStatus === 'available' ? (
+                  <span style={{ fontSize: '10px', color: '#3b82f6', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
+                    <ArrowUpCircle size={11} />
+                    Update available
+                  </span>
+                ) : (
+                  <span style={{ fontSize: '10px', color: 'var(--text-muted)', opacity: 0.8 }}>
+                    DevlopTecy/AppDock
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Action Button */}
+            {updateStatus === 'available' && latestReleaseInfo ? (
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof window !== 'undefined' && (window as any).appDock?.openExternalUrl && latestReleaseInfo.downloadUrl) {
+                    (window as any).appDock.openExternalUrl(latestReleaseInfo.downloadUrl);
+                  }
+                }}
+                className="btn-primary"
+                style={{
+                  width: '100%',
+                  height: '36px',
+                  padding: '0 12px',
+                  borderRadius: '6px',
+                  fontSize: '11.5px',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '7px',
+                  cursor: 'pointer',
+                  background: '#2563eb',
+                  color: '#ffffff',
+                  border: 'none',
+                  boxShadow: 'var(--btn-shadow)',
+                  transition: 'all 0.16s ease'
+                }}
+              >
+                <ArrowUpCircle size={14} />
+                <span>Update to v{latestReleaseInfo.version}</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleManualCheckUpdates}
+                disabled={updateStatus === 'checking'}
+                className="settings-opt-btn"
+                style={{
+                  width: '100%',
+                  height: '34px',
+                  padding: '0 12px',
+                  borderRadius: '6px',
+                  fontSize: '11.5px',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '7px',
+                  cursor: updateStatus === 'checking' ? 'wait' : 'pointer',
+                  background: isAether ? '#5c3e23' : 'var(--bg-surface-active)',
+                  color: isAether ? '#fff9e6' : 'var(--text-primary)',
+                  border: isAether ? '1.5px solid #8c6038' : '1px solid var(--btn-border)',
+                  boxShadow: 'var(--btn-shadow)',
+                  transition: 'all 0.16s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = isAether ? '#ffdf59' : 'var(--btn-border-hover)';
+                  e.currentTarget.style.background = isAether ? '#734e2c' : 'var(--bg-surface-hover)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = isAether ? '#8c6038' : 'var(--btn-border)';
+                  e.currentTarget.style.background = isAether ? '#5c3e23' : 'var(--bg-surface-active)';
+                }}
+              >
+                {updateStatus === 'checking' ? (
+                  <>
+                    <RefreshCw size={13} className="animate-spin" />
+                    <span>Checking for Updates...</span>
+                  </>
+                ) : updateStatus === 'latest' ? (
+                  <>
+                    <Check size={13} color="#22c55e" strokeWidth={2.5} />
+                    <span>Up to Date (v{appVersion})</span>
+                  </>
+                ) : updateStatus === 'error' ? (
+                  <>
+                    <X size={13} color="#ef4444" strokeWidth={2.5} />
+                    <span>{updateErrorMessage ? `Check Failed: ${updateErrorMessage}` : 'Check Failed - Click to Retry'}</span>
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw size={13} />
+                    <span>Check for Updates (v{appVersion})</span>
+                  </>
+                )}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

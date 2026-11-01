@@ -1352,20 +1352,6 @@ export const DockFrame: React.FC<DockFrameProps> = ({
             </button>
           )}
 
-          {quickIconsContent && (
-            <div
-              style={{
-                flex: 1,
-                minWidth: 0,
-                display: 'flex',
-                alignItems: 'center',
-                overflow: 'hidden'
-              }}
-            >
-              {quickIconsContent}
-            </div>
-          )}
-
           {theme === 'kawaii' && (
             <img
               src={getAssetUrl('/stickers/star_helmet.png')}

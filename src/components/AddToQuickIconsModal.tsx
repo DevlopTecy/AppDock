@@ -472,3 +472,4 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
     </div>
   );
 };
+

@@ -780,19 +780,6 @@ export const App: React.FC = () => {
       verticalPosition={data.settings.verticalPosition ?? 0.5}
       onUpdateVerticalPosition={(pos) => updateSettings({ verticalPosition: pos })}
       theme={data.settings.theme}
-      quickIconsContent={
-        !isCleanDock ? (
-          <QuickIconsBar
-            items={data.settings.quickIcons || []}
-            groups={data.groups}
-            onLaunchItem={handleLaunchItem}
-            onRemoveQuickIcon={handleRemoveQuickIcon}
-            onAddQuickIcon={handleAddQuickIcon}
-            onOpenAddModal={() => setIsQuickIconsModalOpen(true)}
-            theme={data.settings.theme}
-          />
-        ) : undefined
-      }
       customTheme={{
         bgImages: data.settings.customThemeBgImages,
         bgBlur: data.settings.customThemeBgBlur,
@@ -833,6 +820,11 @@ export const App: React.FC = () => {
             onMoveGroup={handleMoveGroup}
             theme={data.settings.theme}
             hideAppCount={data.settings.customThemeHideAppCount}
+            quickIcons={data.settings.quickIcons || []}
+            onLaunchItem={handleLaunchItem}
+            onRemoveQuickIcon={handleRemoveQuickIcon}
+            onAddQuickIcon={handleAddQuickIcon}
+            onOpenQuickIconsModal={() => setIsQuickIconsModalOpen(true)}
           />
         )}
 

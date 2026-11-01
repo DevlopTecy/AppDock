@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { getAssetUrl } from '../utils/assets';
-import { AppGroup, DockPosition, DockTheme } from '../types/dock';
+import { AppGroup, AppItem, DockPosition, DockTheme } from '../types/dock';
 import {
   Gamepad2,
   Briefcase,
@@ -20,6 +20,7 @@ import {
   ArrowDown
 } from 'lucide-react';
 import { GroupGridIcon } from './GroupGridIcon';
+import { QuickIconsBar } from './QuickIconsBar';
 
 export const getGroupIcon = (iconName: string, size = 15, group?: AppGroup) => {
   if (group?.customIcon) {
@@ -75,6 +76,11 @@ interface GroupSidebarProps {
   onMoveGroup?: (groupId: string, direction: 'up' | 'down') => void;
   theme?: DockTheme;
   hideAppCount?: boolean;
+  quickIcons?: AppItem[];
+  onLaunchItem?: (item: AppItem) => void;
+  onRemoveQuickIcon?: (itemId: string) => void;
+  onAddQuickIcon?: (item: AppItem) => void;
+  onOpenQuickIconsModal?: () => void;
 }
 
 export const GroupSidebar: React.FC<GroupSidebarProps> = ({
@@ -87,7 +93,12 @@ export const GroupSidebar: React.FC<GroupSidebarProps> = ({
   onEditGroup,
   onMoveGroup,
   theme,
-  hideAppCount = false
+  hideAppCount = false,
+  quickIcons = [],
+  onLaunchItem,
+  onRemoveQuickIcon,
+  onAddQuickIcon,
+  onOpenQuickIconsModal
 }) => {
   const [hoveredGroupId, setHoveredGroupId] = useState<string | null>(null);
   const [confirmDeleteGroup, setConfirmDeleteGroup] = useState<AppGroup | null>(null);
@@ -442,6 +453,30 @@ export const GroupSidebar: React.FC<GroupSidebarProps> = ({
             <Plus size={15} strokeWidth={2.2} />
           )}
         </button>
+
+        {/* Divider between Groups and Quick Icons */}
+        <div
+          style={{
+            width: '28px',
+            height: '1px',
+            background: 'var(--border-subtle)',
+            margin: '6px 0 4px 0',
+            opacity: 0.8
+          }}
+        />
+
+        {/* Quick Icons (Pinned Apps) in Sidebar */}
+        <QuickIconsBar
+          orientation="vertical"
+          items={quickIcons || []}
+          groups={groups}
+          onLaunchItem={onLaunchItem || (() => {})}
+          onRemoveQuickIcon={onRemoveQuickIcon || (() => {})}
+          onAddQuickIcon={onAddQuickIcon || (() => {})}
+          onOpenAddModal={onOpenQuickIconsModal || (() => {})}
+          theme={theme}
+          isRightDock={isRightDock}
+        />
 
         {/* Cute Kawaii Space Candy Sticker */}
         <div
