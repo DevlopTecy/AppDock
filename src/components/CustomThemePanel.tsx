@@ -26,7 +26,9 @@ const Toggle: React.FC<{
   description?: string;
   checked: boolean;
   onChange: (v: boolean) => void;
-}> = ({ label, description, checked, onChange }) => (
+  accentColor?: string;
+  thumbColor?: string;
+}> = ({ label, description, checked, onChange, accentColor, thumbColor }) => (
   <div
     onClick={() => onChange(!checked)}
     style={{
@@ -37,7 +39,9 @@ const Toggle: React.FC<{
       borderRadius: '6px',
       cursor: 'pointer',
       userSelect: 'none',
-      transition: 'background 0.15s ease'
+      transition: 'background 0.15s ease',
+      boxSizing: 'border-box',
+      width: '100%'
     }}
     onMouseEnter={(e) => {
       e.currentTarget.style.background = 'var(--bg-surface-hover)';
@@ -74,7 +78,7 @@ const Toggle: React.FC<{
         width: '36px',
         height: '20px',
         borderRadius: '10px',
-        background: checked ? 'var(--accent-color, #2563eb)' : 'var(--btn-border)',
+        background: checked ? (accentColor || 'var(--accent, #3b82f6)') : 'var(--btn-border)',
         border: '1px solid ' + (checked ? 'rgba(255,255,255,0.18)' : 'var(--border-subtle)'),
         cursor: 'pointer',
         position: 'relative',
@@ -91,7 +95,7 @@ const Toggle: React.FC<{
           width: '14px',
           height: '14px',
           borderRadius: '50%',
-          background: '#ffffff',
+          background: checked && thumbColor ? thumbColor : '#ffffff',
           boxShadow: '0 1px 3px rgba(0, 0, 0, 0.35)',
           transition: 'left 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
           pointerEvents: 'none'
@@ -202,6 +206,13 @@ export const CustomThemePanel: React.FC<CustomThemePanelProps> = ({ settings, on
   const hideAppCount = settings.customThemeHideAppCount || false;
   const hideQuickIcons = settings.customThemeHideQuickIcons || settings.hideQuickIcons || false;
 
+  const currentTheme = settings.theme || 'dark';
+  const isEldenRing = currentTheme === 'eldenring';
+  const isDeathNote = currentTheme === 'deathnote';
+  const isAether = currentTheme === 'aether';
+  const themeAccent = isEldenRing ? '#EAC477' : isDeathNote ? '#c41e24' : isAether ? '#ffdf59' : 'var(--accent, #3b82f6)';
+  const themeThumb = isEldenRing ? '#171813' : '#ffffff';
+
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
@@ -270,32 +281,38 @@ export const CustomThemePanel: React.FC<CustomThemePanelProps> = ({ settings, on
   };
 
   const displayOptions = (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', width: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
       <div style={SECTION_TITLE}>
-        <Sliders size={12} color="var(--text-muted)" />
-        <span>Display options</span>
+        <Sliders size={12} color={isEldenRing ? '#EAC477' : isAether ? '#ffdf59' : 'var(--text-muted)'} />
+        <span style={{ color: isEldenRing ? '#EAC477' : undefined }}>Display options</span>
       </div>
 
-      <Toggle label="Background Blur" checked={bgBlur} onChange={(v) => onUpdateSettings({ customThemeBgBlur: v })} />
-      <Toggle label="Hide Background (solid color)" checked={bgHide} onChange={(v) => onUpdateSettings({ customThemeBgHide: v })} />
-      <Toggle label="Hide Sidebar (weather / calendar / music)" checked={hideSidebar} onChange={(v) => onUpdateSettings({ customThemeHideSidebar: v })} />
+      <Toggle label="Background Blur" checked={bgBlur} onChange={(v) => onUpdateSettings({ customThemeBgBlur: v })} accentColor={themeAccent} thumbColor={themeThumb} />
+      <Toggle label="Hide Background (solid color)" checked={bgHide} onChange={(v) => onUpdateSettings({ customThemeBgHide: v })} accentColor={themeAccent} thumbColor={themeThumb} />
+      <Toggle label="Hide Sidebar (weather / calendar / music)" checked={hideSidebar} onChange={(v) => onUpdateSettings({ customThemeHideSidebar: v })} accentColor={themeAccent} thumbColor={themeThumb} />
 
-      <Toggle label="Hide Module Buttons (keep one)" checked={hideMods} onChange={(v) => onUpdateSettings({ customThemeHideSidebarModules: v })} />
+      <Toggle label="Hide Module Buttons (keep one)" checked={hideMods} onChange={(v) => onUpdateSettings({ customThemeHideSidebarModules: v })} accentColor={themeAccent} thumbColor={themeThumb} />
       {hideMods && (
         <div
           style={{
             display: 'flex',
-            gap: '8px',
+            flexDirection: 'column',
+            gap: '6px',
             marginTop: '2px',
             marginBottom: '6px',
-            padding: '6px 10px',
+            padding: '7px 10px',
             background: 'var(--bg-surface-active)',
             borderRadius: '6px',
-            alignItems: 'center'
+            border: isEldenRing ? '1px solid rgba(197, 161, 90, 0.25)' : '1px solid var(--border-subtle)',
+            boxSizing: 'border-box',
+            width: '100%'
           }}
         >
-          <span style={{ fontSize: '10.5px', color: 'var(--text-muted)', fontWeight: 600 }}>Keep:</span>
-          <div style={{ display: 'flex', gap: '4px', flex: 1 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600 }}>Keep module button:</span>
+            <span style={{ fontSize: '9.5px', color: isEldenRing ? '#EAC477' : 'var(--accent, #3b82f6)', fontWeight: 700, textTransform: 'capitalize' }}>{keepMod}</span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px', width: '100%', boxSizing: 'border-box' }}>
             {MODULE_OPTS.map((m) => {
               const active = keepMod === m;
               return (
@@ -304,16 +321,21 @@ export const CustomThemePanel: React.FC<CustomThemePanelProps> = ({ settings, on
                   type="button"
                   onClick={() => onUpdateSettings({ customThemeKeepSidebarModule: m })}
                   style={{
-                    flex: 1,
-                    padding: '4px 6px',
+                    padding: '5px 2px',
                     borderRadius: '4px',
-                    fontSize: '10.5px',
-                    fontWeight: active ? 600 : 500,
-                    background: active ? 'var(--text-primary)' : 'transparent',
-                    color: active ? 'var(--bg-dock)' : 'var(--text-secondary)',
-                    border: 'none',
+                    fontSize: '10px',
+                    fontWeight: active ? 700 : 500,
+                    background: active
+                      ? (isEldenRing ? '#EAC477' : 'var(--accent, var(--text-primary))')
+                      : 'transparent',
+                    color: active
+                      ? (isEldenRing ? '#171813' : 'var(--bg-dock, #ffffff)')
+                      : 'var(--text-secondary)',
+                    border: active && isEldenRing ? '1px solid #EAC477' : '1px solid var(--btn-border)',
                     cursor: 'pointer',
-                    transition: 'all 0.15s ease'
+                    transition: 'all 0.15s ease',
+                    textAlign: 'center',
+                    boxSizing: 'border-box'
                   }}
                 >
                   {m.charAt(0).toUpperCase() + m.slice(1)}
@@ -328,22 +350,30 @@ export const CustomThemePanel: React.FC<CustomThemePanelProps> = ({ settings, on
         label="Hide A, L, M, S Buttons (density controls)"
         checked={hideALMS}
         onChange={(v) => onUpdateSettings({ customThemeHideALMS: v, customThemeALMSDensity: settings.customThemeALMSDensity || 'auto' })}
+        accentColor={themeAccent}
+        thumbColor={themeThumb}
       />
       {hideALMS && (
         <div
           style={{
             display: 'flex',
-            gap: '8px',
+            flexDirection: 'column',
+            gap: '6px',
             marginTop: '2px',
             marginBottom: '6px',
-            padding: '6px 10px',
+            padding: '7px 10px',
             background: 'var(--bg-surface-active)',
             borderRadius: '6px',
-            alignItems: 'center'
+            border: isEldenRing ? '1px solid rgba(197, 161, 90, 0.25)' : '1px solid var(--border-subtle)',
+            boxSizing: 'border-box',
+            width: '100%'
           }}
         >
-          <span style={{ fontSize: '10.5px', color: 'var(--text-muted)', fontWeight: 600 }}>Default size:</span>
-          <div style={{ display: 'flex', gap: '4px', flex: 1 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600 }}>Default Density size:</span>
+            <span style={{ fontSize: '9.5px', color: isEldenRing ? '#EAC477' : 'var(--accent, #3b82f6)', fontWeight: 700, textTransform: 'capitalize' }}>{almsDensity}</span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '4px', width: '100%', boxSizing: 'border-box' }}>
             {[
               { id: 'auto', label: 'Auto' },
               { id: 'large', label: 'Large' },
@@ -357,16 +387,21 @@ export const CustomThemePanel: React.FC<CustomThemePanelProps> = ({ settings, on
                   type="button"
                   onClick={() => onUpdateSettings({ customThemeALMSDensity: opt.id as any })}
                   style={{
-                    flex: 1,
-                    padding: '4px 6px',
+                    padding: '5px 2px',
                     borderRadius: '4px',
-                    fontSize: '10.5px',
-                    fontWeight: active ? 600 : 500,
-                    background: active ? 'var(--text-primary)' : 'transparent',
-                    color: active ? 'var(--bg-dock)' : 'var(--text-secondary)',
-                    border: 'none',
+                    fontSize: '10px',
+                    fontWeight: active ? 700 : 500,
+                    background: active
+                      ? (isEldenRing ? '#EAC477' : 'var(--accent, var(--text-primary))')
+                      : 'transparent',
+                    color: active
+                      ? (isEldenRing ? '#171813' : 'var(--bg-dock, #ffffff)')
+                      : 'var(--text-secondary)',
+                    border: active && isEldenRing ? '1px solid #EAC477' : '1px solid var(--btn-border)',
                     cursor: 'pointer',
-                    transition: 'all 0.15s ease'
+                    transition: 'all 0.15s ease',
+                    textAlign: 'center',
+                    boxSizing: 'border-box'
                   }}
                 >
                   {opt.label}
@@ -377,24 +412,30 @@ export const CustomThemePanel: React.FC<CustomThemePanelProps> = ({ settings, on
         </div>
       )}
 
-      <Toggle label="Hide App Count badge" checked={hideAppCount} onChange={(v) => onUpdateSettings({ customThemeHideAppCount: v })} />
-      <Toggle label="Hide Quick Icons" checked={hideQuickIcons} onChange={(v) => onUpdateSettings({ customThemeHideQuickIcons: v, hideQuickIcons: v })} />
-      <Toggle label="Background Rotation" checked={bgRotation} onChange={(v) => onUpdateSettings({ customThemeBgRotation: v })} />
+      <Toggle label="Hide App Count badge" checked={hideAppCount} onChange={(v) => onUpdateSettings({ customThemeHideAppCount: v })} accentColor={themeAccent} thumbColor={themeThumb} />
+      <Toggle label="Hide Quick Icons" checked={hideQuickIcons} onChange={(v) => onUpdateSettings({ customThemeHideQuickIcons: v, hideQuickIcons: v })} accentColor={themeAccent} thumbColor={themeThumb} />
+      <Toggle label="Background Rotation" checked={bgRotation} onChange={(v) => onUpdateSettings({ customThemeBgRotation: v })} accentColor={themeAccent} thumbColor={themeThumb} />
       {bgRotation && (
         <div
           style={{
             display: 'flex',
-            gap: '8px',
+            flexDirection: 'column',
+            gap: '6px',
             marginTop: '2px',
             marginBottom: '6px',
-            padding: '6px 10px',
+            padding: '7px 10px',
             background: 'var(--bg-surface-active)',
             borderRadius: '6px',
-            alignItems: 'center'
+            border: isEldenRing ? '1px solid rgba(197, 161, 90, 0.25)' : '1px solid var(--border-subtle)',
+            boxSizing: 'border-box',
+            width: '100%'
           }}
         >
-          <span style={{ fontSize: '10.5px', color: 'var(--text-muted)', fontWeight: 600 }}>Interval:</span>
-          <div style={{ display: 'flex', gap: '4px', flex: 1 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600 }}>Rotation Interval:</span>
+            <span style={{ fontSize: '9.5px', color: isEldenRing ? '#EAC477' : 'var(--accent, #3b82f6)', fontWeight: 700 }}>{bgRotSecs}s</span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '4px', width: '100%', boxSizing: 'border-box' }}>
             {ROTATION_OPTS.map((s) => {
               const active = bgRotSecs === s;
               return (
@@ -403,16 +444,21 @@ export const CustomThemePanel: React.FC<CustomThemePanelProps> = ({ settings, on
                   type="button"
                   onClick={() => onUpdateSettings({ customThemeBgRotationSecs: s })}
                   style={{
-                    flex: 1,
-                    padding: '4px 6px',
+                    padding: '5px 2px',
                     borderRadius: '4px',
-                    fontSize: '10.5px',
-                    fontWeight: active ? 600 : 500,
-                    background: active ? 'var(--text-primary)' : 'transparent',
-                    color: active ? 'var(--bg-dock)' : 'var(--text-secondary)',
-                    border: 'none',
+                    fontSize: '10px',
+                    fontWeight: active ? 700 : 500,
+                    background: active
+                      ? (isEldenRing ? '#EAC477' : 'var(--accent, var(--text-primary))')
+                      : 'transparent',
+                    color: active
+                      ? (isEldenRing ? '#171813' : 'var(--bg-dock, #ffffff)')
+                      : 'var(--text-secondary)',
+                    border: active && isEldenRing ? '1px solid #EAC477' : '1px solid var(--btn-border)',
                     cursor: 'pointer',
-                    transition: 'all 0.15s ease'
+                    transition: 'all 0.15s ease',
+                    textAlign: 'center',
+                    boxSizing: 'border-box'
                   }}
                 >
                   {s}s
@@ -434,7 +480,10 @@ export const CustomThemePanel: React.FC<CustomThemePanelProps> = ({ settings, on
           borderRadius: '8px',
           background: 'var(--bg-surface)',
           border: '1px solid var(--btn-border)',
-          boxShadow: 'var(--btn-shadow)'
+          boxShadow: 'var(--btn-shadow)',
+          boxSizing: 'border-box',
+          width: '100%',
+          overflow: 'hidden'
         }}
       >
         {displayOptions}

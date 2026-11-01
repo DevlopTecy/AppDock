@@ -1,5 +1,4 @@
 import React from 'react';
-import { Volume2 } from 'lucide-react';
 import { getAssetUrl } from '../../utils/assets';
 import { DockPosition, CompanionModuleType, DockTheme } from '../../types/dock';
 import './hub.css';
@@ -11,7 +10,7 @@ interface ConnectorHubProps {
   onSelectModule: (mod: CompanionModuleType) => void;
   theme?: DockTheme;
   hideSidebarModules?: boolean;
-  keepModule?: 'music' | 'weather' | 'calendar' | 'audio';
+  keepModule?: 'music' | 'weather' | 'calendar';
 }
 
 export const ConnectorHub: React.FC<ConnectorHubProps> = ({
@@ -30,9 +29,8 @@ export const ConnectorHub: React.FC<ConnectorHubProps> = ({
   const showMusic = !hideSidebarModules || keepModule === 'music';
   const showWeather = !hideSidebarModules || keepModule === 'weather';
   const showCalendar = !hideSidebarModules || keepModule === 'calendar';
-  const showAudio = !hideSidebarModules || keepModule === 'audio';
 
-  const handleToggle = (id: 'music' | 'weather' | 'calendar' | 'audio', e: React.MouseEvent) => {
+  const handleToggle = (id: 'music' | 'weather' | 'calendar', e: React.MouseEvent) => {
     e.stopPropagation();
     if (activeModule === id) {
       onSelectModule(null);
@@ -148,22 +146,6 @@ export const ConnectorHub: React.FC<ConnectorHubProps> = ({
                 </svg>
               </span>
             )}
-          </button>
-        )}
-
-        {/* Item 4: Audio Device & Volume Switcher */}
-        {showAudio && (
-          <button
-            type="button"
-            className={`uiverse-vbar-item ${activeModule === 'audio' ? 'is-active' : ''}`}
-            onClick={(e) => handleToggle('audio', e)}
-            title="Audio Playback & Volume"
-            aria-label="Audio Playback & Volume"
-            style={isEldenRing ? { height: '54px', padding: 0 } : undefined}
-          >
-            <span className="vbar-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Volume2 size={18} />
-            </span>
           </button>
         )}
 

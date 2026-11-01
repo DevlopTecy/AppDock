@@ -43,3 +43,4 @@ test('Phase 3 - Smart Dodge: App.tsx synchronizes smart dodge setting with Elect
   const appContent = fs.readFileSync(path.join(projectRoot, 'src', 'App.tsx'), 'utf8');
   assert.ok(appContent.includes('setSmartDodge(Boolean(data.settings.smartWindowDodge))'), 'App.tsx must sync setting to Electron');
 });
+

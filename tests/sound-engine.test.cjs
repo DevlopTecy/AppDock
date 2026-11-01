@@ -38,11 +38,11 @@ test('Phase 1 - Sound FX: soundEngine.ts provides audio synthesis and configurat
 
 test('Phase 1 - Sound FX: SettingsView.tsx provides volume slider, profile picker, and preview chime', () => {
   const content = fs.readFileSync(path.join(projectRoot, 'src', 'components', 'SettingsView.tsx'), 'utf8');
-  assert.ok(content.includes('Sound FX & Haptics'), 'SettingsView must render Sound FX section');
+  assert.ok(content.includes('Audio Playback & Sound FX') || content.includes('Sound FX & Haptics'), 'SettingsView must render Sound FX section');
   assert.ok(content.includes('Toggle Acoustic Feedback'), 'SettingsView must render toggle switch for audio feedback');
   assert.ok(content.includes('Feedback Volume'), 'SettingsView must render volume slider');
   assert.ok(content.includes('Sound Profile Pack'), 'SettingsView must render sound pack options');
-  assert.ok(content.includes("playSound('launch', settings.theme)"), 'SettingsView must provide preview chime trigger');
+  assert.ok(content.includes('previewPackSample'), 'SettingsView must provide preview chime trigger');
 });
 
 test('Phase 1 - Sound FX: App.tsx and components trigger acoustic feedback on dock events', () => {
@@ -57,3 +57,4 @@ test('Phase 1 - Sound FX: App.tsx and components trigger acoustic feedback on do
   const dockContent = fs.readFileSync(path.join(projectRoot, 'src', 'components', 'DockFrame.tsx'), 'utf8');
   assert.ok(dockContent.includes("playSound('click', theme)"), 'DockFrame must trigger click sounds');
 });
+

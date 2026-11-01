@@ -397,18 +397,18 @@ test('BUG-29: Header layout adjusts dynamically for small and compact UI widths 
   assert.ok(dockFrameContent.includes('const isCompactUi = drawerWidth < 260;'), 'DockFrame must define isCompactUi for widths < 260');
 
   // Verify header has responsive padding and flex shrinking guard
-  assert.ok(dockFrameContent.includes("padding: isCompactUi ? '6px 8px' : isSmallUi ? '8px 10px' : '10px 14px'"), 'Header must adapt padding dynamically');
-  assert.ok(dockFrameContent.includes("gap: isCompactUi ? '4px' : isSmallUi ? '6px' : '8px'"), 'Header must adapt gap dynamically');
+  assert.ok(dockFrameContent.includes("isCompactUi ? '6px 8px' : isSmallUi ? '8px 10px' : '10px 14px'"), 'Header must adapt padding dynamically');
+  assert.ok(dockFrameContent.includes("isCompactUi ? '4px' : isSmallUi ? '6px' : '8px'"), 'Header must adapt gap dynamically');
 
   // Verify Elden Ring title badge has minWidth: 0 and responsive padding
-  assert.ok(dockFrameContent.includes("padding: isCompactUi ? '0 5px 0 3px' : isSmallUi ? '0 8px 0 4px' : '0 12px 0 6px'"), 'Elden Ring badge must adapt padding dynamically');
-  assert.ok(dockFrameContent.includes("width: isCompactUi ? '18px' : isSmallUi ? '20px' : '26px'"), 'Elden Ring runestone icon must adapt size dynamically');
+  assert.ok(dockFrameContent.includes("isCompactUi ? '0 5px 0 3px' : isSmallUi ? '0 8px 0 4px' : '0 12px 0 6px'"), 'Elden Ring badge must adapt padding dynamically');
+  assert.ok(dockFrameContent.includes("isCompactUi ? '18px' : isSmallUi ? '20px' : '26px'"), 'Elden Ring runestone icon must adapt size dynamically');
 
   // Verify Quick Header Actions container has flexShrink: 0
   assert.ok(dockFrameContent.includes('flexShrink: 0'), 'Quick Header Actions container must prevent flex shrinking / collision');
 
   // Verify action buttons adapt dimensions dynamically
-  assert.ok(dockFrameContent.includes("width: theme === 'eldenring' ? (isCompactUi ? '24px' : isSmallUi ? '27px' : '33px')"), 'Action buttons must adapt width dynamically');
+  assert.ok(dockFrameContent.includes("isCompactUi ? '24px' : isSmallUi ? '27px' : '33px'"), 'Action buttons must adapt width dynamically');
 });
 
 test('BUG-30: Desktop shortcuts in OneDrive folders are not misidentified as OneDrive and corrupted items are auto-healed', () => {

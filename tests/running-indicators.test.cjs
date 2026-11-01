@@ -44,3 +44,4 @@ test('Phase 2 - Running Indicators: AppGrid context menu includes Bring to Front
   assert.ok(gridContent.includes('Bring to Front'), 'AppGrid context menu must include Bring to Front');
   assert.ok(gridContent.includes('Close Process'), 'AppGrid context menu must include Close Process');
 });
+

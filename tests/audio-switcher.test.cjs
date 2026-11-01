@@ -46,10 +46,12 @@ test('Phase 4 - Audio Switcher: AudioModule.tsx provides device switching and ma
   assert.ok(moduleContent.includes('toggleAudioMute'), 'AudioModule must toggle mute');
 });
 
-test('Phase 4 - Audio Switcher: ConnectorHub and App.tsx mount AudioModule in companion area', () => {
+test('Phase 4 - Audio Switcher: Sound button removed from ConnectorHub and integrated into SettingsView with flexible UI', () => {
   const hubContent = fs.readFileSync(path.join(projectRoot, 'src', 'components', 'connectors', 'ConnectorHub.tsx'), 'utf8');
-  assert.ok(hubContent.includes('Audio Playback & Volume'), 'ConnectorHub must render Audio rail button');
+  assert.ok(!hubContent.includes('Audio Playback & Volume'), 'ConnectorHub must not render the old audio button below calendar');
 
-  const appContent = fs.readFileSync(path.join(projectRoot, 'src', 'App.tsx'), 'utf8');
-  assert.ok(appContent.includes('<AudioModule />'), 'App.tsx must mount AudioModule');
+  const settingsContent = fs.readFileSync(path.join(projectRoot, 'src', 'components', 'SettingsView.tsx'), 'utf8');
+  assert.ok(settingsContent.includes('Audio Playback Device'), 'SettingsView must render Audio Playback Device switcher');
+  assert.ok(settingsContent.includes('getAudioDevices'), 'SettingsView must interact with audio endpoints');
 });
+

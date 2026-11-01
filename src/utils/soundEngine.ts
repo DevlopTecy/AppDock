@@ -91,6 +91,42 @@ class SoundEngine {
     }
   }
 
+
+  public previewPackSample(pack: SoundPackType, currentTheme?: DockTheme): void {
+    if (!this.enabled || this.volume <= 0) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    const masterGain = ctx.createGain();
+    masterGain.gain.setValueAtTime(this.volume, ctx.currentTime);
+    masterGain.connect(ctx.destination);
+
+    const targetPack = pack === 'theme' ? this.resolvePack(currentTheme) : pack;
+    try {
+      switch (targetPack) {
+        case 'eldenring':
+          this.playEldenRing(ctx, masterGain, 'launch');
+          break;
+        case 'deathnote':
+          this.playDeathNote(ctx, masterGain, 'launch');
+          break;
+        case 'kawaii':
+          this.playKawaii(ctx, masterGain, 'launch');
+          break;
+        case 'aether':
+          this.playAether(ctx, masterGain, 'launch');
+          break;
+        case 'mechanical':
+          this.playMechanical(ctx, masterGain, 'launch');
+          break;
+        case 'clean':
+        default:
+          this.playClean(ctx, masterGain, 'launch');
+          break;
+      }
+    } catch {}
+  }
+
   public play(event: SoundEvent, currentTheme?: DockTheme): void {
     if (!this.enabled || this.volume <= 0) return;
 
@@ -435,3 +471,4 @@ class SoundEngine {
 
 export const soundEngine = new SoundEngine();
 export const playSound = (event: SoundEvent, currentTheme?: DockTheme) => soundEngine.play(event, currentTheme);
+export const previewPackSample = (pack: SoundPackType, currentTheme?: DockTheme) => soundEngine.previewPackSample(pack, currentTheme);

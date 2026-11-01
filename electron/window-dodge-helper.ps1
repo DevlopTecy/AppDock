@@ -28,3 +28,4 @@ if ($isMax) {
 } else {
     Write-Output "false"
 }
+
