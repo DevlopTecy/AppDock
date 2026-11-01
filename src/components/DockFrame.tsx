@@ -506,11 +506,9 @@ export const DockFrame: React.FC<DockFrameProps> = ({
           borderRight: isRight ? 'none' : '1px solid var(--border-subtle)',
           borderTop: isTop ? 'none' : '1px solid var(--border-subtle)',
           borderBottom: isTop ? 'none' : '1px solid var(--border-subtle)',
-          boxShadow: isRight
-            ? '-8px 0 28px rgba(0, 0, 0, 0.45)'
-            : isLeft
-              ? '8px 0 28px rgba(0, 0, 0, 0.45)'
-              : '0 8px 28px rgba(0, 0, 0, 0.45)',
+          boxShadow: isSidebarHidden
+            ? (isRight ? '-8px 0 28px rgba(0, 0, 0, 0.45)' : isLeft ? '8px 0 28px rgba(0, 0, 0, 0.45)' : '0 8px 28px rgba(0, 0, 0, 0.45)')
+            : 'none',
           overflow: 'hidden',
           position: 'relative',
           background: customTheme?.bgBlur && !['deathnote', 'kawaii', 'aether', 'eldenring', 'onepiece', 'candy', 'custom'].includes(theme || '')

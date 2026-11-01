@@ -288,7 +288,7 @@ export const CustomThemePanel: React.FC<CustomThemePanelProps> = ({ settings, on
       </div>
 
       <Toggle label="Background Blur" checked={bgBlur} onChange={(v) => onUpdateSettings({ customThemeBgBlur: v })} accentColor={themeAccent} thumbColor={themeThumb} />
-      <Toggle label="Hide Background (solid color)" checked={bgHide} onChange={(v) => onUpdateSettings({ customThemeBgHide: v })} accentColor={themeAccent} thumbColor={themeThumb} />
+      <Toggle label="Hide Background" checked={bgHide} onChange={(v) => onUpdateSettings({ customThemeBgHide: v })} accentColor={themeAccent} thumbColor={themeThumb} />
       <Toggle label="Hide Sidebar (weather / calendar / music)" checked={hideSidebar} onChange={(v) => onUpdateSettings({ customThemeHideSidebar: v })} accentColor={themeAccent} thumbColor={themeThumb} />
 
       <Toggle label="Hide Module Buttons (keep one)" checked={hideMods} onChange={(v) => onUpdateSettings({ customThemeHideSidebarModules: v })} accentColor={themeAccent} thumbColor={themeThumb} />

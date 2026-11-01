@@ -414,7 +414,7 @@ export const QuickIconsBar: React.FC<QuickIconsBarProps> = ({
           border: isDragOverBar ? '1.5px dashed #3b82f6' : containerBorder,
           boxShadow: isDragOverBar
             ? '0 0 16px rgba(59, 130, 246, 0.45)'
-            : '0 8px 24px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.08)',
+            : 'inset 0 1px 1px rgba(255, 255, 255, 0.08)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
