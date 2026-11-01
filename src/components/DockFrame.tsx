@@ -8,6 +8,7 @@ import { Search, Settings, X, Minimize2, Maximize2 } from 'lucide-react';
 
 interface DockFrameProps {
   isExpanded: boolean;
+  isClosing?: boolean;
   dockPosition: DockPosition;
   drawerWidth: number;
   toggleOpacity: number;
@@ -88,6 +89,7 @@ const CANDY_BACKGROUNDS = [
 
 export const DockFrame: React.FC<DockFrameProps> = ({
   isExpanded,
+  isClosing = false,
   dockPosition,
   drawerWidth,
   toggleOpacity,
@@ -285,9 +287,10 @@ export const DockFrame: React.FC<DockFrameProps> = ({
   };
 
   // If not expanded, render ONLY the edge handle flush against the screen edge
-  if (!isExpanded) {
+  if (!isExpanded && !isClosing) {
     return (
       <div
+        className="dock-handle-container dock-handle-enter"
         style={{
           width: '100%',
           height: '100%',
@@ -330,8 +333,13 @@ export const DockFrame: React.FC<DockFrameProps> = ({
   const companionW = isSidebarHidden ? 0 : (isModuleActive ? 340 : 54);
   const _totalExpandedWidth = drawerWidth + companionW;
 
+  const animClass = isClosing
+    ? (isRight ? 'dock-frame-exit-right' : isLeft ? 'dock-frame-exit-left' : 'dock-frame-exit-top')
+    : (isRight ? 'dock-frame-enter-right' : isLeft ? 'dock-frame-enter-left' : 'dock-frame-enter-top');
+
   return (
     <div
+      className={`dock-frame-root ${animClass}`}
       style={{
         display: 'flex',
         flexDirection: isTop ? 'column' : 'row',

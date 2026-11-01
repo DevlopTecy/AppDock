@@ -2621,6 +2621,269 @@ input {
   to { opacity: 1; transform: scale(1); }
 }
 
+/* ========================================================
+   SMOOTH OPEN & CLOSE DOCK TRANSITIONS (Compositor Only)
+   ======================================================== */
+@keyframes dockSlideInRight {
+  0% {
+    transform: translate3d(100%, 0, 0);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
 
+@keyframes dockSlideOutRight {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(100%, 0, 0);
+    opacity: 0.7;
+  }
+}
 
+@keyframes dockSlideInLeft {
+  0% {
+    transform: translate3d(-100%, 0, 0);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes dockSlideOutLeft {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(-100%, 0, 0);
+    opacity: 0.7;
+  }
+}
+
+@keyframes dockSlideInTop {
+  0% {
+    transform: translate3d(0, -100%, 0);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes dockSlideOutTop {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(0, -100%, 0);
+    opacity: 0.7;
+  }
+}
+
+.dock-frame-enter-right {
+  animation: dockSlideInRight 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.dock-frame-exit-right {
+  animation: dockSlideOutRight 0.21s cubic-bezier(0.2, 0, 0.4, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.dock-frame-enter-left {
+  animation: dockSlideInLeft 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.dock-frame-exit-left {
+  animation: dockSlideOutLeft 0.21s cubic-bezier(0.2, 0, 0.4, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.dock-frame-enter-top {
+  animation: dockSlideInTop 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.dock-frame-exit-top {
+  animation: dockSlideOutTop 0.21s cubic-bezier(0.2, 0, 0.4, 1) forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes handleFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.dock-handle-enter {
+  animation: handleFadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ========================================================
+   SMOOTH MODAL & MENU TRANSITIONS
+   ======================================================== */
+@keyframes modalSlideUpFade {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes contextMenuSlideIn {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -6px, 0) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes dialogScaleIn {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0) scale(0.94);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes dialogBackdropFade {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.settings-modal-view,
+.add-modal-view,
+.new-group-modal-view,
+.edit-group-modal-view,
+.search-modal-view,
+.modal-overlay-content {
+  animation: modalSlideUpFade 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.group-context-menu,
+.glass-card-context-menu,
+.app-context-menu {
+  animation: contextMenuSlideIn 0.16s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.dock-dialog-backdrop {
+  animation: dialogBackdropFade 0.18s ease forwards;
+}
+
+.dock-dialog-card {
+  animation: dialogScaleIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+/* ========================================================
+   UNIVERSAL SMOOTH BUTTONS & CONTROLS MICRO-INTERACTIONS
+   ======================================================== */
+button,
+.btn-smooth,
+.uiverse-vbar-item,
+.group-tab-btn,
+.group-sidebar-btn,
+.quick-icon-btn,
+.edge-toggle-btn {
+  transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 0.15s ease,
+              border-color 0.15s ease,
+              box-shadow 0.16s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.15s ease,
+              color 0.15s ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+button:active,
+.btn-smooth:active,
+.btn-dock:active,
+.btn-primary:active,
+.btn-secondary:active,
+.btn-danger:active,
+.group-tab-btn:active,
+.group-sidebar-btn:active,
+.quick-icon-btn:active,
+.edge-toggle-btn:active {
+  transform: scale(0.93) !important;
+  transition-duration: 0.08s !important;
+}
+
+/* ========================================================
+   SMOOTH APP DRAG AND PLACE
+   ======================================================== */
+.glass-card {
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.2s ease,
+              border-color 0.2s ease,
+              background 0.2s ease;
+  will-change: transform;
+}
+
+.glass-card:active {
+  transform: scale(0.95) !important;
+  transition-duration: 0.08s !important;
+}
+
+.glass-card.is-dragging {
+  opacity: 0.38 !important;
+  transform: scale(0.92) !important;
+  cursor: grabbing !important;
+  box-shadow: none !important;
+}
+
+.glass-card.is-drag-over {
+  transform: scale(1.06) translateY(-4px) !important;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 2px var(--accent), 0 12px 28px rgba(0, 0, 0, 0.5) !important;
+  z-index: 10 !important;
+}
+
+@keyframes dropOverlayFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.drop-files-overlay {
+  animation: dropOverlayFadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
 

@@ -433,6 +433,7 @@ export const QuickIconsBar: React.FC<QuickIconsBarProps> = ({
             onMouseLeave={() => setIsHoveredAdd(false)}
             title={isHoveredAdd ? "Add Quick Icon from your apps" : "Quick Icons · Hover to add apps"}
             aria-label="Add Quick Icon"
+            className="quick-icon-btn btn-add-quick"
             style={{
               width: '38px',
               height: '38px',
@@ -614,6 +615,7 @@ export const QuickIconsBar: React.FC<QuickIconsBarProps> = ({
                     }}
                     title={`${item.name} (Quick Launch)\nRight-click to remove`}
                     aria-label={`Launch ${item.name}`}
+                    className="quick-icon-btn"
                     style={{
                       width: '38px',
                       height: '38px',

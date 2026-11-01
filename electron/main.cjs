@@ -1,3 +1,4 @@
+let collapseFallbackTimer = null;
 const { app, BrowserWindow, ipcMain, screen, shell, dialog, Tray, Menu, nativeImage } = require('electron');
 const path = require('path');
 const fs = require('fs');
@@ -206,9 +207,13 @@ function collapseDockWindow() {
   if (!mainWindow.isVisible()) {
     mainWindow.show();
   }
-  isExpanded = false;
-  updateWindowBounds();
   mainWindow.webContents.send('dock:collapse');
+  if (collapseFallbackTimer) clearTimeout(collapseFallbackTimer);
+  collapseFallbackTimer = setTimeout(() => {
+    if (!isExpanded) {
+      updateWindowBounds();
+    }
+  }, 450);
 }
 
 function toggleDockVisibility() {
@@ -327,6 +332,10 @@ function createTray() {
 // ----------------- IPC HANDLERS -----------------
 
 ipcMain.handle('dock:set-state', (event, expanded) => {
+  if (collapseFallbackTimer) {
+    clearTimeout(collapseFallbackTimer);
+    collapseFallbackTimer = null;
+  }
   isExpanded = !!expanded;
   if (!isExpanded) {
     moduleWidth = 0;

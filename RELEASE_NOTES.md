@@ -39,6 +39,26 @@
   - Implemented one-time preset migration in `loadDockData` ensuring these states take effect when existing users update, while leaving all user customization intact.
   - Verified with test `BUG-31` in `tests/bug-fixes-verification.test.cjs`.
 
+### 💫 Ultra-Smooth Fluid Motion System Across AppDock (BUG-32)
+- **Smooth Open & Close Dock Transitions**:
+  - **Problem**: Previously, expanding or collapsing the dock abruptly mounted or unmounted the React tree, causing the drawer to snap into and out of existence instantly.
+  - **Solution**: Implemented hardware-accelerated, compositor-only slide transitions (`translate3d`, `opacity`, `will-change`) using luxury easing curves (`cubic-bezier(0.16, 1, 0.3, 1)` for entrance over 240ms; `cubic-bezier(0.2, 0, 0.4, 1)` for exit over 210ms).
+  - **Bounds Synchronization**: `App.tsx` coordinates an `isClosing` state, allowing the full exit slide to complete smoothly before notifying Electron to shrink the window bounds to the collapsed handle. `main.cjs` handles tray and external collapse events via IPC notifications and a fallback timer.
+  - **Handle Entrance Fade**: The collapsed `EdgeToggle` enters smoothly via `dock-handle-enter` with `handleFadeIn` to eliminate edge pop.
+- **Universal Smooth Button Micro-Interactions**:
+  - Added tactile active-press micro-interactions (`:active { transform: scale(0.93) !important; }`) and fluid spring release across all buttons: Quick Header Actions (Search, Clean Dock, Maximize, Settings, Close), Group icons, Quick Icons bar, EdgeToggle, Settings switches/sliders, and modal buttons.
+  - Replaced non-compositor `transition: all` with dedicated `transform`, `box-shadow`, and `opacity` transitions to prevent layout thrashing and maintain constant 60/120fps.
+- **Smooth Menu & Modal Entrances**:
+  - Upgraded `SettingsView`, `AddToQuickIconsModal`, `NewGroupModal`, `EditGroupModal`, and `SearchBar` with `modalSlideUpFade` (starts at `translate3d(0, 10px, 0) scale(0.97)` and glides to rest).
+  - Added `contextMenuSlideIn` for group and app card right-click context menus.
+  - Added `dialogScaleIn` and `dialogBackdropFade` for confirmation dialogs (Reset Custom Theme warning, Delete Group confirmation).
+- **Smooth App Drag and Place**:
+  - Enhanced App Grid cards with active drag ghosting (`opacity: 0.38`, `transform: scale(0.92)`), elevated drag-over target indicator (`transform: scale(1.06) translateY(-4px)` with glowing accent border), and smooth settling animation on drop.
+  - Upgraded "Drop files here" external drop overlay with `dropOverlayFadeIn` (`scale(0.96)` &rarr; `scale(1)`).
+- **Zero Layout Thrashing & Compositor Performance**:
+  - Strictly adheres to the `fixing-motion-performance` skill: animates only compositor properties (`transform`, `opacity`), never animates layout triggers (`width`, `height`, `left`, `top`), and uses surgical `will-change`.
+  - Verified with automated test `BUG-32` in `tests/bug-fixes-verification.test.cjs`.
+
 ---
 
 ## 🚀 Release: v1.0.6 (2026-11-01)

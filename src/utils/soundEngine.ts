@@ -15,7 +15,7 @@ class SoundEngine {
   }
 
   private getContext(): AudioContext | null {
-    if (typeof window === 'undefined') return null;
+    if (typeof window === 'undefined' || !this.enabled || this.volume <= 0) return null;
     if (!this.ctx) {
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
       if (AudioContextClass) {
@@ -30,8 +30,11 @@ class SoundEngine {
 
   public initSound(settings?: Partial<DockSettings>): void {
     if (!settings) return;
-    if (settings.soundEnabled !== undefined) {
-      this.enabled = settings.soundEnabled;
+    this.enabled = Boolean(settings.soundEnabled);
+    if (!this.enabled && this.ctx && this.ctx.state !== 'closed') {
+      try {
+        this.ctx.suspend().catch(() => {});
+      } catch {}
     }
     if (settings.soundVolume !== undefined) {
       this.volume = Math.max(0, Math.min(100, settings.soundVolume)) / 100;
@@ -47,6 +50,11 @@ class SoundEngine {
 
   public setSoundEnabled(enabled: boolean): void {
     this.enabled = enabled;
+    if (!enabled && this.ctx && this.ctx.state !== 'closed') {
+      try {
+        this.ctx.suspend().catch(() => {});
+      } catch {}
+    }
   }
 
   public isSoundEnabled(): boolean {
@@ -105,6 +113,13 @@ class SoundEngine {
     masterGain.gain.setValueAtTime(this.volume, ctx.currentTime);
     masterGain.connect(ctx.destination);
 
+    // Auto-disconnect masterGain to prevent node accumulation and eliminate residual DC clicks
+    setTimeout(() => {
+      try {
+        masterGain.disconnect();
+      } catch {}
+    }, 600);
+
     const targetPack = pack === 'theme' ? this.resolvePack(currentTheme) : pack;
     try {
       switch (targetPack) {
@@ -150,6 +165,13 @@ class SoundEngine {
     const masterGain = ctx.createGain();
     masterGain.gain.setValueAtTime(this.volume, ctx.currentTime);
     masterGain.connect(ctx.destination);
+
+    // Auto-disconnect masterGain to prevent node accumulation and eliminate residual DC clicks
+    setTimeout(() => {
+      try {
+        masterGain.disconnect();
+      } catch {}
+    }, 600);
 
     try {
       switch (pack) {
@@ -474,5 +496,11 @@ class SoundEngine {
 }
 
 export const soundEngine = new SoundEngine();
-export const playSound = (event: SoundEvent, currentTheme?: DockTheme) => soundEngine.play(event, currentTheme);
-export const previewPackSample = (pack: SoundPackType, currentTheme?: DockTheme) => soundEngine.previewPackSample(pack, currentTheme);
+export const playSound = (event: SoundEvent, currentTheme?: DockTheme) => {
+  if (!soundEngine.isSoundEnabled()) return;
+  soundEngine.play(event, currentTheme);
+};
+export const previewPackSample = (pack: SoundPackType, currentTheme?: DockTheme) => {
+  if (!soundEngine.isSoundEnabled()) return;
+  soundEngine.previewPackSample(pack, currentTheme);
+};

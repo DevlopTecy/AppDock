@@ -73,6 +73,9 @@ export const App: React.FC = () => {
   const effectiveWidth = isMaximized ? 460 : (isCleanDock ? (data.settings.cleanDockWidth || 220) : data.settings.drawerWidth);
   const effectiveHeight = isMaximized ? screenMaxHeight : (isCleanDock ? (data.settings.cleanDockHeight || 460) : (data.settings.drawerHeight || 540));
 
+  const [isClosing, setIsClosing] = useState(false);
+  const closeTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
   const [isExpanded, setIsExpanded] = useState(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
@@ -446,24 +449,36 @@ export const App: React.FC = () => {
   // Handle expanding / collapsing dock window with smooth, flicker-free bounds synchronization
   const handleToggle = useCallback(
     async (forceState?: boolean) => {
-      const nextState = typeof forceState === 'boolean' ? forceState : !isExpanded;
+      const nextState = typeof forceState === 'boolean' ? forceState : (isExpanded && !isClosing ? false : true);
 
       if (!nextState) {
+        if (isClosing) return;
         playSound('collapse', data.settings.theme);
-        // Collapsing: update React state immediately so UI transitions synchronously
-        setIsExpanded(false);
+        // Collapsing: mark isClosing so React plays smooth slide-out animation before window bounds shrink
+        setIsClosing(true);
         setActiveModule(null);
         if (typeof window !== 'undefined' && (window as any).appDock?.setModuleWidth) {
           (window as any).appDock.setModuleWidth(0);
         }
-        if (typeof window !== 'undefined' && (window as any).appDock?.setState) {
-          try {
-            await (window as any).appDock.setState(false);
-          } catch (err) {
-            console.error('Failed to notify Electron of dock state:', err);
+
+        if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+        closeTimeoutRef.current = setTimeout(async () => {
+          setIsExpanded(false);
+          setIsClosing(false);
+          if (typeof window !== 'undefined' && (window as any).appDock?.setState) {
+            try {
+              await (window as any).appDock.setState(false);
+            } catch (err) {
+              console.error('Failed to notify Electron of dock state:', err);
+            }
           }
-        }
+        }, 220);
       } else {
+        if (closeTimeoutRef.current) {
+          clearTimeout(closeTimeoutRef.current);
+          closeTimeoutRef.current = null;
+        }
+        setIsClosing(false);
         playSound('expand', data.settings.theme);
         // Expanding: prepare window dimensions first so handle is positioned stably
         if (typeof window !== 'undefined' && (window as any).appDock?.setModuleWidth) {
@@ -482,7 +497,7 @@ export const App: React.FC = () => {
         setIsExpanded(true);
       }
     },
-    [isExpanded, isCleanDock, activeModule]
+    [isExpanded, isClosing, isCleanDock, activeModule, data.settings.theme, data.settings.customThemeHideQuickIcons, data.settings.hideQuickIcons, data.settings.customThemeHideSidebar]
   );
 
   // Listen for collapse and expand commands from Electron (e.g. system tray, taskbar toggle)
@@ -831,6 +846,7 @@ export const App: React.FC = () => {
   return (
     <DockFrame
       isExpanded={isExpanded}
+      isClosing={isClosing}
       dockPosition={data.settings.dockPosition}
       drawerWidth={effectiveWidth}
       toggleOpacity={data.settings.toggleOpacity}

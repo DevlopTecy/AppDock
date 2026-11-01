@@ -150,6 +150,11 @@ export const MusicModule: React.FC = () => {
         } catch {}
         oscillatorRef.current = null;
       }
+      if (audioCtxRef.current && audioCtxRef.current.state === 'running') {
+        try {
+          audioCtxRef.current.suspend();
+        } catch {}
+      }
     }
 
     return () => {
@@ -159,6 +164,11 @@ export const MusicModule: React.FC = () => {
           oscillatorRef.current.disconnect();
         } catch {}
         oscillatorRef.current = null;
+      }
+      if (audioCtxRef.current && audioCtxRef.current.state === 'running') {
+        try {
+          audioCtxRef.current.suspend();
+        } catch {}
       }
     };
   }, [hasWinMedia, isPlayingLocal, trackIndex]);

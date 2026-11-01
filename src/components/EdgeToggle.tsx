@@ -130,6 +130,7 @@ export const EdgeToggle: React.FC<EdgeToggleProps> = ({
             : "Click to open · Hold & drag to move up/down"
       }
       aria-label={isExpanded ? "Collapse Dock" : "Open Dock"}
+      className="edge-toggle-btn"
       style={{
         opacity: isDragging ? 1 : isExpanded ? Math.max(0.85, opacity) : opacity,
         display: 'flex',

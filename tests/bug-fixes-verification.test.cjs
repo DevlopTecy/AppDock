@@ -529,3 +529,35 @@ test('BUG-31: Download & Update Settings Preset: Background Rotation (ON), Start
     'SettingsView must fallback smartWindowDodge to false'
   );
 });
+
+test('BUG-32: Smooth Dock Open & Close Transitions, Universal Button Micro-Interactions, Modal Entrance Transitions, and Smooth App Drag & Place', () => {
+  // 1. DockFrame.tsx animation states and classes
+  const dockFramePath = path.join(projectRoot, 'src', 'components', 'DockFrame.tsx');
+  const dockFrame = fs.readFileSync(dockFramePath, 'utf-8');
+  assert.ok(dockFrame.includes('isClosing?: boolean'), 'DockFrame must declare isClosing in props');
+  assert.ok(dockFrame.includes('dock-frame-enter-right') && dockFrame.includes('dock-frame-exit-right'), 'DockFrame must render slide enter and exit animation classes');
+  assert.ok(dockFrame.includes('dock-handle-enter'), 'DockFrame must render dock-handle-enter for smooth handle entrance');
+
+  // 2. App.tsx smooth closing coordination
+  const appPath = path.join(projectRoot, 'src', 'App.tsx');
+  const appTsx = fs.readFileSync(appPath, 'utf-8');
+  assert.ok(appTsx.includes('const [isClosing, setIsClosing] = useState(false)'), 'App.tsx must maintain isClosing state');
+  assert.ok(appTsx.includes('setIsClosing(true)'), 'App.tsx handleToggle must activate isClosing state on collapse');
+  assert.ok(appTsx.includes('isClosing={isClosing}'), 'App.tsx must pass isClosing to DockFrame');
+
+  // 3. electron/main.cjs smooth bounds synchronization
+  const mainPath = path.join(projectRoot, 'electron', 'main.cjs');
+  const mainCjs = fs.readFileSync(mainPath, 'utf-8');
+  assert.ok(mainCjs.includes('collapseFallbackTimer'), 'main.cjs must define collapseFallbackTimer for smooth bounds coordination');
+  assert.ok(mainCjs.includes("mainWindow.webContents.send('dock:collapse')"), 'main.cjs must send dock:collapse before shrinking bounds');
+
+  // 4. index.css keyframe definitions and micro-interactions
+  const cssPath = path.join(projectRoot, 'src', 'index.css');
+  const css = fs.readFileSync(cssPath, 'utf-8');
+  assert.ok(css.includes('@keyframes dockSlideInRight') && css.includes('@keyframes dockSlideOutRight'), 'index.css must define dockSlideInRight and dockSlideOutRight');
+  assert.ok(css.includes('@keyframes modalSlideUpFade'), 'index.css must define modalSlideUpFade for smooth menu and modal entrances');
+  assert.ok(css.includes('@keyframes contextMenuSlideIn'), 'index.css must define contextMenuSlideIn for smooth context menu opens');
+  assert.ok(css.includes('.glass-card.is-drag-over') && css.includes('.glass-card.is-dragging'), 'index.css must define smooth drag and drop styles for app cards');
+  assert.ok(css.includes('cubic-bezier(0.16, 1, 0.3, 1)'), 'index.css must utilize high-end fluid cubic-bezier curve');
+});
+

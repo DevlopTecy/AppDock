@@ -314,6 +314,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   const [masterAudioVolume, setMasterAudioVolume] = useState<number>(50);
   const [isAudioMuted, setIsAudioMuted] = useState<boolean>(false);
   const [isAudioLoading, setIsAudioLoading] = useState<boolean>(false);
+  const [isAudioSectionOpen, setIsAudioSectionOpen] = useState<boolean>(false); // Closed by default in downbox
 
   const fetchAudioDevices = React.useCallback(async () => {
     setIsAudioLoading(true);
@@ -2026,10 +2027,30 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           </div>
         </div>
 
-        {/* Priority 7: Audio Playback & Sound FX System */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%', boxSizing: 'border-box' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        {/* Priority 7: Audio Playback & Sound FX System (Downbox - Closed by Default) */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%', boxSizing: 'border-box' }}>
+          <div
+            onClick={() => setIsAudioSectionOpen(!isAudioSectionOpen)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '8px 10px',
+              borderRadius: '7px',
+              background: isDeathNote ? '#0c0c0e' : (isEldenRing ? 'rgba(23, 24, 19, 0.75)' : 'var(--bg-surface)'),
+              border: isEldenRing ? '1px solid rgba(197, 161, 90, 0.35)' : (isDeathNote ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid var(--btn-border)'),
+              cursor: 'pointer',
+              transition: 'all 0.18s ease',
+              userSelect: 'none'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = isDeathNote ? '#141416' : (isEldenRing ? 'rgba(23, 24, 19, 0.95)' : 'var(--bg-surface-hover)');
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = isDeathNote ? '#0c0c0e' : (isEldenRing ? 'rgba(23, 24, 19, 0.75)' : 'var(--bg-surface)');
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Volume2 className="settings-section-icon" size={13} color={isEldenRing ? '#EAC477' : isAether ? '#ffdf59' : 'var(--text-muted)'} />
               <span
                 className="settings-section-title"
@@ -2045,33 +2066,48 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               </span>
             </div>
 
-            <button
-              type="button"
-              onClick={() => {
-                soundEngine.previewPackSample(settings.soundPack || 'theme', settings.theme);
-              }}
-              style={{
-                background: isEldenRing ? 'rgba(234, 196, 119, 0.12)' : (isDeathNote ? '#101012' : 'var(--bg-surface-active)'),
-                border: isEldenRing ? '1px solid rgba(234, 196, 119, 0.4)' : (isDeathNote ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid var(--btn-border)'),
-                borderRadius: '5px',
-                padding: '3px 9px',
-                fontSize: '10px',
-                fontWeight: 600,
-                color: isEldenRing ? '#EAC477' : 'var(--text-primary)',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                transition: 'all 0.15s ease'
-              }}
-              title="Test audio sound profile"
-            >
-              <Volume2 size={11} />
-              <span>Test Chime</span>
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  soundEngine.previewPackSample(settings.soundPack || 'theme', settings.theme);
+                }}
+                style={{
+                  background: isEldenRing ? 'rgba(234, 196, 119, 0.12)' : (isDeathNote ? '#101012' : 'var(--bg-surface-active)'),
+                  border: isEldenRing ? '1px solid rgba(234, 196, 119, 0.4)' : (isDeathNote ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid var(--btn-border)'),
+                  borderRadius: '5px',
+                  padding: '3px 8px',
+                  fontSize: '10px',
+                  fontWeight: 600,
+                  color: isEldenRing ? '#EAC477' : 'var(--text-primary)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  transition: 'all 0.15s ease'
+                }}
+                title="Test audio sound profile"
+              >
+                <Volume2 size={11} />
+                <span>Test Chime</span>
+              </button>
+
+              <ChevronDown
+                size={14}
+                style={{
+                  color: isEldenRing ? '#EAC477' : 'var(--text-muted)',
+                  transform: isAudioSectionOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+                }}
+              />
+            </div>
           </div>
 
-          {/* Card A: Audio Output Endpoint Switcher (Compact Dropdown + Master Volume) */}
+          {/* Collapsible Content: Closed by default */}
+          {isAudioSectionOpen && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', boxSizing: 'border-box', animation: 'fadeIn 0.15s ease' }}>
+              {/* Card A: Audio Output Endpoint Switcher (Compact Dropdown + Master Volume) */}
           <div
             style={{
               display: 'flex',
@@ -2503,6 +2539,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               />
             </div>
           </div>
+            </div>
+          )}
         </div>
 
         {/* Quick Update Button */}
