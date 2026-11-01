@@ -151,6 +151,11 @@ export const App: React.FC = () => {
   // Injects custom theme CSS variables when theme === 'custom'
   useCustomThemeVars(data.settings);
 
+  // Synchronize Sound FX engine settings
+  useEffect(() => {
+    soundEngine.initSound(data.settings);
+  }, [data.settings.soundEnabled, data.settings.soundVolume, data.settings.soundPack]);
+
   // Sync module bounds with Electron when dock is expanded
   useEffect(() => {
     if (typeof window !== 'undefined' && (window as any).appDock?.setModuleWidth) {

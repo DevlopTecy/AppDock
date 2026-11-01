@@ -464,3 +464,68 @@ test('BUG-30: Desktop shortcuts in OneDrive folders are not misidentified as One
     'App.tsx drop handler must guard against renaming dropped apps to onedrive'
   );
 });
+
+test('BUG-31: Download & Update Settings Preset: Background Rotation (ON), Start with Windows (ON), Smart Window Dodge (OFF), Acoustic Feedback (OFF)', () => {
+  const storagePath = path.join(projectRoot, 'src', 'utils', 'storage.ts');
+  const storageContent = fs.readFileSync(storagePath, 'utf-8');
+
+  // 1. DEFAULT_SETTINGS for fresh download
+  assert.ok(
+    storageContent.includes('customThemeBgRotation: true'),
+    'DEFAULT_SETTINGS must define customThemeBgRotation: true (Background Rotation : on)'
+  );
+  assert.ok(
+    storageContent.includes('autoStartWithWindows: true'),
+    'DEFAULT_SETTINGS must define autoStartWithWindows: true (Start with Windows : on)'
+  );
+  assert.ok(
+    storageContent.includes('smartWindowDodge: false'),
+    'DEFAULT_SETTINGS must define smartWindowDodge: false (Smart Window Dodge : off)'
+  );
+  assert.ok(
+    storageContent.includes('soundEnabled: false'),
+    'DEFAULT_SETTINGS must define soundEnabled: false (Acoustic Feedback : off)'
+  );
+
+  // 2. Migration in loadDockData for update
+  assert.ok(
+    storageContent.includes('appdock_defaults_v1_0_7_applied'),
+    'loadDockData must apply update migration preset for existing users'
+  );
+
+  // 3. soundEngine.ts defaults enabled to false
+  const soundEnginePath = path.join(projectRoot, 'src', 'utils', 'soundEngine.ts');
+  const soundEngineContent = fs.readFileSync(soundEnginePath, 'utf-8');
+  assert.ok(
+    soundEngineContent.includes('private enabled: boolean = false;'),
+    'soundEngine must default enabled state to false'
+  );
+
+  // 4. CustomThemePanel defaults bgRotation to true
+  const customThemePath = path.join(projectRoot, 'src', 'components', 'CustomThemePanel.tsx');
+  const customThemeContent = fs.readFileSync(customThemePath, 'utf-8');
+  assert.ok(
+    customThemeContent.includes('const bgRotation = settings.customThemeBgRotation ?? true;'),
+    'CustomThemePanel must fallback bgRotation to true'
+  );
+  assert.ok(
+    customThemeContent.includes('customThemeBgRotation: true,'),
+    'CustomThemePanel handleReset must reset bgRotation to true'
+  );
+
+  // 5. SettingsView defaults Start with Windows to true, Acoustic Feedback to false, Smart Window Dodge to false
+  const settingsViewPath = path.join(projectRoot, 'src', 'components', 'SettingsView.tsx');
+  const settingsViewContent = fs.readFileSync(settingsViewPath, 'utf-8');
+  assert.ok(
+    settingsViewContent.includes('settings.autoStartWithWindows ?? true'),
+    'SettingsView must fallback autoStartWithWindows to true'
+  );
+  assert.ok(
+    settingsViewContent.includes('settings.soundEnabled ?? false'),
+    'SettingsView must fallback soundEnabled to false'
+  );
+  assert.ok(
+    settingsViewContent.includes('settings.smartWindowDodge ?? false'),
+    'SettingsView must fallback smartWindowDodge to false'
+  );
+});

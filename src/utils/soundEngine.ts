@@ -41,6 +41,10 @@ class SoundEngine {
     }
   }
 
+  public init(settings?: Partial<DockSettings>): void {
+    this.initSound(settings);
+  }
+
   public setSoundEnabled(enabled: boolean): void {
     this.enabled = enabled;
   }

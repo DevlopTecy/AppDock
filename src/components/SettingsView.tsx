@@ -2346,7 +2346,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             {/* Enable Acoustic Feedback Toggle */}
             <div
               onClick={() => {
-                const newVal = !(settings.soundEnabled ?? true);
+                const newVal = !(settings.soundEnabled ?? false);
                 onUpdateSettings({ soundEnabled: newVal });
                 soundEngine.setSoundEnabled(newVal);
                 if (newVal) soundEngine.previewPackSample(settings.soundPack || 'theme', settings.theme);
@@ -2374,25 +2374,25 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               <button
                 type="button"
                 role="switch"
-                aria-checked={settings.soundEnabled ?? true}
+                aria-checked={settings.soundEnabled ?? false}
                 onClick={(e) => {
                   e.stopPropagation();
-                  const newVal = !(settings.soundEnabled ?? true);
+                  const newVal = !(settings.soundEnabled ?? false);
                   onUpdateSettings({ soundEnabled: newVal });
                   soundEngine.setSoundEnabled(newVal);
                   if (newVal) soundEngine.previewPackSample(settings.soundPack || 'theme', settings.theme);
                 }}
-                className={`toggle-switch ${(settings.soundEnabled ?? true) ? 'active' : ''}`}
+                className={`toggle-switch ${(settings.soundEnabled ?? false) ? 'active' : ''}`}
                 style={{
                   width: '34px',
                   height: '19px',
                   borderRadius: '10px',
-                  background: (settings.soundEnabled ?? true)
+                  background: (settings.soundEnabled ?? false)
                     ? (isEldenRing ? '#EAC477' : currentTheme === 'deathnote' ? '#c41e24' : isAether ? '#59bcf4' : 'var(--accent, #3b82f6)')
                     : 'var(--btn-border)',
                   position: 'relative',
                   cursor: 'pointer',
-                  border: '1px solid ' + ((settings.soundEnabled ?? true) ? 'rgba(255,255,255,0.22)' : 'var(--border-subtle)'),
+                  border: '1px solid ' + ((settings.soundEnabled ?? false) ? 'rgba(255,255,255,0.22)' : 'var(--border-subtle)'),
                   padding: 0,
                   transition: 'background 0.18s ease, border-color 0.18s ease',
                   flexShrink: 0
@@ -2405,10 +2405,10 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                     width: '13px',
                     height: '13px',
                     borderRadius: '50%',
-                    background: (settings.soundEnabled ?? true) && isEldenRing ? '#171813' : '#ffffff',
+                    background: (settings.soundEnabled ?? false) && isEldenRing ? '#171813' : '#ffffff',
                     position: 'absolute',
                     top: '2px',
-                    left: (settings.soundEnabled ?? true) ? '17px' : '2px',
+                    left: (settings.soundEnabled ?? false) ? '17px' : '2px',
                     transition: 'left 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
                     boxShadow: '0 1px 3px rgba(0, 0, 0, 0.35)'
                   }}

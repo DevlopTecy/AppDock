@@ -28,6 +28,17 @@
     4. **AUMID Mismatch Refinement**: Adjusted `isMismatchedAumid` so ordinary file paths with extensions (`.lnk`, `.exe`) are not mistakenly treated as mismatched AUMIDs.
   - **Verification**: Verified with automated test `BUG-30` in `tests/bug-fixes-verification.test.cjs` and full test suite passing 100% green.
 
+### ⚙️ Settings Defaults & Migration Preset (Download & Update)
+- **Configured Initial Toggle States**:
+  - **Background Rotation**: **ON** (`customThemeBgRotation: true`)
+  - **Start with Windows**: **ON** (`autoStartWithWindows: true`)
+  - **Smart Window Dodge**: **OFF** (`smartWindowDodge: false`)
+  - **Acoustic Feedback**: **OFF** (`soundEnabled: false`)
+  - *All other settings (themes, custom colors, wallpapers, drawer dimensions, density, clean dock, and items) remain strictly unchanged.*
+- **Update Migration**:
+  - Implemented one-time preset migration in `loadDockData` ensuring these states take effect when existing users update, while leaving all user customization intact.
+  - Verified with test `BUG-31` in `tests/bug-fixes-verification.test.cjs`.
+
 ---
 
 ## 🚀 Release: v1.0.6 (2026-11-01)
