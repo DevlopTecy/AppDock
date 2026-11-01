@@ -21,7 +21,8 @@ export const DEFAULT_SETTINGS: DockSettings = {
   cleanDockGroupId: 'grp-games',
   autoCheckUpdates: true,
   githubRepo: 'DevlopTecy/AppDock',
-  autoStartWithWindows: true
+  autoStartWithWindows: true,
+  quickIcons: []
 };
 
 export const DEFAULT_GROUPS: AppGroup[] = [
