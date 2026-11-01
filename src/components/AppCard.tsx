@@ -94,6 +94,10 @@ export const AppCard: React.FC<AppCardProps> = ({
           src={activeIconSrc}
           alt=""
           draggable={false}
+          onDragStart={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
           onError={() => {
             if (activeIconSrc !== googleFaviconUrl && googleFaviconUrl) {
               setImgError(true);
@@ -108,7 +112,10 @@ export const AppCard: React.FC<AppCardProps> = ({
             borderRadius: iconSize > 40 ? '10px' : '6px',
             imageRendering: 'auto',
             filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.35))',
-            transition: 'transform 0.18s ease'
+            transition: 'transform 0.18s ease',
+            userSelect: 'none',
+            pointerEvents: 'none',
+            ...({ WebkitUserDrag: 'none' } as any)
           }}
         />
       );

@@ -446,107 +446,129 @@ export const GroupSidebar: React.FC<GroupSidebarProps> = ({
       </div>
 
       {/* Warning Confirmation Dialog for Removing Group */}
-      {confirmDeleteGroup && (
-        <div
-          onClick={(e) => {
-            e.stopPropagation();
-            setConfirmDeleteGroup(null);
-          }}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0, 0, 0, 0.65)',
-            backdropFilter: 'blur(8px)',
-            WebkitBackdropFilter: 'blur(8px)',
-            zIndex: 99999,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '16px'
-          }}
-        >
+      {confirmDeleteGroup &&
+        typeof document !== 'undefined' &&
+        createPortal(
           <div
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              setConfirmDeleteGroup(null);
+            }}
             style={{
-              width: '230px',
-              background: 'var(--modal-bg)',
-              border: '1px solid var(--border-hover)',
-              borderRadius: '12px',
-              padding: '16px 14px',
-              boxShadow: 'var(--shadow-dock)',
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0, 0, 0, 0.7)',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+              zIndex: 100000,
               display: 'flex',
-              flexDirection: 'column',
               alignItems: 'center',
-              gap: '10px',
-              textAlign: 'center'
+              justifyContent: 'center',
+              padding: '16px'
             }}
           >
             <div
+              onClick={(e) => e.stopPropagation()}
               style={{
-                width: '38px',
-                height: '38px',
-                borderRadius: '50%',
-                background: 'rgba(239, 68, 68, 0.14)',
-                color: '#ef4444',
+                width: '240px',
+                background: 'var(--modal-bg)',
+                border: '1px solid var(--border-hover)',
+                borderRadius: '12px',
+                padding: '18px 16px',
+                boxShadow: '0 12px 36px rgba(0, 0, 0, 0.55), var(--shadow-dock)',
                 display: 'flex',
+                flexDirection: 'column',
                 alignItems: 'center',
-                justifyContent: 'center'
+                gap: '12px',
+                textAlign: 'center',
+                animation: 'scaleIn 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
               }}
             >
-              <AlertTriangle size={20} />
-            </div>
-
-            <div>
-              <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>
-                Delete "{confirmDeleteGroup.name}"?
-              </div>
-              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: 1.35 }}>
-                This removes all {confirmDeleteGroup.items.length} {confirmDeleteGroup.items.length === 1 ? 'app' : 'apps'} in this group.
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', gap: '8px', width: '100%', marginTop: '4px' }}>
-              <button
-                type="button"
-                onClick={() => setConfirmDeleteGroup(null)}
+              <div
                 style={{
-                  flex: 1,
-                  padding: '7px 4px',
-                  borderRadius: '6px',
-                  background: 'var(--bg-surface)',
-                  color: 'var(--text-secondary)',
-                  border: '1px solid var(--btn-border)',
-                  fontSize: '11.5px',
-                  fontWeight: 500,
-                  cursor: 'pointer'
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '50%',
+                  background: 'rgba(239, 68, 68, 0.16)',
+                  color: '#ef4444',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 0 16px rgba(239, 68, 68, 0.25)'
                 }}
               >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  onDeleteGroup(confirmDeleteGroup.id);
-                  setConfirmDeleteGroup(null);
-                }}
-                style={{
-                  flex: 1,
-                  padding: '7px 4px',
-                  borderRadius: '6px',
-                  background: '#ef4444',
-                  color: '#ffffff',
-                  border: '1px solid #dc2626',
-                  fontSize: '11.5px',
-                  fontWeight: 600,
-                  cursor: 'pointer'
-                }}
-              >
-                Delete
-              </button>
+                <AlertTriangle size={22} />
+              </div>
+
+              <div>
+                <div style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--text-primary)' }}>
+                  Delete "{confirmDeleteGroup.name}"?
+                </div>
+                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '5px', lineHeight: 1.4 }}>
+                  This removes all {confirmDeleteGroup.items.length} {confirmDeleteGroup.items.length === 1 ? 'app' : 'apps'} in this group.
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '8px', width: '100%', marginTop: '6px' }}>
+                <button
+                  type="button"
+                  onClick={() => setConfirmDeleteGroup(null)}
+                  style={{
+                    flex: 1,
+                    padding: '8px 6px',
+                    borderRadius: '7px',
+                    background: 'var(--bg-surface)',
+                    color: 'var(--text-secondary)',
+                    border: '1px solid var(--btn-border)',
+                    fontSize: '12px',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'var(--bg-surface-hover)';
+                    e.currentTarget.style.color = 'var(--text-primary)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'var(--bg-surface)';
+                    e.currentTarget.style.color = 'var(--text-secondary)';
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onDeleteGroup(confirmDeleteGroup.id);
+                    setConfirmDeleteGroup(null);
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: '8px 6px',
+                    borderRadius: '7px',
+                    background: '#dc2626',
+                    color: '#ffffff',
+                    border: '1px solid #b91c1c',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 8px rgba(220, 38, 38, 0.35)',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#ef4444';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = '#dc2626';
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
 
       {/* Right-click Context Menu on Group Icon */}
       {contextMenu &&

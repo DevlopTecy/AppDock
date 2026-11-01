@@ -129,21 +129,21 @@ test('BUG-16: Main handle EdgeToggle remains pinned to screen edge and handleTog
   );
 });
 
-test('BUG-17: Auto-launch defaults to false and never auto-registers in development mode', () => {
+test('BUG-17: Auto-launch enables for packaged app on Windows boot and never auto-registers in development mode', () => {
   const mainContent = fs.readFileSync(path.join(projectRoot, 'electron', 'main.cjs'), 'utf-8');
   assert.ok(
     mainContent.includes('!app.isPackaged && openAtLogin') && mainContent.includes('Skipping auto-launch'),
     'main.cjs setAutoLaunchSetting must skip registration in dev mode'
   );
   assert.ok(
-    !mainContent.includes('if (!current.openAtLogin) {\n        setAutoLaunchSetting(true);'),
-    'main.cjs startup lifecycle must not force auto-launch to true'
+    mainContent.includes('if (app.isPackaged)') && mainContent.includes('setAutoLaunchSetting(true)'),
+    'main.cjs startup lifecycle must enable auto-launch for packaged app'
   );
 
   const storageContent = fs.readFileSync(path.join(projectRoot, 'src', 'utils', 'storage.ts'), 'utf-8');
   assert.ok(
-    storageContent.includes('autoStartWithWindows: false'),
-    'storage.ts DEFAULT_SETTINGS must default autoStartWithWindows to false'
+    storageContent.includes('autoStartWithWindows: true'),
+    'storage.ts DEFAULT_SETTINGS must default autoStartWithWindows to true'
   );
 });
 
@@ -206,4 +206,93 @@ test('BUG-20: autoUpdater disables differential download and UpdateNotification 
     notifContent.includes('showManualFallback') && notifContent.includes('openManualDownload'),
     'UpdateNotification.tsx must provide manual browser download fallback when download stalls or fails'
   );
+});
+
+test('BUG-21: Group delete confirmation modal uses createPortal to document.body and high z-index', () => {
+  const sidebarContent = fs.readFileSync(path.join(projectRoot, 'src', 'components', 'GroupSidebar.tsx'), 'utf-8');
+  assert.ok(
+    sidebarContent.includes('confirmDeleteGroup &&') && sidebarContent.includes('createPortal(') && sidebarContent.includes('document.body'),
+    'GroupSidebar.tsx must render confirmDeleteGroup inside createPortal(..., document.body)'
+  );
+  assert.ok(
+    sidebarContent.includes('zIndex: 100000'),
+    'confirmDeleteGroup dialog must have zIndex: 100000 so it is never trapped behind UI'
+  );
+});
+
+test('BUG-22: AUMID StartApp resolution, launch, and icon extraction', () => {
+  const mainContent = fs.readFileSync(path.join(projectRoot, 'electron', 'main.cjs'), 'utf-8');
+  assert.ok(
+    mainContent.includes('findStartApp') && mainContent.includes('Get-StartApps'),
+    'main.cjs must implement findStartApp to resolve Windows AUMIDs'
+  );
+  assert.ok(
+    mainContent.includes('shell:AppsFolder\\'),
+    'main.cjs launch-path and resolve-item must handle shell:AppsFolder\\ protocol'
+  );
+
+  const appContent = fs.readFileSync(path.join(projectRoot, 'src', 'App.tsx'), 'utf-8');
+  assert.ok(
+    appContent.includes('const EXT_REGEX = /\\.(exe|lnk|url|bat|cmd|appref-ms|ico|png|jpg|jpeg|svg|webp)$/i;'),
+    'App.tsx handleDropFiles must only strip real file extensions and preserve AUMIDs'
+  );
+  assert.ok(
+    appContent.includes('item.name.toLowerCase() === \'google\'') || appContent.includes('isMismatchedAumid'),
+    'App.tsx repairItems must detect and repair mismatched AUMID / Google items'
+  );
+});
+
+test('BUG-23: Internal card drag does not trigger file drop overlay or create download cards', () => {
+  const gridContent = fs.readFileSync(path.join(projectRoot, 'src', 'components', 'AppGrid.tsx'), 'utf-8');
+  assert.ok(
+    gridContent.includes('draggedItemIdRef') && gridContent.includes('isInternalCardDrag'),
+    'AppGrid.tsx must track internal card drag synchronously with ref and flag'
+  );
+  assert.ok(
+    gridContent.includes('if (isInternalCardDrag)') && gridContent.includes('setIsDragOver(false)'),
+    'AppGrid.tsx handleDragOver must never show file drop overlay during internal card drag'
+  );
+  assert.ok(
+    gridContent.includes('if (sourceId)') && gridContent.includes('return;'),
+    'AppGrid.tsx handleCardDrop must return after internal reorder without checking files'
+  );
+
+  const cardContent = fs.readFileSync(path.join(projectRoot, 'src', 'components', 'AppCard.tsx'), 'utf-8');
+  assert.ok(
+    cardContent.includes("WebkitUserDrag: 'none'") && cardContent.includes("pointerEvents: 'none'"),
+    'AppCard.tsx img must have pointerEvents: none and WebkitUserDrag: none to prevent synthetic download file drag'
+  );
+
+  const appContent = fs.readFileSync(path.join(projectRoot, 'src', 'App.tsx'), 'utf-8');
+  assert.ok(
+    appContent.includes('isSyntheticDownload'),
+    'App.tsx must discard synthetic download files and clean them up from storage'
+  );
+});
+
+test('BUG-24: Collapsed tab screen center matches expanded drawer handle center across all vertical ratios', () => {
+  const mainContent = fs.readFileSync(path.join(projectRoot, 'electron', 'main.cjs'), 'utf-8');
+  assert.ok(
+    mainContent.includes('const tabCenterY = Math.round(centerY + (h - tabH) / 2);'),
+    'main.cjs calculateBounds must align collapsed tab vertical center exactly with expanded drawer handle'
+  );
+
+  // Mathematical verification: test across multiple vertical ratios
+  const workArea = { x: 0, y: 0, width: 1920, height: 1080 };
+  const tabH = 64;
+  const h = 580;
+
+  [0.05, 0.2, 0.35, 0.5, 0.7, 0.85, 0.95].forEach((vertRatio) => {
+    const safeRatio = Math.max(0.02, Math.min(0.98, vertRatio));
+    const centerY = Math.round(workArea.y + (workArea.height - h) * safeRatio);
+    const tabCenterY = Math.round(centerY + (h - tabH) / 2);
+
+    const expandedHandleCenterY = centerY + h / 2;
+    const collapsedHandleCenterY = tabCenterY + tabH / 2;
+
+    assert.ok(
+      Math.abs(expandedHandleCenterY - collapsedHandleCenterY) <= 0.5,
+      `Vertical handle center must match on screen for ratio ${vertRatio}: expanded ${expandedHandleCenterY} vs collapsed ${collapsedHandleCenterY}`
+    );
+  });
 });

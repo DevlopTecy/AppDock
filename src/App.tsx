@@ -183,6 +183,15 @@ export const App: React.FC = () => {
           for (const item of grp.items) {
             const normName = item.name.toLowerCase().trim();
             const normTarget = item.target.toLowerCase().trim();
+            // Automatically remove synthetic "download" artifacts mistakenly created from browser drag
+            const isSyntheticDownload =
+              normName === 'download' &&
+              (!item.target || normTarget === 'download' || normTarget.endsWith('/download'));
+            if (isSyntheticDownload) {
+              grpChanged = true;
+              changed = true;
+              continue;
+            }
             const key = `${normName}|${normTarget}`;
             if (!seen.has(key) && !seen.has(normName)) {
               seen.add(key);
@@ -218,16 +227,26 @@ export const App: React.FC = () => {
 
               const isRelative = item.type === 'app' && !item.target.includes('\\') && !item.target.includes('/');
               const isGenericOrBroken = item.type === 'app' && isGenericOrBrokenIcon(item.icon);
-              const needsFix = item.type === 'app' && (isRelative || isGenericOrBroken || item.name.toLowerCase().includes('gemini'));
+              const isMismatchedAumid =
+                item.type === 'app' &&
+                (item.target.includes('Antigravity') ||
+                  item.target.includes('.') ||
+                  item.name.toLowerCase() === 'google' ||
+                  item.target.toLowerCase().startsWith('shell:'));
+              const needsFix =
+                item.type === 'app' &&
+                (isRelative || isGenericOrBroken || isMismatchedAumid || item.name.toLowerCase().includes('gemini'));
 
               if (needsFix) {
                 try {
+                  let newName = item.name;
                   let newTarget = item.target;
                   let newIcon: string | null = null;
 
                   if ((window as any).appDock?.resolveItem) {
                     const res = await (window as any).appDock.resolveItem({ name: item.name, target: item.target });
                     if (res) {
+                      if (res.name && res.name !== item.name) newName = res.name;
                       if (res.target) newTarget = res.target;
                       if (res.icon && !isGenericOrBrokenIcon(res.icon)) {
                         newIcon = res.icon;
@@ -242,13 +261,18 @@ export const App: React.FC = () => {
                     }
                   }
 
-                  if (newIcon && newIcon !== item.icon) {
+                  if (
+                    (newIcon && newIcon !== item.icon) ||
+                    newName !== item.name ||
+                    newTarget !== item.target
+                  ) {
                     grpChanged = true;
                     changed = true;
                     return {
                       ...item,
+                      name: newName,
                       target: newTarget,
-                      icon: newIcon
+                      icon: newIcon || item.icon
                     };
                   }
                 } catch {}
@@ -338,7 +362,8 @@ export const App: React.FC = () => {
       const nextState = typeof forceState === 'boolean' ? forceState : !isExpanded;
 
       if (!nextState) {
-        // Collapsing: close modules and notify Electron bounds first to prevent handle jumping
+        // Collapsing: update React state immediately so UI transitions synchronously
+        setIsExpanded(false);
         setActiveModule(null);
         if (typeof window !== 'undefined' && (window as any).appDock?.setModuleWidth) {
           (window as any).appDock.setModuleWidth(0);
@@ -350,7 +375,6 @@ export const App: React.FC = () => {
             console.error('Failed to notify Electron of dock state:', err);
           }
         }
-        setIsExpanded(false);
       } else {
         // Expanding: prepare window dimensions first so handle is positioned stably
         if (typeof window !== 'undefined' && (window as any).appDock?.setModuleWidth) {
@@ -623,9 +647,21 @@ export const App: React.FC = () => {
       if (!filePath) {
         filePath = (file as any).path || file.name;
       }
-      const baseName = file.name.replace(/\.[^/.]+$/, '');
+      const rawName = file.name;
+      // Discard synthetic browser drag artifacts (such as dragging an image producing a virtual "download" file)
+      const normRawName = rawName.toLowerCase();
+      const isSyntheticDownload =
+        (normRawName === 'download' || normRawName.startsWith('download.')) &&
+        (!filePath || filePath === rawName || filePath.endsWith('/download'));
+      if (isSyntheticDownload) {
+        continue;
+      }
+
+      const EXT_REGEX = /\.(exe|lnk|url|bat|cmd|appref-ms|ico|png|jpg|jpeg|svg|webp)$/i;
+      const baseName = rawName.replace(EXT_REGEX, '');
 
       let icon: string | undefined = undefined;
+      let finalName = baseName;
       let finalTarget = filePath;
 
       if (typeof window !== 'undefined' && (window as any).appDock) {
@@ -633,6 +669,7 @@ export const App: React.FC = () => {
           if ((window as any).appDock.resolveItem) {
             const res = await (window as any).appDock.resolveItem({ name: baseName, target: filePath });
             if (res) {
+              if (res.name) finalName = res.name;
               if (res.target) finalTarget = res.target;
               if (res.icon) icon = res.icon;
             }
@@ -645,7 +682,7 @@ export const App: React.FC = () => {
 
       newItems.push({
         id: `dropped-${Date.now()}-${i}`,
-        name: baseName,
+        name: finalName,
         type: 'app',
         target: finalTarget,
         icon,

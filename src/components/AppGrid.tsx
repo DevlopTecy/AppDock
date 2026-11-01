@@ -45,6 +45,7 @@ export const AppGrid: React.FC<AppGridProps> = ({
   const [editingItem, setEditingItem] = useState<AppItem | null>(null);
   const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
   const [dragOverItemId, setDragOverItemId] = useState<string | null>(null);
+  const draggedItemIdRef = React.useRef<string | null>(null);
 
   // Close context menu on outside click or Esc
   useEffect(() => {
@@ -71,17 +72,21 @@ export const AppGrid: React.FC<AppGridProps> = ({
   }, [contextMenu]);
 
   const handleCardDragStart = (e: React.DragEvent, itemId: string) => {
-    e.dataTransfer.setData('application/x-appdock-item', itemId);
-    e.dataTransfer.setData('text/plain', itemId);
-    e.dataTransfer.effectAllowed = 'move';
+    draggedItemIdRef.current = itemId;
+    if (typeof window !== 'undefined') {
+      (window as any).__appdock_dragging_card_id = itemId;
+    }
     setDraggedItemId(itemId);
+    e.dataTransfer.setData('application/x-appdock-item', itemId);
+    e.dataTransfer.effectAllowed = 'move';
   };
 
   const handleCardDragOver = (e: React.DragEvent, targetId: string) => {
     e.preventDefault();
     e.stopPropagation();
     e.dataTransfer.dropEffect = 'move';
-    if (draggedItemId && draggedItemId !== targetId && dragOverItemId !== targetId) {
+    const activeId = draggedItemIdRef.current || (typeof window !== 'undefined' ? (window as any).__appdock_dragging_card_id : null) || draggedItemId;
+    if (activeId && activeId !== targetId && dragOverItemId !== targetId) {
       setDragOverItemId(targetId);
     }
   };
@@ -92,10 +97,22 @@ export const AppGrid: React.FC<AppGridProps> = ({
     setIsDragOver(false);
     setDragOverItemId(null);
 
-    // If an existing card is being reordered, perform reorder and never treat as file drop
-    if (draggedItemId) {
-      if (draggedItemId !== targetId && group && onReorderItems) {
-        const fromIndex = group.items.findIndex((it) => it.id === draggedItemId);
+    const sourceId =
+      draggedItemIdRef.current ||
+      (typeof window !== 'undefined' ? (window as any).__appdock_dragging_card_id : null) ||
+      draggedItemId ||
+      e.dataTransfer.getData('application/x-appdock-item');
+
+    draggedItemIdRef.current = null;
+    if (typeof window !== 'undefined') {
+      (window as any).__appdock_dragging_card_id = null;
+    }
+    setDraggedItemId(null);
+
+    // If an existing card is being reordered, perform reorder and NEVER treat as file drop
+    if (sourceId) {
+      if (sourceId !== targetId && group && onReorderItems) {
+        const fromIndex = group.items.findIndex((it) => it.id === sourceId);
         const toIndex = group.items.findIndex((it) => it.id === targetId);
         if (fromIndex !== -1 && toIndex !== -1) {
           const nextItems = [...group.items];
@@ -104,23 +121,35 @@ export const AppGrid: React.FC<AppGridProps> = ({
           onReorderItems(group.id, nextItems);
         }
       }
-      setDraggedItemId(null);
       return;
     }
 
-    // Only process external files when not dragging an internal card
+    // Only process external files when absolutely NOT dragging an internal card
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0 && onDropFiles) {
       onDropFiles(e.dataTransfer.files);
     }
-    setDraggedItemId(null);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    // Only show "Drop files here" if external files are being dragged, NEVER for internal card reordering!
-    const types = Array.from(e.dataTransfer.types || []);
-    const isExternalFile = !draggedItemId && types.includes('Files') && !types.includes('application/x-appdock-item');
+
+    const rawTypes = Array.from(e.dataTransfer.types || []);
+    const types = rawTypes.map((t) => t.toLowerCase());
+    const isInternalCardDrag =
+      !!draggedItemIdRef.current ||
+      !!(typeof window !== 'undefined' && (window as any).__appdock_dragging_card_id) ||
+      !!draggedItemId ||
+      types.includes('application/x-appdock-item');
+
+    // NEVER show "Drop files here" overlay during internal card reordering!
+    if (isInternalCardDrag) {
+      if (isDragOver) setIsDragOver(false);
+      return;
+    }
+
+    // Only show "Drop files here" if actual external files are being dragged from the OS
+    const isExternalFile = !draggedItemId && types.includes('Files') && !types.includes('application/x-appdock-item') || (!isInternalCardDrag && types.includes('files'));
     if (isExternalFile) {
       setIsDragOver(true);
     }
@@ -136,13 +165,27 @@ export const AppGrid: React.FC<AppGridProps> = ({
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(false);
-
-    const wasDraggingCard = !!draggedItemId;
-    setDraggedItemId(null);
     setDragOverItemId(null);
 
-    // Only accept file drops if the drag was not an internal card drag
-    if (!wasDraggingCard && e.dataTransfer.files && e.dataTransfer.files.length > 0 && onDropFiles) {
+    const wasDraggingCard =
+      !!draggedItemIdRef.current ||
+      !!(typeof window !== 'undefined' && (window as any).__appdock_dragging_card_id) ||
+      !!draggedItemId ||
+      !!e.dataTransfer.getData('application/x-appdock-item');
+
+    draggedItemIdRef.current = null;
+    if (typeof window !== 'undefined') {
+      (window as any).__appdock_dragging_card_id = null;
+    }
+    setDraggedItemId(null);
+
+    // If dropped on empty space in grid while reordering an existing card, do nothing and NEVER call onDropFiles!
+    if (wasDraggingCard) {
+      return;
+    }
+
+    // External OS files only
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0 && onDropFiles) {
       onDropFiles(e.dataTransfer.files);
     }
   };
@@ -482,7 +525,15 @@ export const AppGrid: React.FC<AppGridProps> = ({
                 onDragStart={(e) => handleCardDragStart(e, item.id)}
                 onDragOver={(e) => handleCardDragOver(e, item.id)}
                 onDrop={(e) => handleCardDrop(e, item.id)}
-                onDragEnd={() => { setDraggedItemId(null); setDragOverItemId(null); }}
+                onDragEnd={() => {
+                  draggedItemIdRef.current = null;
+                  if (typeof window !== 'undefined') {
+                    (window as any).__appdock_dragging_card_id = null;
+                  }
+                  setDraggedItemId(null);
+                  setDragOverItemId(null);
+                  setIsDragOver(false);
+                }}
                 isDragging={draggedItemId === item.id}
                 isDragOver={dragOverItemId === item.id}
                 iconSize={layout.iconSize}

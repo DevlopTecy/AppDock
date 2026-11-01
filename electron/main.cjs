@@ -50,7 +50,8 @@ function calculateBounds(position, expanded, workArea, vertRatio = verticalRatio
   const h = Math.min(drawerHeight, workArea.height);
   const safeRatio = Math.max(0.02, Math.min(0.98, typeof vertRatio === 'number' ? vertRatio : 0.5));
   const centerY = Math.round(workArea.y + (workArea.height - h) * safeRatio);
-  const tabCenterY = Math.round(workArea.y + (workArea.height - tabH) * safeRatio);
+  // Position collapsed tab so its screen center matches expanded drawer handle center (centerY + h / 2)
+  const tabCenterY = Math.round(centerY + (h - tabH) / 2);
 
   // Dynamic companion width: 340px when companion module is active, 54px when idle (ConnectorHub handles), 0 in Clean Dock mode (moduleWidth < 0)
   // Prevents oversized ghost hitbox from blocking background apps/clicks when no module is open.
@@ -424,7 +425,37 @@ ipcMain.handle('app:launch-path', async (event, targetPath) => {
     if (!targetPath || typeof targetPath !== 'string') {
       return { success: false, error: 'Empty or invalid path' };
     }
-    const resolvedPath = resolveShortcutPath(targetPath) || targetPath.trim();
+    const trimmed = targetPath.trim();
+
+    // 1. Handle Windows AUMID / StartApp / shell:AppsFolder items
+    if (trimmed.toLowerCase().startsWith('shell:') || (!fs.existsSync(trimmed) && (trimmed.includes('.') || trimmed.includes('!')))) {
+      const startApp = findStartApp(trimmed);
+      const appTarget = trimmed.toLowerCase().startsWith('shell:appsfolder\\')
+        ? trimmed
+        : startApp
+          ? `shell:AppsFolder\\${startApp.AppID}`
+          : `shell:AppsFolder\\${trimmed}`;
+
+      // If we can resolve to a physical .lnk or .exe on disk, launch that directly
+      const physical = resolveShortcutPath(startApp?.Name || trimmed);
+      if (physical && fs.existsSync(physical)) {
+        const err = await shell.openPath(physical);
+        if (!err) return { success: true };
+      }
+
+      // Otherwise launch via Windows shell:AppsFolder
+      return new Promise((resolve) => {
+        exec(`cmd /c start "" "${appTarget}"`, (err) => {
+          if (err) {
+            resolve({ success: false, error: err.message });
+          } else {
+            resolve({ success: true });
+          }
+        });
+      });
+    }
+
+    const resolvedPath = resolveShortcutPath(trimmed) || trimmed;
     const openErr = await shell.openPath(resolvedPath);
     if (!openErr) {
       return { success: true };
@@ -519,10 +550,60 @@ function getSearchDirectories() {
   return dirs.filter(Boolean);
 }
 
+let startAppsCache = null;
+let lastStartAppsFetch = 0;
+
+function getStartAppsList() {
+  const now = Date.now();
+  if (startAppsCache && (now - lastStartAppsFetch < 300000)) {
+    return startAppsCache;
+  }
+  try {
+    const { execSync } = require('child_process');
+    const jsonStr = execSync('powershell -NoProfile -Command "Get-StartApps | ConvertTo-Json"', { timeout: 4000 }).toString();
+    const data = JSON.parse(jsonStr);
+    startAppsCache = Array.isArray(data) ? data : [data];
+    lastStartAppsFetch = now;
+  } catch (e) {
+    if (!startAppsCache) startAppsCache = [];
+  }
+  return startAppsCache;
+}
+
+function findStartApp(identifier) {
+  if (!identifier || typeof identifier !== 'string') return null;
+  const cleanId = identifier.replace(/^shell:appsfolder\\/i, '').trim().toLowerCase();
+  const apps = getStartAppsList();
+
+  // 1. Exact match on AppID
+  let match = apps.find((a) => a.AppID && a.AppID.toLowerCase() === cleanId);
+  if (match) return match;
+
+  // 2. Exact match on Name
+  match = apps.find((a) => a.Name && a.Name.toLowerCase() === cleanId);
+  if (match) return match;
+
+  // 3. Substring match on AppID
+  match = apps.find(
+    (a) => a.AppID && (a.AppID.toLowerCase().includes(cleanId) || cleanId.includes(a.AppID.toLowerCase()))
+  );
+  if (match) return match;
+
+  // 4. Substring match on Name
+  match = apps.find(
+    (a) => a.Name && (a.Name.toLowerCase().includes(cleanId) || cleanId.includes(a.Name.toLowerCase()))
+  );
+  return match || null;
+}
+
 function resolveShortcutPath(inputPath) {
   if (!inputPath || typeof inputPath !== 'string') return null;
   const trimmed = inputPath.trim();
-  if (fs.existsSync(trimmed)) return trimmed;
+  if (fs.existsSync(trimmed)) {
+    try {
+      if (fs.statSync(trimmed).isFile()) return trimmed;
+    } catch (e) {}
+  }
 
   const base = path.basename(trimmed);
   const nameWithoutExt = path.basename(trimmed, path.extname(trimmed));
@@ -537,7 +618,15 @@ function resolveShortcutPath(inputPath) {
   for (const dir of searchDirs) {
     for (const cand of candidateNames) {
       const full = path.join(dir, cand);
-      if (fs.existsSync(full)) return full;
+      if (fs.existsSync(full)) {
+        try {
+          if (fs.statSync(full).isFile()) return full;
+          const innerLnk = path.join(full, `${cand}.lnk`);
+          if (fs.existsSync(innerLnk) && fs.statSync(innerLnk).isFile()) return innerLnk;
+          const innerNameLnk = path.join(full, `${nameWithoutExt}.lnk`);
+          if (fs.existsSync(innerNameLnk) && fs.statSync(innerNameLnk).isFile()) return innerNameLnk;
+        } catch (e) {}
+      }
     }
   }
 
@@ -553,12 +642,24 @@ function resolveShortcutPath(inputPath) {
           if (sub.isDirectory()) {
             for (const cand of candidateNames) {
               const full = path.join(dir, sub.name, cand);
-              if (fs.existsSync(full)) return full;
+              if (fs.existsSync(full)) {
+                try {
+                  if (fs.statSync(full).isFile()) return full;
+                  const innerLnk = path.join(full, `${cand}.lnk`);
+                  if (fs.existsSync(innerLnk) && fs.statSync(innerLnk).isFile()) return innerLnk;
+                } catch (e) {}
+              }
             }
           }
         }
       } catch (e) {}
     }
+  }
+
+  // Fallback: If inputPath matches a Windows StartApp (AUMID), resolve via its Name
+  const startApp = findStartApp(inputPath);
+  if (startApp && startApp.Name && startApp.Name !== inputPath) {
+    return resolveShortcutPath(startApp.Name);
   }
 
   return null;
@@ -724,7 +825,16 @@ function extractIconsBatchWithPowerShell(filePaths) {
 
 async function extractNativeIcon(filePath) {
   if (!filePath) return null;
-  const resolvedPath = resolveShortcutPath(filePath) || filePath;
+  let resolvedPath = resolveShortcutPath(filePath) || filePath;
+  if (!fs.existsSync(resolvedPath)) {
+    const startApp = findStartApp(filePath);
+    if (startApp) {
+      const lnk = resolveShortcutPath(startApp.Name) || resolveShortcutPath(startApp.AppID);
+      if (lnk && fs.existsSync(lnk)) {
+        resolvedPath = lnk;
+      }
+    }
+  }
   if (!fs.existsSync(resolvedPath)) return null;
 
   if (iconMemoryCache.has(resolvedPath)) {
@@ -834,10 +944,26 @@ ipcMain.handle('app:extract-icon', async (event, filePath) => {
 });
 
 ipcMain.handle('app:resolve-item', async (event, { name, target }) => {
+  // 1. Check if target or name matches a Windows StartApp (AUMID / Windows 11 Start Menu pinned item)
+  const startApp = findStartApp(target) || findStartApp(name);
+  if (startApp) {
+    const lnkPath = resolveShortcutPath(startApp.Name) || resolveShortcutPath(startApp.AppID);
+    let icon = null;
+    if (lnkPath) {
+      icon = await extractNativeIcon(lnkPath);
+    }
+    return {
+      name: startApp.Name,
+      target: lnkPath || `shell:AppsFolder\\${startApp.AppID}`,
+      icon
+    };
+  }
+
   const resolved = resolveShortcutPath(target) || resolveShortcutPath(name);
   if (resolved) {
     const icon = await extractNativeIcon(resolved);
-    return { target: resolved, icon };
+    const resolvedName = path.basename(resolved, path.extname(resolved));
+    return { target: resolved, icon, name: resolvedName };
   }
   return null;
 });
@@ -1255,10 +1381,16 @@ app.whenReady().then(() => {
   createWindow();
   setupAutoUpdater();
 
-  // Windows startup hygiene: Do not auto-launch on PC boot unless user enabled it in settings
+  // Windows startup: Auto-start packaged AppDock on Windows boot, but strictly prevent dev Electron from registering
   if (process.platform === 'win32') {
     try {
-      if (!app.isPackaged) {
+      if (app.isPackaged) {
+        // Auto setup when windows starts up for the installed desktop dock
+        const current = app.getLoginItemSettings();
+        if (!current.openAtLogin) {
+          setAutoLaunchSetting(true);
+        }
+      } else {
         // In development mode, always remove auto-launch so dev Electron never runs on boot
         app.setLoginItemSettings({ openAtLogin: false });
       }

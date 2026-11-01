@@ -94,3 +94,4 @@ execSync(`gh release edit v1.0.5 --notes-file "${file105}"`, {
 });
 
 console.log('Both releases updated successfully!');
+

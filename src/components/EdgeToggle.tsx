@@ -60,7 +60,7 @@ export const EdgeToggle: React.FC<EdgeToggleProps> = ({
         const availHeight = (typeof window !== 'undefined' && window.screen?.availHeight)
           ? window.screen.availHeight
           : 1040;
-        const travelHeight = Math.max(200, availHeight - (isExpanded ? 580 : 64));
+        const travelHeight = Math.max(200, availHeight - 580);
         const deltaRatio = deltaY / travelHeight;
         const newRatio = Math.max(0.02, Math.min(0.98, dragRef.current.startRatio + deltaRatio));
         dragRef.current.latestRatio = newRatio;
