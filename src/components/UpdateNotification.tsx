@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowUpCircle, Download, RotateCw, X, Sparkles } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ArrowUpCircle, Download, RotateCw, X, Sparkles, ExternalLink, AlertCircle } from 'lucide-react';
 import { DockTheme } from '../types/dock';
 
 export interface UpdateInfo {
@@ -7,6 +7,7 @@ export interface UpdateInfo {
   releaseNotes?: string;
   releaseDate?: string;
   downloadUrl?: string;
+  htmlUrl?: string;
 }
 
 interface UpdateNotificationProps {
@@ -20,15 +21,19 @@ export const UpdateNotification: React.FC<UpdateNotificationProps> = ({ theme })
   const [downloadProgress, setDownloadProgress] = useState<number | null>(null);
   const [isReadyToInstall, setIsReadyToInstall] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [showManualFallback, setShowManualFallback] = useState(false);
+  const watchdogTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       if (params.get('mockupdate') === '1' || params.get('mockupdate') === 'true') {
         setUpdateInfo({
-          version: '1.0.1',
+          version: '1.0.5',
           releaseNotes: 'Fixed dock transitions and updated theme rendering.',
-          downloadUrl: 'https://github.com/DevlopTecy/AppDock/releases'
+          downloadUrl: 'https://github.com/DevlopTecy/AppDock/releases/download/v1.0.5/AppDock-Setup-1.0.5.exe',
+          htmlUrl: 'https://github.com/DevlopTecy/AppDock/releases/tag/v1.0.5'
         });
       }
     }
@@ -38,27 +43,65 @@ export const UpdateNotification: React.FC<UpdateNotificationProps> = ({ theme })
     const cleanupAvailable = (window as any).appDock.onUpdateAvailable?.((info: UpdateInfo) => {
       setUpdateInfo(info);
       setIsDismissed(false);
+      setDownloadError(null);
+      setShowManualFallback(false);
     });
 
     const cleanupProgress = (window as any).appDock.onUpdateProgress?.((progress: { percent: number }) => {
       setDownloadProgress(progress.percent);
       setIsDownloading(true);
+      setDownloadError(null);
+      if (progress.percent > 0 && watchdogTimerRef.current) {
+        clearTimeout(watchdogTimerRef.current);
+        watchdogTimerRef.current = null;
+        setShowManualFallback(false);
+      }
     });
 
     const cleanupDownloaded = (window as any).appDock.onUpdateDownloaded?.(() => {
+      if (watchdogTimerRef.current) {
+        clearTimeout(watchdogTimerRef.current);
+        watchdogTimerRef.current = null;
+      }
       setIsDownloading(false);
       setIsReadyToInstall(true);
       setDownloadProgress(100);
+      setDownloadError(null);
+      setShowManualFallback(false);
+    });
+
+    const cleanupError = (window as any).appDock.onUpdateError?.((err: string) => {
+      if (watchdogTimerRef.current) {
+        clearTimeout(watchdogTimerRef.current);
+        watchdogTimerRef.current = null;
+      }
+      console.warn('[UpdateNotification] onUpdateError:', err);
+      setIsDownloading(false);
+      setDownloadError(typeof err === 'string' ? err : 'Update download failed');
+      setShowManualFallback(true);
     });
 
     return () => {
+      if (watchdogTimerRef.current) clearTimeout(watchdogTimerRef.current);
       if (cleanupAvailable) cleanupAvailable();
       if (cleanupProgress) cleanupProgress();
       if (cleanupDownloaded) cleanupDownloaded();
+      if (cleanupError) cleanupError();
     };
   }, []);
 
   if (!updateInfo || isDismissed) return null;
+
+  const fallbackUrl =
+    updateInfo.downloadUrl ||
+    updateInfo.htmlUrl ||
+    `https://github.com/DevlopTecy/AppDock/releases/tag/v${updateInfo.version}`;
+
+  const openManualDownload = () => {
+    if (typeof window !== 'undefined' && (window as any).appDock?.openExternalUrl) {
+      (window as any).appDock.openExternalUrl(fallbackUrl);
+    }
+  };
 
   const handleAction = async () => {
     if (typeof window === 'undefined' || !(window as any).appDock) return;
@@ -69,13 +112,30 @@ export const UpdateNotification: React.FC<UpdateNotificationProps> = ({ theme })
     }
 
     setIsDownloading(true);
-    const res = await (window as any).appDock.downloadUpdate?.();
-    if (!res || !res.success) {
-      // In development mode or if native updater is not active, open download URL
-      if (updateInfo.downloadUrl) {
-        (window as any).appDock.openExternalUrl?.(updateInfo.downloadUrl);
+    setDownloadError(null);
+    setShowManualFallback(false);
+
+    // Watchdog timer: if stuck at 0% for more than 10 seconds, reveal the manual browser download option
+    if (watchdogTimerRef.current) clearTimeout(watchdogTimerRef.current);
+    watchdogTimerRef.current = setTimeout(() => {
+      setShowManualFallback(true);
+    }, 10000);
+
+    try {
+      const res = await (window as any).appDock.downloadUpdate?.();
+      if (!res || !res.success) {
+        console.warn('[UpdateNotification] downloadUpdate error result:', res);
+        setIsDownloading(false);
+        setShowManualFallback(true);
+        if (res?.error) {
+          setDownloadError(res.error);
+        }
       }
+    } catch (err: any) {
+      console.warn('[UpdateNotification] downloadUpdate exception:', err);
       setIsDownloading(false);
+      setShowManualFallback(true);
+      setDownloadError(err?.message || 'Download could not start');
     }
   };
 
@@ -156,9 +216,11 @@ export const UpdateNotification: React.FC<UpdateNotificationProps> = ({ theme })
       <div style={{ fontSize: '10.5px', color: 'var(--text-secondary)', lineHeight: 1.3 }}>
         {isReadyToInstall
           ? 'Update downloaded and ready to install!'
-          : isDownloading
-            ? `Downloading update (${downloadProgress ?? 0}%)...`
-            : 'A new release is ready with the latest features and bug fixes.'}
+          : downloadError
+            ? `Download interrupted: ${downloadError}`
+            : isDownloading
+              ? `Downloading update (${downloadProgress ?? 0}%)...`
+              : 'A new release is ready with the latest features and bug fixes.'}
       </div>
 
       {/* Download Progress Bar */}
@@ -175,13 +237,39 @@ export const UpdateNotification: React.FC<UpdateNotificationProps> = ({ theme })
         >
           <div
             style={{
-              width: `${downloadProgress ?? 10}%`,
+              width: `${Math.max(downloadProgress ?? 0, 5)}%`,
               height: '100%',
               background: isAether ? '#ffdf59' : isDeathNote ? '#a3262d' : 'var(--text-primary)',
               transition: 'width 0.2s ease'
             }}
           />
         </div>
+      )}
+
+      {/* Manual download option if stuck or errored */}
+      {showManualFallback && (
+        <button
+          type="button"
+          onClick={openManualDownload}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '5px',
+            padding: '4px 6px',
+            fontSize: '10px',
+            fontWeight: 600,
+            borderRadius: '4px',
+            background: 'rgba(255, 255, 255, 0.08)',
+            border: '1px solid rgba(255, 255, 255, 0.16)',
+            color: isAether ? '#ffdf59' : isDeathNote ? '#ff8080' : 'var(--text-primary)',
+            cursor: 'pointer',
+            marginTop: '2px'
+          }}
+        >
+          <ExternalLink size={11} />
+          <span>Stuck? Download Setup Directly (Browser)</span>
+        </button>
       )}
 
       {/* Action Buttons */}

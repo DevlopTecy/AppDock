@@ -185,3 +185,25 @@ test('BUG-19: AppGrid context menu includes Edit URL & Name for web links and re
 
 
 
+
+test('BUG-20: autoUpdater disables differential download and UpdateNotification listens to errors and provides watchdog fallback', () => {
+  const mainContent = fs.readFileSync(path.join(projectRoot, 'electron', 'main.cjs'), 'utf-8');
+  assert.ok(
+    mainContent.includes('autoUpdater.disableDifferentialDownload = true'),
+    'main.cjs must set autoUpdater.disableDifferentialDownload = true to prevent stall on GitHub'
+  );
+  assert.ok(
+    mainContent.includes('setupAsset') && mainContent.includes(".toLowerCase().includes('setup')"),
+    'main.cjs checkGitHubReleases must prioritize Setup installer asset'
+  );
+
+  const notifContent = fs.readFileSync(path.join(projectRoot, 'src', 'components', 'UpdateNotification.tsx'), 'utf-8');
+  assert.ok(
+    notifContent.includes('onUpdateError'),
+    'UpdateNotification.tsx must register onUpdateError listener'
+  );
+  assert.ok(
+    notifContent.includes('showManualFallback') && notifContent.includes('openManualDownload'),
+    'UpdateNotification.tsx must provide manual browser download fallback when download stalls or fails'
+  );
+});

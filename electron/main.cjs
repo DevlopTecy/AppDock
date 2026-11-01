@@ -11,6 +11,7 @@ try {
   if (autoUpdater) {
     autoUpdater.autoDownload = false;
     autoUpdater.autoInstallOnAppQuit = true;
+    autoUpdater.disableDifferentialDownload = true; // Disable delta downloads to prevent stalling on GitHub range requests
   }
 } catch (e) {
   console.log('[AutoUpdater] electron-updater not initialized:', e.message);
@@ -1032,11 +1033,15 @@ function setupAutoUpdater() {
 
   autoUpdater.on('update-available', (info) => {
     console.log('[AutoUpdater] Update available:', info.version);
+    const ver = (info.version || '').replace(/^[^\d]*/, '').replace(/[^\d.]*$/, '');
+    const directExeUrl = `https://github.com/DevlopTecy/AppDock/releases/download/v${ver}/AppDock-Setup-${ver}.exe`;
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.webContents.send('dock:update-available', {
         version: info.version,
         releaseDate: info.releaseDate,
-        releaseNotes: typeof info.releaseNotes === 'string' ? info.releaseNotes : ''
+        releaseNotes: typeof info.releaseNotes === 'string' ? info.releaseNotes : '',
+        downloadUrl: directExeUrl,
+        htmlUrl: `https://github.com/DevlopTecy/AppDock/releases/tag/v${ver}`
       });
     }
   });
@@ -1118,7 +1123,10 @@ function checkGitHubReleases(repoSlug = 'DevlopTecy/AppDock') {
             // Extract direct Windows installer executable if present in release assets
             let directExeUrl = release.html_url || '';
             if (Array.isArray(release.assets)) {
-              const exeAsset = release.assets.find(
+              const setupAsset = release.assets.find(
+                (a) => a.name && (a.name.toLowerCase().includes('setup') && a.name.endsWith('.exe'))
+              );
+              const exeAsset = setupAsset || release.assets.find(
                 (a) => a.name && (a.name.endsWith('.exe') || a.name.endsWith('.zip'))
               );
               if (exeAsset && exeAsset.browser_download_url) {
@@ -1207,9 +1215,17 @@ ipcMain.handle('dock:check-for-updates', async (event, customRepo) => {
 ipcMain.handle('dock:download-update', async () => {
   if (autoUpdater && app.isPackaged) {
     try {
-      await autoUpdater.downloadUpdate();
+      console.log('[AutoUpdater] Initiating downloadUpdate...');
+      const downloadPromise = autoUpdater.downloadUpdate();
+      downloadPromise.catch((err) => {
+        console.warn('[AutoUpdater] downloadPromise error:', err ? err.message : err);
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          mainWindow.webContents.send('dock:update-error', err ? err.message : 'Download failed');
+        }
+      });
       return { success: true };
     } catch (err) {
+      console.warn('[AutoUpdater] downloadUpdate call error:', err.message);
       return { success: false, error: err.message };
     }
   }
