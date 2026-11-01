@@ -112,6 +112,13 @@ test('Custom Theme Studio & Sub-Options Verification', async (t) => {
     assert.ok(frameContent.includes('if (!customTheme?.bgRotation) return;'), 'DockFrame must not rotate backgrounds when bgRotation is off');
     assert.ok(frameContent.includes('setEldenBgIndex(0)'), 'DockFrame must reset background indices when bgRotation is toggled off');
     assert.ok(frameContent.includes('customTheme?.bgRotationSecs || 30'), 'DockFrame must use customTheme.bgRotationSecs for rotation interval');
+    assert.ok(frameContent.includes('KAWAII_BACKGROUNDS'), 'DockFrame must declare KAWAII_BACKGROUNDS');
+    assert.ok(frameContent.includes('AETHER_BACKGROUNDS'), 'DockFrame must declare AETHER_BACKGROUNDS');
+    assert.ok(frameContent.includes('DEATH_NOTE_BACKGROUNDS'), 'DockFrame must declare DEATH_NOTE_BACKGROUNDS');
+    assert.ok(frameContent.includes('setKawaiiBgIndex(0)'), 'DockFrame must reset Kawaii rotation index when off');
+    assert.ok(frameContent.includes('setAetherBgIndex(0)'), 'DockFrame must reset Aether rotation index when off');
+    assert.ok(frameContent.includes('KAWAII_BACKGROUNDS.map'), 'DockFrame must map over KAWAII_BACKGROUNDS for cross-fade rotation');
+    assert.ok(frameContent.includes('AETHER_BACKGROUNDS.map'), 'DockFrame must map over AETHER_BACKGROUNDS for cross-fade rotation');
   });
 
   await t.test('10. Reset custom theme triggers high-end confirmation modal and reverts to dark theme', () => {

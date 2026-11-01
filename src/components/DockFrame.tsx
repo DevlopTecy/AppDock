@@ -48,10 +48,25 @@ interface DockFrameProps {
 
 const DEATH_NOTE_BACKGROUNDS = [
   '/deathnote/backgrounds/wallpaper_kira_l_divided.png',
+  '/deathnote/backgrounds/wallpaper_ryuk_tokyo.jpg',
+  '/deathnote/backgrounds/wallpaper_l_investigation.jpg',
   '/deathnote/backgrounds/wallpaper_main_1.jpg',
   '/deathnote/backgrounds/wallpaper_main_2.jpg',
-  '/deathnote/backgrounds/wallpaper_main_3.jpg',
   '/deathnote/backgrounds/wallpaper_main_4.jpg'
+];
+
+const KAWAII_BACKGROUNDS = [
+  '/kawaii/wallpaper_kawaii_nook.png',
+  '/kawaii/wallpaper_kawaii_gamer_room.jpg',
+  '/kawaii/wallpaper_kawaii_starry_night.jpg',
+  '/kawaii/wallpaper_kawaii_sunset_cafe.jpg'
+];
+
+const AETHER_BACKGROUNDS = [
+  '/aether/wallpaper_aether_sky.jpg',
+  '/aether/wallpaper_aether_sunset.jpg',
+  '/aether/wallpaper_aether_night.jpg',
+  '/aether/wallpaper_aether_dawn.jpg'
 ];
 
 const ELDEN_RING_BACKGROUNDS = [
@@ -105,6 +120,8 @@ export const DockFrame: React.FC<DockFrameProps> = ({
   const [candyBgIndex, setCandyBgIndex] = React.useState(0);
   const [customBgIndex, setCustomBgIndex] = React.useState(0);
   const [deathNoteBgIndex, setDeathNoteBgIndex] = React.useState(0);
+  const [kawaiiBgIndex, setKawaiiBgIndex] = React.useState(0);
+  const [aetherBgIndex, setAetherBgIndex] = React.useState(0);
   const exitTimerRef = React.useRef<number | null>(null);
 
   const customBgImages = customTheme?.bgImages || [];
@@ -117,6 +134,8 @@ export const DockFrame: React.FC<DockFrameProps> = ({
       setOnePieceBgIndex(0);
       setCandyBgIndex(0);
       setDeathNoteBgIndex(0);
+      setKawaiiBgIndex(0);
+      setAetherBgIndex(0);
     }
   }, [customTheme?.bgRotation]);
 
@@ -149,6 +168,16 @@ export const DockFrame: React.FC<DockFrameProps> = ({
     } else if (theme === 'deathnote' && DEATH_NOTE_BACKGROUNDS.length > 1) {
       const timer = window.setInterval(() => {
         setDeathNoteBgIndex((prev) => (prev + 1) % DEATH_NOTE_BACKGROUNDS.length);
+      }, intervalMs);
+      return () => window.clearInterval(timer);
+    } else if (theme === 'kawaii' && KAWAII_BACKGROUNDS.length > 1) {
+      const timer = window.setInterval(() => {
+        setKawaiiBgIndex((prev) => (prev + 1) % KAWAII_BACKGROUNDS.length);
+      }, intervalMs);
+      return () => window.clearInterval(timer);
+    } else if (theme === 'aether' && AETHER_BACKGROUNDS.length > 1) {
+      const timer = window.setInterval(() => {
+        setAetherBgIndex((prev) => (prev + 1) % AETHER_BACKGROUNDS.length);
       }, intervalMs);
       return () => window.clearInterval(timer);
     }
@@ -592,20 +621,25 @@ export const DockFrame: React.FC<DockFrameProps> = ({
               overflow: 'hidden'
             }}
           >
-            {/* Main High-Res Pastel Cat Gamer Nook Wallpaper */}
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                backgroundImage: `url('${getAssetUrl('/kawaii/wallpaper_kawaii_nook.png')}')`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center 20%',
-                backgroundRepeat: 'no-repeat',
-                filter: customTheme?.bgBlur ? 'blur(45px)' : 'contrast(1.02) saturate(1.04)',
-                transform: customTheme?.bgBlur ? 'scale(1.15)' : 'none',
-                transition: 'filter 0.35s ease, transform 0.35s ease'
-              }}
-            />
+            {/* Multiple Kawaii Wallpapers rotating when background rotation is enabled */}
+            {KAWAII_BACKGROUNDS.map((bgUrl, idx) => (
+              <div
+                key={bgUrl}
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  backgroundImage: `url('${getAssetUrl(bgUrl)}')`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: idx === 0 ? 'center 20%' : 'center',
+                  backgroundRepeat: 'no-repeat',
+                  filter: customTheme?.bgBlur ? 'blur(45px)' : 'contrast(1.02) saturate(1.04)',
+                  transform: customTheme?.bgBlur ? 'scale(1.15)' : 'none',
+                  opacity: kawaiiBgIndex === idx ? 1 : 0,
+                  transition: 'opacity 1.5s ease-in-out, filter 0.35s ease, transform 0.35s ease',
+                  zIndex: 0
+                }}
+              />
+            ))}
             {/* Soft dreamy vignette to preserve pastel tones while aiding text contrast */}
             <div
               style={{
@@ -613,7 +647,8 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 inset: 0,
                 background:
                   'linear-gradient(180deg, rgba(255, 235, 245, 0.22) 0%, rgba(255, 255, 255, 0.06) 40%, rgba(255, 225, 240, 0.32) 100%)',
-                pointerEvents: 'none'
+                pointerEvents: 'none',
+                zIndex: 1
               }}
             />
           </div>
@@ -631,21 +666,25 @@ export const DockFrame: React.FC<DockFrameProps> = ({
               overflow: 'hidden'
             }}
           >
-            {/* Main High-Res Celestial Sky Wallpaper */}
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                backgroundImage: `url('${getAssetUrl('/aether/wallpaper_aether_sky.jpg')}')`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center top',
-                backgroundRepeat: 'no-repeat',
-                opacity: 0.98,
-                filter: customTheme?.bgBlur ? 'blur(45px)' : 'contrast(1.02) saturate(1.05)',
-                transform: customTheme?.bgBlur ? 'scale(1.15)' : 'none',
-                transition: 'filter 0.35s ease, transform 0.35s ease'
-              }}
-            />
+            {/* Multiple Celestial Aether Wallpapers rotating when background rotation is enabled */}
+            {AETHER_BACKGROUNDS.map((bgUrl, idx) => (
+              <div
+                key={bgUrl}
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  backgroundImage: `url('${getAssetUrl(bgUrl)}')`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center top',
+                  backgroundRepeat: 'no-repeat',
+                  opacity: aetherBgIndex === idx ? 0.98 : 0,
+                  filter: customTheme?.bgBlur ? 'blur(45px)' : 'contrast(1.02) saturate(1.05)',
+                  transform: customTheme?.bgBlur ? 'scale(1.15)' : 'none',
+                  transition: 'opacity 1.5s ease-in-out, filter 0.35s ease, transform 0.35s ease',
+                  zIndex: 0
+                }}
+              />
+            ))}
             {/* Luminous Heavenly Sky Ambient Gradient */}
             <div
               style={{
@@ -653,7 +692,8 @@ export const DockFrame: React.FC<DockFrameProps> = ({
                 inset: 0,
                 background:
                   'linear-gradient(180deg, rgba(89, 188, 244, 0.12) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(220, 240, 255, 0.25) 100%)',
-                pointerEvents: 'none'
+                pointerEvents: 'none',
+                zIndex: 1
               }}
             />
           </div>
