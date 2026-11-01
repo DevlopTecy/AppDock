@@ -375,7 +375,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
           style={{
             position: 'absolute',
             top: '50%',
-            right: '0px',
+            left: '0px',
             transform: 'translateY(-50%)',
             display: 'flex',
             alignItems: 'center',
@@ -1523,7 +1523,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
           style={{
             position: 'absolute',
             top: '50%',
-            left: '0px',
+            right: '0px',
             transform: 'translateY(-50%)',
             display: 'flex',
             alignItems: 'center',

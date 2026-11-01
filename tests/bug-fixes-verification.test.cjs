@@ -356,3 +356,17 @@ test('BUG-26: Dynamic composite GroupGridIcon (2-4 apps) matching iOS/Android/La
     'GroupSidebar.tsx must render customIcon or GroupGridIcon when group uses custom or grid mode'
   );
 });
+
+test('BUG-27: Expanded dock handle EdgeToggle is placed on inner edge facing desktop when sidebar is hidden', () => {
+  const dockFramePath = path.join(projectRoot, 'src', 'components', 'DockFrame.tsx');
+  const dockFrameContent = fs.readFileSync(dockFramePath, 'utf-8');
+
+  // Verify Right dock when sidebar is hidden puts handle on inner desktop edge (left: '0px'), NOT right: '0px'
+  const rightHiddenMatch = dockFrameContent.match(/isRight\s*&&\s*isSidebarHidden[\s\S]*?position:\s*'absolute'[\s\S]*?left:\s*'0px'/);
+  assert.ok(rightHiddenMatch, 'DockFrame.tsx must position handle on left inner edge (left: 0px) for right dock when sidebar is hidden');
+
+  // Verify Left dock when sidebar is hidden puts handle on inner desktop edge (right: '0px'), NOT left: '0px'
+  const leftHiddenMatch = dockFrameContent.match(/isLeft\s*&&\s*isSidebarHidden[\s\S]*?position:\s*'absolute'[\s\S]*?right:\s*'0px'/);
+  assert.ok(leftHiddenMatch, 'DockFrame.tsx must position handle on right inner edge (right: 0px) for left dock when sidebar is hidden');
+});
+
