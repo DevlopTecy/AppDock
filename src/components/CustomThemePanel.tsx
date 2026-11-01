@@ -257,10 +257,10 @@ export const CustomThemePanel: React.FC<CustomThemePanelProps> = ({ settings, on
       </div>
 
       <Toggle label="Background Blur" checked={bgBlur} onChange={(v) => onUpdateSettings({ customThemeBgBlur: v })} />
-      <Toggle label="Hide background (solid color)" checked={bgHide} onChange={(v) => onUpdateSettings({ customThemeBgHide: v })} />
-      <Toggle label="Hide sidebar (weather / calendar / music)" checked={hideSidebar} onChange={(v) => onUpdateSettings({ customThemeHideSidebar: v })} />
+      <Toggle label="Hide Background (solid color)" checked={bgHide} onChange={(v) => onUpdateSettings({ customThemeBgHide: v })} />
+      <Toggle label="Hide Sidebar (weather / calendar / music)" checked={hideSidebar} onChange={(v) => onUpdateSettings({ customThemeHideSidebar: v })} />
 
-      <Toggle label="Hide module buttons (keep one)" checked={hideMods} onChange={(v) => onUpdateSettings({ customThemeHideSidebarModules: v })} />
+      <Toggle label="Hide Module Buttons (keep one)" checked={hideMods} onChange={(v) => onUpdateSettings({ customThemeHideSidebarModules: v })} />
       {hideMods && (
         <div
           style={{
@@ -305,7 +305,7 @@ export const CustomThemePanel: React.FC<CustomThemePanelProps> = ({ settings, on
       )}
 
       <Toggle
-        label="Hide density controls (A, L, M, S)"
+        label="Hide A, L, M, S Buttons (density controls)"
         checked={hideALMS}
         onChange={(v) => onUpdateSettings({ customThemeHideALMS: v, customThemeALMSDensity: settings.customThemeALMSDensity || 'auto' })}
       />
@@ -357,8 +357,8 @@ export const CustomThemePanel: React.FC<CustomThemePanelProps> = ({ settings, on
         </div>
       )}
 
-      <Toggle label="Hide app count badge" checked={hideAppCount} onChange={(v) => onUpdateSettings({ customThemeHideAppCount: v })} />
-      <Toggle label="Background rotation" checked={bgRotation} onChange={(v) => onUpdateSettings({ customThemeBgRotation: v })} />
+      <Toggle label="Hide App Count badge" checked={hideAppCount} onChange={(v) => onUpdateSettings({ customThemeHideAppCount: v })} />
+      <Toggle label="Background Rotation" checked={bgRotation} onChange={(v) => onUpdateSettings({ customThemeBgRotation: v })} />
       {bgRotation && (
         <div
           style={{
