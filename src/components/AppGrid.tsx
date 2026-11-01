@@ -79,12 +79,19 @@ export const AppGrid: React.FC<AppGridProps> = ({
 
   const handleCardDragStart = (e: React.DragEvent, itemId: string) => {
     draggedItemIdRef.current = itemId;
+    const item = group?.items.find((it) => it.id === itemId);
     if (typeof window !== 'undefined') {
       (window as any).__appdock_dragging_card_id = itemId;
+      if (item) (window as any).__appdock_dragging_item = item;
     }
     setDraggedItemId(itemId);
     e.dataTransfer.setData('application/x-appdock-item', itemId);
-    e.dataTransfer.effectAllowed = 'move';
+    if (item) {
+      try {
+        e.dataTransfer.setData('application/x-appdock-item-json', JSON.stringify(item));
+      } catch {}
+    }
+    e.dataTransfer.effectAllowed = 'copyMove';
   };
 
   const handleCardDragOver = (e: React.DragEvent, targetId: string) => {
@@ -543,6 +550,7 @@ export const AppGrid: React.FC<AppGridProps> = ({
                   draggedItemIdRef.current = null;
                   if (typeof window !== 'undefined') {
                     (window as any).__appdock_dragging_card_id = null;
+                    (window as any).__appdock_dragging_item = null;
                   }
                   setDraggedItemId(null);
                   setDragOverItemId(null);
