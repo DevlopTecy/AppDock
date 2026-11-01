@@ -69,7 +69,9 @@ const AETHER_BACKGROUNDS = [
 
 const ELDEN_RING_BACKGROUNDS = [
   '/eldenring/backgrounds/weary_knight_beneath_the_golden_tree.png',
-  '/eldenring/backgrounds/vertical_golden_tree_wallpaper.png',
+  '/eldenring/backgrounds/crimson_duel_beneath_the_golden_erdtree.png',
+  '/eldenring/backgrounds/golden_halo_over_misty_ruins.png',
+  '/eldenring/backgrounds/golden_eyed_warrior_beneath_the_eldritch_tree.png',
   '/eldenring/backgrounds/vertical_erdtree_wallpaper.png'
 ];
 
