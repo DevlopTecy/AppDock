@@ -1,5 +1,7 @@
-const { spawn } = require('child_process');
+const { spawn, execSync } = require('child_process');
+const fs = require('fs');
 const path = require('path');
+
 const child = spawn('git', ['credential', 'fill'], { stdio: ['pipe', 'pipe', 'inherit'] });
 let out = '';
 child.stdout.on('data', d => out += d);
@@ -11,21 +13,42 @@ child.on('close', code => {
   }
   const token = line.replace('password=', '').trim();
   const projectRoot = path.resolve(__dirname, '..');
-  const installer = path.join(projectRoot, 'release', 'AppDock Setup 1.0.5.exe');
-  const portable = path.join(projectRoot, 'release', 'AppDock 1.0.5.exe');
-  const zipPkg = path.join(projectRoot, 'release', 'AppDock-v1.0.5-windows-x64.zip');
-  const notesFile = path.join(projectRoot, 'release', 'release-notes-v1.0.5.md');
+  const pkg = JSON.parse(fs.readFileSync(path.join(projectRoot, 'package.json'), 'utf-8'));
+  const version = pkg.version;
+  const tag = `v${version}`;
+
+  const releaseDir = path.join(projectRoot, 'release');
+  const installer = path.join(releaseDir, `AppDock Setup ${version}.exe`);
+  const installerHyphen = path.join(releaseDir, `AppDock-Setup-${version}.exe`);
+  const blockmapSrc = path.join(releaseDir, `AppDock Setup ${version}.exe.blockmap`);
+  const blockmapDst = path.join(releaseDir, `AppDock-Setup-${version}.exe.blockmap`);
+  const portable = path.join(releaseDir, `AppDock ${version}.exe`);
+  const zipPkg = path.join(releaseDir, `AppDock-v${version}-windows-x64.zip`);
+  const latestYml = path.join(releaseDir, 'latest.yml');
+  const notesFile = path.join(releaseDir, `release-notes-v${version}.md`);
+
+  // Ensure hyphenated installer exists for latest.yml compatibility
+  if (fs.existsSync(installer) && !fs.existsSync(installerHyphen)) {
+    fs.copyFileSync(installer, installerHyphen);
+  }
+  if (fs.existsSync(blockmapSrc) && !fs.existsSync(blockmapDst)) {
+    fs.copyFileSync(blockmapSrc, blockmapDst);
+  }
+
+  const assets = [installer, portable, zipPkg];
+  if (fs.existsSync(installerHyphen)) assets.push(installerHyphen);
+  if (fs.existsSync(blockmapDst)) assets.push(blockmapDst);
+  if (fs.existsSync(latestYml)) assets.push(latestYml);
 
   const cmd = [
-    'release', 'create', 'v1.0.5',
-    installer,
-    portable,
-    zipPkg,
+    'release', 'create', tag,
+    ...assets,
     '--repo', 'DevlopTecy/AppDock',
-    '--title', 'AppDock v1.0.5 – Disabled Auto-Start, Web Favicon Fix & Web URL Editing',
+    '--title', `AppDock ${tag}`,
     '--notes-file', notesFile
   ];
-  console.log('Publishing v1.0.5 release to GitHub...');
+
+  console.log(`Publishing ${tag} release to GitHub with all updater metadata...`);
   const res = spawn('gh', cmd, {
     cwd: projectRoot,
     env: { ...process.env, GH_TOKEN: token },
