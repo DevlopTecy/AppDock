@@ -28,7 +28,6 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
   const isAether = theme === 'aether';
   const isEldenRing = theme === 'eldenring';
   const isKawaii = theme === 'kawaii';
-  const isOnePiece = theme === 'onepiece';
   const isCandy = theme === 'candy';
 
   const pinnedSet = useMemo(() => {
@@ -80,7 +79,7 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
   };
 
   const renderIconThumb = (item: AppItem) => {
-    if (!item) return <AppWindow size={18} color="var(--text-primary)" />;
+    if (!item) return <AppWindow size={16} color="var(--text-primary)" />;
     const isUrl = item.type === 'url';
     const target = item.target || '';
     const googleFavicon = isUrl && target
@@ -96,13 +95,13 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
           src={iconSrc}
           alt=""
           style={{
-            width: '26px',
-            height: '26px',
+            width: '24px',
+            height: '24px',
             objectFit: 'contain',
             borderRadius: '5px',
             pointerEvents: 'none',
             userSelect: 'none',
-            filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45))'
+            filter: 'drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4))'
           }}
           onError={(e) => {
             (e.currentTarget as HTMLElement).style.display = 'none';
@@ -112,9 +111,9 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
     }
 
     if (isUrl) {
-      return <Globe size={18} color="var(--text-primary)" />;
+      return <Globe size={16} color="var(--text-secondary)" />;
     }
-    return <AppWindow size={18} color="var(--text-primary)" />;
+    return <AppWindow size={16} color="var(--text-secondary)" />;
   };
 
   return (
@@ -132,7 +131,7 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
         overflow: 'hidden'
       }}
     >
-      {/* Death Note Theme Thematic Background Artwork */}
+      {/* Death Note Theme Thematic Background Artwork with Soft Scrim */}
       {isDeathNote && (
         <div
           style={{
@@ -150,8 +149,15 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
               backgroundImage: `url('${getAssetUrl('/deathnote/backgrounds/wallpaper_main_4.jpg')}')`,
               backgroundSize: 'cover',
               backgroundPosition: 'center 20%',
-              filter: 'brightness(0.55) contrast(1.15)',
-              opacity: 0.35
+              filter: 'brightness(0.35) contrast(1.1)',
+              opacity: 0.22
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'radial-gradient(ellipse at center, rgba(12, 12, 12, 0.8) 0%, rgba(5, 5, 5, 0.96) 100%)'
             }}
           />
         </div>
@@ -170,34 +176,34 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
           zIndex: 2
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
           <div
             style={{
-              width: '26px',
-              height: '26px',
-              borderRadius: '6px',
-              background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+              width: '28px',
+              height: '28px',
+              borderRadius: '7px',
+              background: 'var(--bg-surface-active)',
+              border: '1px solid var(--border-subtle)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 2px 8px rgba(245, 158, 11, 0.4)'
+              boxShadow: 'var(--btn-shadow)'
             }}
           >
-            <Zap size={15} color="#fff" strokeWidth={2.4} />
+            <Zap size={14} color={isDeathNote ? '#e05a61' : isAether ? '#ffdf59' : '#f59e0b'} strokeWidth={2.4} />
           </div>
           <div>
             <div
               style={{
                 fontSize: '12.5px',
-                fontWeight: 700,
-                color: isDeathNote ? '#e05a61' : isAether ? '#ffdf59' : 'var(--text-primary)',
-                fontFamily: isDeathNote ? 'var(--font-gothic)' : undefined,
-                letterSpacing: isDeathNote ? '0.5px' : undefined
+                fontWeight: 600,
+                color: isDeathNote ? '#fca5a5' : isAether ? '#ffdf59' : 'var(--text-primary)',
+                letterSpacing: '0.1px'
               }}
             >
               Add to Quick Icons
             </div>
-            <div style={{ fontSize: '9.5px', color: 'var(--text-muted)' }}>
+            <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
               Pin apps and links for fast 1-click launching
             </div>
           </div>
@@ -206,18 +212,31 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
         <button
           onClick={onClose}
           className="btn-icon"
-          title="Close"
+          title="Close (Esc)"
+          aria-label="Close"
           style={{
             width: '26px',
             height: '26px',
             borderRadius: '6px',
             cursor: 'pointer',
-            border: 'none',
-            background: 'transparent',
-            color: 'var(--text-muted)'
+            border: '1px solid var(--btn-border)',
+            background: 'var(--bg-surface)',
+            color: 'var(--text-muted)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'all 0.15s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'var(--bg-surface-hover)';
+            e.currentTarget.style.color = 'var(--text-primary)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'var(--bg-surface)';
+            e.currentTarget.style.color = 'var(--text-muted)';
           }}
         >
-          <X size={16} />
+          <X size={14} />
         </button>
       </div>
 
@@ -236,13 +255,15 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            background: 'rgba(0, 0, 0, 0.25)',
+            background: 'var(--bg-dock)',
             border: '1px solid var(--btn-border)',
-            borderRadius: '7px',
-            padding: '5px 9px'
+            borderRadius: '6px',
+            padding: '0 10px',
+            height: '34px',
+            transition: 'border-color 0.15s ease'
           }}
         >
-          <Search size={14} color="var(--text-muted)" />
+          <Search size={13} color="var(--text-muted)" />
           <input
             type="text"
             placeholder="Search apps or URLs across groups..."
@@ -262,15 +283,19 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
             <button
               type="button"
               onClick={() => setSearchQuery('')}
+              aria-label="Clear search"
               style={{
                 background: 'transparent',
                 border: 'none',
                 cursor: 'pointer',
                 color: 'var(--text-muted)',
-                padding: 0
+                padding: '2px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
               }}
             >
-              <X size={13} />
+              <X size={12} />
             </button>
           )}
         </div>
@@ -281,10 +306,10 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
         style={{
           flex: 1,
           overflowY: 'auto',
-          padding: '10px 12px',
+          padding: '12px',
           display: 'flex',
           flexDirection: 'column',
-          gap: '12px',
+          gap: '14px',
           position: 'relative',
           zIndex: 2
         }}
@@ -297,23 +322,36 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              padding: '30px 15px',
+              padding: '36px 16px',
               textAlign: 'center',
               color: 'var(--text-muted)',
-              gap: '6px'
+              gap: '8px'
             }}
           >
-            <Zap size={28} strokeWidth={1.5} color="var(--text-muted)" style={{ opacity: 0.5 }} />
+            <div
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                background: 'var(--bg-surface-active)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '1px solid var(--border-subtle)'
+              }}
+            >
+              <Search size={18} color="var(--text-muted)" />
+            </div>
             <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)' }}>
               No matching items found
             </div>
-            <div style={{ fontSize: '10.5px' }}>
-              Add apps or URLs to your groups first, or try another search.
+            <div style={{ fontSize: '11px', maxWidth: '240px', lineHeight: '1.4' }}>
+              Try searching with another keyword or add items to your groups first.
             </div>
           </div>
         ) : (
           filteredGroups.map((grp) => (
-            <div key={grp.id} style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+            <div key={grp.id} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               {/* Group Section Header */}
               <div
                 style={{
@@ -321,11 +359,9 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
                   alignItems: 'center',
                   gap: '6px',
                   padding: '2px 4px',
-                  fontSize: '10px',
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.6px',
-                  color: isDeathNote ? '#e05a61' : grp.accentColor || 'var(--text-muted)'
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  color: isDeathNote ? '#e05a61' : grp.accentColor || 'var(--text-secondary)'
                 }}
               >
                 <span
@@ -333,19 +369,33 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
                     width: '6px',
                     height: '6px',
                     borderRadius: '50%',
-                    background: grp.accentColor || 'var(--accent, #3b82f6)'
+                    background: grp.accentColor || 'var(--accent, #3b82f6)',
+                    boxShadow: `0 0 6px ${grp.accentColor || 'rgba(59, 130, 246, 0.4)'}`
                   }}
                 />
-                <span>{grp.name}</span>
-                <span style={{ fontSize: '9px', opacity: 0.65 }}>({grp.items.length})</span>
+                <span style={{ letterSpacing: '0.1px' }}>{grp.name}</span>
+                <span
+                  style={{
+                    fontSize: '9.5px',
+                    fontWeight: 600,
+                    fontVariantNumeric: 'tabular-nums',
+                    color: 'var(--text-muted)',
+                    background: 'var(--bg-surface-active)',
+                    padding: '1px 6px',
+                    borderRadius: '999px',
+                    border: '1px solid var(--border-subtle)'
+                  }}
+                >
+                  {grp.items.length}
+                </span>
               </div>
 
               {/* Group Items Grid */}
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))',
-                  gap: '6px'
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+                  gap: '7px'
                 }}
               >
                 {grp.items.map((item) => {
@@ -361,31 +411,33 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
                       style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '8px',
-                        padding: '6px 8px',
-                        borderRadius: isKawaii || isCandy ? '10px' : isEldenRing ? '6px' : '7px',
+                        gap: '9px',
+                        padding: '8px 10px',
+                        borderRadius: isKawaii || isCandy ? '10px' : isEldenRing ? '6px' : '8px',
                         background: isPinned
-                          ? 'rgba(0, 0, 0, 0.15)'
+                          ? 'rgba(255, 255, 255, 0.03)'
                           : 'var(--bg-surface)',
                         border: isPinned
-                          ? '1px solid rgba(255, 255, 255, 0.05)'
+                          ? '1px solid var(--border-subtle)'
                           : '1px solid var(--btn-border)',
-                        opacity: isPinned ? 0.65 : 1,
+                        opacity: isPinned ? 0.6 : 1,
                         cursor: isPinned ? 'default' : 'pointer',
                         textAlign: 'left',
                         position: 'relative',
                         transition: 'all 0.15s ease',
-                        boxShadow: isPinned ? 'none' : '0 2px 4px rgba(0, 0, 0, 0.25)'
+                        boxShadow: isPinned ? 'none' : 'var(--btn-shadow)'
                       }}
                       onMouseEnter={(e) => {
                         if (!isPinned) {
                           e.currentTarget.style.borderColor = 'var(--btn-border-hover)';
+                          e.currentTarget.style.background = 'var(--bg-surface-hover)';
                           e.currentTarget.style.transform = 'translateY(-1px)';
                         }
                       }}
                       onMouseLeave={(e) => {
                         if (!isPinned) {
                           e.currentTarget.style.borderColor = 'var(--btn-border)';
+                          e.currentTarget.style.background = 'var(--bg-surface)';
                           e.currentTarget.style.transform = 'none';
                         }
                       }}
@@ -395,10 +447,12 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
                         style={{
                           width: '28px',
                           height: '28px',
+                          borderRadius: '6px',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          flexShrink: 0
+                          flexShrink: 0,
+                          background: 'rgba(0, 0, 0, 0.2)'
                         }}
                       >
                         {renderIconThumb(item)}
@@ -408,7 +462,7 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div
                           style={{
-                            fontSize: '11px',
+                            fontSize: '11.5px',
                             fontWeight: 600,
                             color: 'var(--text-primary)',
                             whiteSpace: 'nowrap',
@@ -420,11 +474,12 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
                         </div>
                         <div
                           style={{
-                            fontSize: '9px',
+                            fontSize: '9.5px',
                             color: 'var(--text-muted)',
                             whiteSpace: 'nowrap',
                             overflow: 'hidden',
-                            textOverflow: 'ellipsis'
+                            textOverflow: 'ellipsis',
+                            marginTop: '1px'
                           }}
                         >
                           {item.type === 'url' ? 'Web Link' : 'Application'}
@@ -434,19 +489,21 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
                       {/* Pin/Check Badge */}
                       <div
                         style={{
-                          width: '18px',
-                          height: '18px',
-                          borderRadius: '50%',
+                          width: '20px',
+                          height: '20px',
+                          borderRadius: '5px',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           flexShrink: 0,
-                          background: isPinned ? '#10b981' : 'rgba(255, 255, 255, 0.08)',
-                          color: isPinned ? '#fff' : 'var(--text-muted)',
+                          background: isPinned ? 'rgba(34, 197, 94, 0.14)' : 'var(--bg-surface-active)',
+                          color: isPinned ? '#22c55e' : 'var(--text-muted)',
+                          border: isPinned ? '1px solid rgba(34, 197, 94, 0.3)' : '1px solid var(--border-subtle)',
                           transition: 'all 0.15s ease'
                         }}
+                        aria-label={isPinned ? 'Pinned' : 'Add to Quick Icons'}
                       >
-                        {isPinned ? <Check size={11} strokeWidth={3} /> : <Plus size={12} strokeWidth={2.5} />}
+                        {isPinned ? <Check size={11} strokeWidth={2.6} /> : <Plus size={12} strokeWidth={2.2} />}
                       </div>
                     </button>
                   );
@@ -460,7 +517,7 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
       {/* Footer Info & Close */}
       <div
         style={{
-          padding: '8px 12px',
+          padding: '10px 14px',
           borderTop: '1px solid var(--border-subtle)',
           background: 'var(--bg-footer)',
           display: 'flex',
@@ -470,16 +527,30 @@ export const AddToQuickIconsModal: React.FC<AddToQuickIconsModalProps> = ({
           zIndex: 2
         }}
       >
-        <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
-          💡 Tip: You can also drag and drop cards directly from groups onto the Quick Icons bar!
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span
+            style={{
+              fontSize: '10.5px',
+              color: 'var(--text-secondary)',
+              fontWeight: 500,
+              fontVariantNumeric: 'tabular-nums'
+            }}
+          >
+            {pinnedSet.size} pinned
+          </span>
+          <span style={{ fontSize: '10px', color: 'var(--text-muted)', opacity: 0.5 }}>•</span>
+          <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+            Drag cards onto Quick Icons anytime
+          </span>
+        </div>
+
         <button
           type="button"
           onClick={onClose}
-          className="btn-dock"
+          className="btn-primary"
           style={{
-            padding: '4px 12px',
-            fontSize: '11px',
+            padding: '5px 14px',
+            fontSize: '11.5px',
             fontWeight: 600,
             borderRadius: '6px',
             cursor: 'pointer'

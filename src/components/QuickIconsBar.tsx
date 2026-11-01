@@ -2,7 +2,22 @@ import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { AppItem, AppGroup, DockTheme } from '../types/dock';
 import { getAssetUrl, isGenericOrBrokenIcon } from '../utils/assets';
-import { Plus, Globe, AppWindow, X, Trash2 } from 'lucide-react';
+import {
+  Plus,
+  Globe,
+  AppWindow,
+  X,
+  Trash2,
+  Moon,
+  Sun,
+  Layers,
+  Droplets,
+  Square,
+  Zap,
+  Compass,
+  Gem,
+  Palette
+} from 'lucide-react';
 
 export interface QuickIconsBarProps {
   items: AppItem[];
@@ -73,6 +88,166 @@ export const QuickIconsBar: React.FC<QuickIconsBarProps> = ({
       return <Globe size={isEldenRing ? 18 : 16} color="var(--text-primary)" />;
     }
     return <AppWindow size={isEldenRing ? 18 : 16} color="var(--text-primary)" />;
+  };
+
+  // Render Theme Sticker or Icon for the disguised Add button (unhovered state)
+  const renderThemeStickerOrIcon = () => {
+    // 1. Fancy Themes: Theme stickers / emblem graphics
+    if (isDeathNote) {
+      return (
+        <img
+          src={getAssetUrl('/deathnote/icons/apple_red.png')}
+          alt="Death Note"
+          style={{
+            width: '22px',
+            height: '22px',
+            objectFit: 'contain',
+            filter: 'drop-shadow(0 2px 5px rgba(163, 38, 45, 0.7))',
+            pointerEvents: 'none',
+            userSelect: 'none'
+          }}
+        />
+      );
+    }
+    if (isEldenRing) {
+      return (
+        <img
+          src={getAssetUrl('/eldenring/icons/sword.png')}
+          alt="Elden Ring"
+          style={{
+            width: '21px',
+            height: '21px',
+            objectFit: 'contain',
+            filter: 'drop-shadow(0 1px 4px rgba(234, 196, 119, 0.8))',
+            pointerEvents: 'none',
+            userSelect: 'none'
+          }}
+        />
+      );
+    }
+    if (isOnePiece) {
+      return (
+        <img
+          src={getAssetUrl('/onepiece/icons/straw_hat_emblem.png')}
+          alt="One Piece"
+          style={{
+            width: '22px',
+            height: '22px',
+            objectFit: 'contain',
+            filter: 'drop-shadow(0 1px 4px rgba(245, 158, 11, 0.7))',
+            pointerEvents: 'none',
+            userSelect: 'none'
+          }}
+        />
+      );
+    }
+    if (isKawaii) {
+      return (
+        <img
+          src={getAssetUrl('/stickers/star_helmet.png')}
+          alt="Kawaii"
+          style={{
+            width: '22px',
+            height: '22px',
+            objectFit: 'contain',
+            filter: 'drop-shadow(0 1px 4px rgba(244, 63, 94, 0.6))',
+            pointerEvents: 'none',
+            userSelect: 'none'
+          }}
+        />
+      );
+    }
+    if (isCandy) {
+      return (
+        <img
+          src={getAssetUrl('/candy/decorations/lollipop_candy.png')}
+          alt="Candy"
+          style={{
+            width: '22px',
+            height: '22px',
+            objectFit: 'contain',
+            filter: 'drop-shadow(0 1px 4px rgba(244, 114, 182, 0.6))',
+            pointerEvents: 'none',
+            userSelect: 'none'
+          }}
+        />
+      );
+    }
+    if (isAether) {
+      return (
+        <img
+          src={getAssetUrl('/aether/crafting_table.png')}
+          alt="Aether"
+          style={{
+            width: '21px',
+            height: '21px',
+            objectFit: 'contain',
+            imageRendering: 'pixelated',
+            filter: 'drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6))',
+            pointerEvents: 'none',
+            userSelect: 'none'
+          }}
+        />
+      );
+    }
+
+    // 2. Default Themes & Custom Theme: Standard theme icons matching Settings
+    switch (theme) {
+      case 'light':
+        return <Sun size={17} strokeWidth={2.2} color="#2563eb" />;
+      case 'translucent':
+        return <Layers size={17} strokeWidth={2.2} color="#38bdf8" />;
+      case 'glassy':
+        return <Droplets size={17} strokeWidth={2.2} color="#60a5fa" />;
+      case 'minimal':
+        return <Square size={16} strokeWidth={2.2} color="var(--text-secondary)" />;
+      case 'cyberpunk':
+        return <Zap size={17} strokeWidth={2.2} color="#00f2fe" />;
+      case 'midnight':
+        return <Compass size={17} strokeWidth={2.2} color="#38bdf8" />;
+      case 'emerald':
+        return <Gem size={17} strokeWidth={2.2} color="#10b981" />;
+      case 'custom':
+        return <Palette size={17} strokeWidth={2.2} color="#a78bfa" />;
+      case 'dark':
+      default:
+        return <Moon size={17} strokeWidth={2.2} color="#60a5fa" />;
+    }
+  };
+
+  // Render Plus Icon for the revealed state on hover / drag
+  const renderPlusIcon = () => {
+    if (isEldenRing) {
+      return (
+        <img
+          src={getAssetUrl('/eldenring/icons/add.png')}
+          alt="Add"
+          style={{
+            width: '18px',
+            height: '18px',
+            objectFit: 'contain',
+            filter: 'drop-shadow(0 0 6px rgba(234, 196, 119, 0.85))'
+          }}
+        />
+      );
+    }
+    return (
+      <Plus
+        size={17}
+        strokeWidth={2.6}
+        color={
+          isDeathNote
+            ? '#ffffff'
+            : isAether
+              ? '#2e1c0d'
+              : isKawaii || isCandy
+                ? '#db2777'
+                : isOnePiece
+                  ? '#ffffff'
+                  : 'var(--text-primary)'
+        }
+      />
+    );
   };
 
   // Drag and Drop: Dragging from group grid onto QuickIconsBar
@@ -229,79 +404,117 @@ export const QuickIconsBar: React.FC<QuickIconsBarProps> = ({
           transition: 'all 250ms ease-in-out'
         }}
       >
-        {/* Plus (+) Add Quick Icon Button at the TOP of the box */}
+        {/* Disguised Theme Sticker / Plus (+) Add Quick Icon Button */}
         <div style={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'center' }}>
           <button
             type="button"
             onClick={onOpenAddModal}
             onMouseEnter={() => setIsHoveredAdd(true)}
             onMouseLeave={() => setIsHoveredAdd(false)}
-            title="Add Quick Icon from your apps"
+            title={isHoveredAdd ? "Add Quick Icon from your apps" : "Quick Icons · Hover to add apps"}
             aria-label="Add Quick Icon"
             style={{
               width: '38px',
               height: '38px',
               borderRadius: isEldenRing ? '6px' : '10px',
-              background: isHoveredAdd
+              background: isHoveredAdd || isDragOverBar
                 ? isAether
                   ? '#ffdf59'
                   : isDeathNote
-                    ? '#3a1215'
+                    ? '#801419'
                     : isEldenRing
                       ? 'rgba(38, 36, 26, 0.95)'
-                      : 'var(--bg-surface-active)'
+                      : isOnePiece
+                        ? 'rgba(245, 158, 11, 0.35)'
+                        : isKawaii || isCandy
+                          ? '#fce7f3'
+                          : 'var(--bg-surface-active)'
                 : isAether
                   ? '#4a321b'
                   : isDeathNote
                     ? 'rgba(18, 18, 18, 0.85)'
                     : isEldenRing
                       ? 'rgba(23, 24, 19, 0.85)'
-                      : 'transparent',
-              border: isHoveredAdd
+                      : isOnePiece
+                        ? 'rgba(33, 25, 20, 0.85)'
+                        : isKawaii || isCandy
+                          ? 'rgba(255, 255, 255, 0.85)'
+                          : 'var(--bg-surface)',
+              border: isHoveredAdd || isDragOverBar
                 ? isAether
                   ? '1px solid #ffe885'
                   : isDeathNote
                     ? '1px solid #c41e24'
                     : isEldenRing
                       ? '1px solid #eac477'
-                      : '1px solid var(--btn-border-hover)'
+                      : isOnePiece
+                        ? '1px solid #f59e0b'
+                        : isKawaii || isCandy
+                          ? '1px solid #f472b6'
+                          : '1px solid var(--btn-border-hover)'
                 : isAether
-                  ? '1px dashed #8c6038'
+                  ? '1px solid rgba(140, 96, 56, 0.6)'
                   : isDeathNote
-                    ? '1px dashed #a3262d'
+                    ? '1px solid rgba(163, 38, 45, 0.45)'
                     : isEldenRing
-                      ? '1px dashed rgba(197, 161, 90, 0.6)'
-                      : '1px dashed var(--btn-border)',
-              color: isHoveredAdd
-                ? isDeathNote
-                  ? '#ffffff'
-                  : 'var(--text-primary)'
-                : isAether
-                  ? '#ffdf59'
-                  : isDeathNote
-                    ? '#e05a61'
-                    : isEldenRing
-                      ? '#EAC477'
-                      : 'var(--text-muted)',
+                      ? '1px solid rgba(197, 161, 90, 0.45)'
+                      : isOnePiece
+                        ? '1px solid rgba(245, 158, 11, 0.45)'
+                        : isKawaii || isCandy
+                          ? '1px solid rgba(244, 114, 182, 0.45)'
+                          : '1px solid var(--border-subtle)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               padding: 0,
               boxSizing: 'border-box',
-              transform: isHoveredAdd ? 'scale(1.06)' : 'none',
+              position: 'relative',
+              overflow: 'hidden',
+              boxShadow: isHoveredAdd || isDragOverBar
+                ? isDeathNote
+                  ? '0 0 10px rgba(196, 30, 36, 0.5)'
+                  : isEldenRing
+                    ? '0 0 10px rgba(234, 196, 119, 0.45)'
+                    : '0 0 8px rgba(255, 255, 255, 0.15)'
+                : 'var(--btn-shadow)',
+              transform: isHoveredAdd || isDragOverBar ? 'scale(1.06)' : 'scale(1)',
               transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
             }}
           >
-            {isEldenRing ? (
-              <img
-                src={getAssetUrl('/eldenring/icons/add.png')}
-                alt="Add"
-                style={{ width: '18px', height: '18px', objectFit: 'contain', filter: 'drop-shadow(0 0 5px rgba(234, 196, 119, 0.7))' }}
-              />
-            ) : (
-              <Plus size={16} strokeWidth={2.4} />
-            )}
+            {/* The Hidden/Theme Sticker or Icon when NOT hovered */}
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: isHoveredAdd || isDragOverBar ? 0 : 1,
+                transform: isHoveredAdd || isDragOverBar ? 'scale(0.65) rotate(-15deg)' : 'scale(1) rotate(0deg)',
+                transition: 'opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                pointerEvents: 'none'
+              }}
+            >
+              {renderThemeStickerOrIcon()}
+            </div>
+
+            {/* The Plus (+) Icon revealed on hover or drag */}
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: isHoveredAdd || isDragOverBar ? 1 : 0,
+                transform: isHoveredAdd || isDragOverBar ? 'scale(1) rotate(0deg)' : 'scale(0.65) rotate(15deg)',
+                transition: 'opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                pointerEvents: 'none'
+              }}
+            >
+              {renderPlusIcon()}
+            </div>
           </button>
 
           {/* Floating Tooltip for Add Button */}

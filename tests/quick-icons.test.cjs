@@ -129,4 +129,19 @@ assert(
 );
 console.log('  ✓ App.tsx wires QuickIconsBar into companion anchor column, modal state, and storage persistence');
 
+// 8. Verify Disguised Theme Sticker / Hover Plus Reveal in QuickIconsBar
+assert(
+  barContent.includes('renderThemeStickerOrIcon') && barContent.includes('renderPlusIcon'),
+  'QuickIconsBar must disguise the Add button with theme stickers/icons and reveal Plus on hover'
+);
+assert(
+  barContent.includes('apple_red.png') && barContent.includes('straw_hat_emblem.png'),
+  'QuickIconsBar must include theme stickers for anime/fantasy themes'
+);
+assert(
+  barContent.includes('<Moon') && barContent.includes('<Sun') && barContent.includes('<Layers'),
+  'QuickIconsBar must include default theme icons (Moon, Sun, Layers, etc.) for core themes'
+);
+console.log('  ✓ QuickIconsBar disguises Add button with theme stickers/icons and reveals Plus on hover');
+
 console.log('🎉 All Quick Icons tests passed successfully!\n');
