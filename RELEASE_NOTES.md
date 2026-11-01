@@ -15,7 +15,12 @@
 
 ---
 
-## 🚀 Upcoming Release: v1.0.6 (Staged Post-v1.0.5)
+## 📋 Upcoming Release Staging: v1.0.7
+- *Staging open for v1.0.7 post-release changes.*
+
+---
+
+## 🚀 Release: v1.0.6 (2026-11-01)
 
 ### 1. New Features
 

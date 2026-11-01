@@ -306,7 +306,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   const [updateErrorMessage, setUpdateErrorMessage] = useState<string>('');
   const [downloadProgress, setDownloadProgress] = useState<number>(0);
   const [downloadSpeed, setDownloadSpeed] = useState<string>('');
-  const [appVersion, setAppVersion] = useState<string>('1.0.5');
+  const [appVersion, setAppVersion] = useState<string>('1.0.6');
   const [latestReleaseInfo, setLatestReleaseInfo] = useState<{ version: string; downloadUrl?: string } | null>(null);
 
   React.useEffect(() => {
@@ -391,7 +391,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           // so user can test and experience the download progress and restart menu flow
           if ((import.meta as any).env?.DEV || !res?.success) {
             setUpdateStatus('available');
-            setLatestReleaseInfo({ version: '1.0.6', downloadUrl: res?.downloadUrl });
+            setLatestReleaseInfo({ version: '1.0.7', downloadUrl: res?.downloadUrl });
           } else {
             setUpdateStatus('latest');
             if (res?.currentVersion) setAppVersion(res.currentVersion);
@@ -401,7 +401,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       } else {
         setTimeout(() => {
           setUpdateStatus('available');
-          setLatestReleaseInfo({ version: '1.0.6' });
+          setLatestReleaseInfo({ version: '1.0.7' });
         }, 800);
       }
     } catch (err: any) {

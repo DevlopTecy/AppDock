@@ -30,10 +30,10 @@ export const UpdateNotification: React.FC<UpdateNotificationProps> = ({ theme })
       const params = new URLSearchParams(window.location.search);
       if (params.get('mockupdate') === '1' || params.get('mockupdate') === 'true') {
         setUpdateInfo({
-          version: '1.0.5',
+          version: '1.0.6',
           releaseNotes: 'Fixed dock transitions and updated theme rendering.',
-          downloadUrl: 'https://github.com/DevlopTecy/AppDock/releases/download/v1.0.5/AppDock-Setup-1.0.5.exe',
-          htmlUrl: 'https://github.com/DevlopTecy/AppDock/releases/tag/v1.0.5'
+          downloadUrl: 'https://github.com/DevlopTecy/AppDock/releases/download/v1.0.6/AppDock-Setup-1.0.6.exe',
+          htmlUrl: 'https://github.com/DevlopTecy/AppDock/releases/tag/v1.0.6'
         });
       }
     }

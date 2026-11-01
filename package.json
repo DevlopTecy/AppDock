@@ -1,7 +1,7 @@
 {
   "name": "appdock",
   "productName": "AppDock",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "AppDock - Sleek Windows Application & URL Dock Launcher",
   "main": "electron/main.cjs",
   "type": "module",
