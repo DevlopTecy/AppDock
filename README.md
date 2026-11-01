@@ -1,7 +1,7 @@
 # AppDock
 
 <p align="center">
-  <img src="public/icons/logo.png" width="80" height="80" alt="AppDock Logo" style="border-radius: 16px;" />
+  <img src="public/icons/logo.png" width="80" height="80" alt="AppDock Logo" style="border-radius: 16 px;" />
 </p>
 
 <p align="center">
@@ -14,7 +14,6 @@
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6.svg?style=flat-square&logo=windows" alt="Platform" />
   <img src="https://img.shields.io/badge/react-19-61DAFB.svg?style=flat-square&logo=react" alt="React 19" />
   <img src="https://img.shields.io/badge/electron-32.3.3-47848F.svg?style=flat-square&logo=electron" alt="Electron" />
-  <img src="https://img.shields.io/badge/license-MIT-green.svg?style=flat-square" alt="License" />
 </p>
 
 ---
