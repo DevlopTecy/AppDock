@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { AppGroup, AppItem, DockSettings, GroupDensity, CompanionModuleType } from './types/dock';
-import { loadDockData, saveDockData, DEFAULT_GROUPS, DEFAULT_SETTINGS } from './utils/storage';
+import { loadDockData, saveDockData, DEFAULT_GROUPS, DEFAULT_SETTINGS, normalizeUrl } from './utils/storage';
 import { DockFrame } from './components/DockFrame';
 import { GroupTabs } from './components/GroupTabs';
 import { AppGrid } from './components/AppGrid';
@@ -196,6 +196,26 @@ export const App: React.FC = () => {
 
           const newItems = await Promise.all(
             dedupedItems.map(async (item) => {
+              // If web item has no icon or broken icon, automatically assign high-res Google favicon
+              if (item.type === 'url') {
+                const needsWebFix = !item.icon || isGenericOrBrokenIcon(item.icon);
+                if (needsWebFix) {
+                  try {
+                    const clean = normalizeUrl(item.target);
+                    const domain = new URL(clean).hostname;
+                    const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+                    if (item.icon !== faviconUrl) {
+                      grpChanged = true;
+                      changed = true;
+                      return {
+                        ...item,
+                        icon: faviconUrl
+                      };
+                    }
+                  } catch {}
+                }
+              }
+
               const isRelative = item.type === 'app' && !item.target.includes('\\') && !item.target.includes('/');
               const isGenericOrBroken = item.type === 'app' && isGenericOrBrokenIcon(item.icon);
               const needsFix = item.type === 'app' && (isRelative || isGenericOrBroken || item.name.toLowerCase().includes('gemini'));
@@ -542,6 +562,23 @@ export const App: React.FC = () => {
     updateGroups(updatedGroups);
   };
 
+  // Update Item handler (Edit URL & Name from AppGrid right-click context menu)
+  const handleUpdateItem = useCallback(
+    (groupId: string, updatedItem: AppItem) => {
+      const updatedGroups = data.groups.map((grp) => {
+        if (grp.id === groupId) {
+          return {
+            ...grp,
+            items: grp.items.map((it) => (it.id === updatedItem.id ? updatedItem : it))
+          };
+        }
+        return grp;
+      });
+      updateGroups(updatedGroups);
+    },
+    [data.groups, updateGroups]
+  );
+
   // Update Group handler (Full Edit: Name, Logo, Color, Density, Items)
   const handleUpdateGroup = (updatedGroup: AppGroup) => {
     const updatedGroups = data.groups.map((grp) => {
@@ -719,6 +756,10 @@ export const App: React.FC = () => {
             onDeleteItem={(id) => {
               const targetGrp = isCleanDock ? cleanDockGroup : activeGroup;
               if (targetGrp) handleDeleteItem(targetGrp.id, id);
+            }}
+            onUpdateItem={(updatedItem) => {
+              const targetGrp = isCleanDock ? cleanDockGroup : activeGroup;
+              if (targetGrp) handleUpdateItem(targetGrp.id, updatedItem);
             }}
             onReorderItems={handleReorderItems}
             onOpenAddModal={() => setIsAddModalOpen(true)}

@@ -1356,18 +1356,18 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 <button
                   type="button"
                   onClick={() => {
-                    const newVal = !(settings.autoStartWithWindows ?? true);
+                    const newVal = !(settings.autoStartWithWindows ?? false);
                     onUpdateSettings({ autoStartWithWindows: newVal });
                     if (typeof window !== 'undefined' && (window as any).appDock?.setAutoLaunch) {
                       (window as any).appDock.setAutoLaunch(newVal);
                     }
                   }}
-                  className={`toggle-switch ${(settings.autoStartWithWindows ?? true) ? 'active' : ''}`}
+                  className={`toggle-switch ${(settings.autoStartWithWindows ?? false) ? 'active' : ''}`}
                   style={{
                     width: '36px',
                     height: '20px',
                     borderRadius: '10px',
-                    background: (settings.autoStartWithWindows ?? true)
+                    background: (settings.autoStartWithWindows ?? false)
                       ? (currentTheme === 'deathnote' ? '#c41e24' : isAether ? '#59bcf4' : 'var(--accent-color, #3b82f6)')
                       : 'var(--btn-border)',
                     position: 'relative',
@@ -1388,7 +1388,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                       borderRadius: '50%',
                       background: '#fff',
                       position: 'absolute',
-                      left: (settings.autoStartWithWindows ?? true) ? '19px' : '3px',
+                      left: (settings.autoStartWithWindows ?? false) ? '19px' : '3px',
                       transition: 'left 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
                       boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
                     }}

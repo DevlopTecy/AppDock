@@ -4,11 +4,11 @@ const fs = require('fs');
 const path = require('path');
 
 test('Process 2: Start with Windows & Auto Setup Verification', async (t) => {
-  await t.test('storage.ts defaults include autoStartWithWindows = true', () => {
+  await t.test('storage.ts defaults include autoStartWithWindows = false', () => {
     const storageCode = fs.readFileSync(path.join(__dirname, '../src/utils/storage.ts'), 'utf8');
     assert.ok(
-      storageCode.includes('autoStartWithWindows: true'),
-      'storage.ts should define autoStartWithWindows: true in DEFAULT_SETTINGS'
+      storageCode.includes('autoStartWithWindows: false'),
+      'storage.ts should define autoStartWithWindows: false in DEFAULT_SETTINGS'
     );
   });
 

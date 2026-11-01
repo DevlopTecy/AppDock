@@ -7,6 +7,8 @@ const { execFile } = require('child_process');
 
 function isGenericOrBrokenIcon(dataUrl) {
   if (!dataUrl || typeof dataUrl !== 'string') return true;
+  if (dataUrl.startsWith('http://') || dataUrl.startsWith('https://')) return false;
+  if (dataUrl.startsWith('./') || dataUrl.startsWith('/')) return false;
   if (!dataUrl.startsWith('data:image/')) return true;
   if (dataUrl.length <= 860) return true;
   if (dataUrl.length >= 950 && dataUrl.length <= 1050 && dataUrl.includes('iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM')) {
@@ -51,6 +53,12 @@ test('isGenericOrBrokenIcon correctly rejects invalid, empty, and generic icons'
 
   // Real icon should be accepted
   const realIcon = 'data:image/png;base64,' + 'B'.repeat(1500);
+  assert.strictEqual(isGenericOrBrokenIcon(realIcon), false, 'large valid base64 icon is accepted');
+
+  // Web URLs and relative paths should be accepted as valid icons
+  assert.strictEqual(isGenericOrBrokenIcon('https://www.google.com/s2/favicons?domain=youtube.com&sz=128'), false, 'web favicon URL is accepted');
+  assert.strictEqual(isGenericOrBrokenIcon('https://github.com/favicon.ico'), false, 'direct web favicon is accepted');
+  assert.strictEqual(isGenericOrBrokenIcon('./eldenring/icons/gamepad.png'), false, 'relative asset path is accepted');
   assert.strictEqual(isGenericOrBrokenIcon(realIcon), false, 'valid real icon is accepted');
 });
 

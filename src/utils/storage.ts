@@ -21,7 +21,7 @@ export const DEFAULT_SETTINGS: DockSettings = {
   cleanDockGroupId: 'grp-games',
   autoCheckUpdates: true,
   githubRepo: 'DevlopTecy/AppDock',
-  autoStartWithWindows: true
+  autoStartWithWindows: false
 };
 
 export const DEFAULT_GROUPS: AppGroup[] = [
@@ -36,7 +36,7 @@ export const DEFAULT_GROUPS: AppGroup[] = [
         name: 'Steam Store',
         type: 'url',
         target: 'https://store.steampowered.com',
-        icon: 'https://store.steampowered.com/favicon.ico',
+        icon: 'https://www.google.com/s2/favicons?domain=store.steampowered.com&sz=128',
         launchCount: 12
       },
       {
@@ -44,7 +44,7 @@ export const DEFAULT_GROUPS: AppGroup[] = [
         name: 'Epic Games',
         type: 'url',
         target: 'https://store.epicgames.com',
-        icon: 'https://store.epicgames.com/favicon.ico',
+        icon: 'https://www.google.com/s2/favicons?domain=store.epicgames.com&sz=128',
         launchCount: 4
       }
     ]
@@ -89,7 +89,7 @@ export const DEFAULT_GROUPS: AppGroup[] = [
         name: 'Google Search',
         type: 'url',
         target: 'https://www.google.com',
-        icon: 'https://www.google.com/favicon.ico',
+        icon: 'https://www.google.com/s2/favicons?domain=google.com&sz=128',
         launchCount: 45
       },
       {
@@ -97,7 +97,7 @@ export const DEFAULT_GROUPS: AppGroup[] = [
         name: 'GitHub',
         type: 'url',
         target: 'https://github.com',
-        icon: 'https://github.githubassets.com/favicons/favicon.png',
+        icon: 'https://www.google.com/s2/favicons?domain=github.com&sz=128',
         launchCount: 38
       },
       {
@@ -105,7 +105,7 @@ export const DEFAULT_GROUPS: AppGroup[] = [
         name: 'YouTube',
         type: 'url',
         target: 'https://www.youtube.com',
-        icon: 'https://www.youtube.com/favicon.ico',
+        icon: 'https://www.google.com/s2/favicons?domain=youtube.com&sz=128',
         launchCount: 29
       }
     ]

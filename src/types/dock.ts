@@ -60,7 +60,7 @@ export interface DockSettings {
   autoCheckUpdates?: boolean;   // Automatically check for GitHub updates
   githubRepo?: string;          // GitHub repository (e.g. "owner/repo")
   hideFromTaskbar?: boolean;    // Hide from Windows taskbar, running quietly in tray while staying on screen
-  autoStartWithWindows?: boolean;// Automatically run and set up when Windows boots (Default: true)
+  autoStartWithWindows?: boolean;// Automatically run and set up when Windows boots (Default: false)
 }
 
 export interface SystemApp {

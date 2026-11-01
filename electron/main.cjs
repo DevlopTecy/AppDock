@@ -239,10 +239,15 @@ function getAutoLaunchSetting() {
 function setAutoLaunchSetting(enable) {
   try {
     const openAtLogin = !!enable;
+    // In dev mode (node_modules/electron), never register auto-launch to avoid opening dev electron on PC boot
+    if (!app.isPackaged && openAtLogin) {
+      console.log('[AutoLaunch] Skipping auto-launch registration in development mode');
+      return { success: true, openAtLogin: false };
+    }
     app.setLoginItemSettings({
       openAtLogin,
       path: process.execPath,
-      args: process.env.NODE_ENV === 'development' ? [path.resolve(__dirname, '..')] : []
+      args: []
     });
     updateTrayMenu();
     return { success: true, openAtLogin };
@@ -1234,15 +1239,15 @@ app.whenReady().then(() => {
   createWindow();
   setupAutoUpdater();
 
-  // Auto-setup: Ensure AppDock launches automatically when Windows starts if on Windows
-  if (process.platform === 'win32' && app.isPackaged) {
+  // Windows startup hygiene: Do not auto-launch on PC boot unless user enabled it in settings
+  if (process.platform === 'win32') {
     try {
-      const current = app.getLoginItemSettings();
-      if (!current.openAtLogin) {
-        setAutoLaunchSetting(true);
+      if (!app.isPackaged) {
+        // In development mode, always remove auto-launch so dev Electron never runs on boot
+        app.setLoginItemSettings({ openAtLogin: false });
       }
     } catch (e) {
-      console.warn('[AutoLaunch] Initial Windows setup check:', e.message);
+      console.warn('[AutoLaunch] Startup check:', e.message);
     }
   }
 

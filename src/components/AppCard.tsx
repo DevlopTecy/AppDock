@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppItem } from '../types/dock';
 import { AppWindow, Globe, Trash2, ArrowUpRight } from 'lucide-react';
 import { isGenericOrBrokenIcon } from '../utils/assets';
@@ -45,6 +45,25 @@ export const AppCard: React.FC<AppCardProps> = ({
 }) => {
   const [isLaunching, setIsLaunching] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [triedFallback, setTriedFallback] = useState(false);
+
+  // Derive high-resolution Google favicon URL for web items
+  const googleFaviconUrl = React.useMemo(() => {
+    if (item.type !== 'url' || !item.target) return '';
+    try {
+      const clean = item.target.trim().replace(/^https?:\/\//i, '');
+      const domain = clean.split('/')[0].split('?')[0].split('#')[0];
+      return domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=128` : '';
+    } catch {
+      return '';
+    }
+  }, [item.type, item.target]);
+
+  // Reset image error state whenever item icon or target changes
+  useEffect(() => {
+    setImgError(false);
+    setTriedFallback(false);
+  }, [item.icon, item.target]);
 
   const handleLaunchClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -61,14 +80,27 @@ export const AppCard: React.FC<AppCardProps> = ({
   const iconDimension = `${iconSize}px`;
   const lucideIconSize = Math.max(16, Math.round(iconSize * 0.56));
 
+  // Determine active icon src: primary icon -> Google favicon fallback -> null
+  const activeIconSrc = (!imgError && item.icon && !isGenericOrBrokenIcon(item.icon))
+    ? item.icon
+    : (!triedFallback && item.type === 'url' && googleFaviconUrl)
+      ? googleFaviconUrl
+      : null;
+
   const renderIcon = () => {
-    if (item.icon && !imgError && !isGenericOrBrokenIcon(item.icon)) {
+    if (activeIconSrc) {
       return (
         <img
-          src={item.icon}
+          src={activeIconSrc}
           alt=""
           draggable={false}
-          onError={() => setImgError(true)}
+          onError={() => {
+            if (activeIconSrc !== googleFaviconUrl && googleFaviconUrl) {
+              setImgError(true);
+            } else {
+              setTriedFallback(true);
+            }
+          }}
           style={{
             width: iconDimension,
             height: iconDimension,

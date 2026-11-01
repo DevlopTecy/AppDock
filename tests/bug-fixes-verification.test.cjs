@@ -129,4 +129,59 @@ test('BUG-16: Main handle EdgeToggle remains pinned to screen edge and handleTog
   );
 });
 
+test('BUG-17: Auto-launch defaults to false and never auto-registers in development mode', () => {
+  const mainContent = fs.readFileSync(path.join(projectRoot, 'electron', 'main.cjs'), 'utf-8');
+  assert.ok(
+    mainContent.includes('!app.isPackaged && openAtLogin') && mainContent.includes('Skipping auto-launch'),
+    'main.cjs setAutoLaunchSetting must skip registration in dev mode'
+  );
+  assert.ok(
+    !mainContent.includes('if (!current.openAtLogin) {\n        setAutoLaunchSetting(true);'),
+    'main.cjs startup lifecycle must not force auto-launch to true'
+  );
+
+  const storageContent = fs.readFileSync(path.join(projectRoot, 'src', 'utils', 'storage.ts'), 'utf-8');
+  assert.ok(
+    storageContent.includes('autoStartWithWindows: false'),
+    'storage.ts DEFAULT_SETTINGS must default autoStartWithWindows to false'
+  );
+});
+
+test('BUG-18: isGenericOrBrokenIcon accepts web favicon URLs and AppCard derives high-res Google favicon fallback', () => {
+  const assetsContent = fs.readFileSync(path.join(projectRoot, 'src', 'utils', 'assets.ts'), 'utf-8');
+  assert.ok(
+    assetsContent.includes("dataUrl.startsWith('http://') || dataUrl.startsWith('https://')"),
+    'assets.ts isGenericOrBrokenIcon must accept http and https web URLs'
+  );
+
+  const cardContent = fs.readFileSync(path.join(projectRoot, 'src', 'components', 'AppCard.tsx'), 'utf-8');
+  assert.ok(
+    cardContent.includes('googleFaviconUrl') && cardContent.includes('s2/favicons?domain='),
+    'AppCard.tsx must derive Google high-res favicon fallback for web links'
+  );
+});
+
+test('BUG-19: AppGrid context menu includes Edit URL & Name for web links and renders EditItemModal', () => {
+  const gridContent = fs.readFileSync(path.join(projectRoot, 'src', 'components', 'AppGrid.tsx'), 'utf-8');
+  assert.ok(
+    gridContent.includes('Edit URL & Name'),
+    'AppGrid.tsx context menu must include Edit URL & Name for web links'
+  );
+  assert.ok(
+    gridContent.includes('<EditItemModal'),
+    'AppGrid.tsx must render EditItemModal component'
+  );
+
+  const editModalContent = fs.readFileSync(path.join(projectRoot, 'src', 'components', 'EditItemModal.tsx'), 'utf-8');
+  assert.ok(
+    editModalContent.includes('WEB URL') && editModalContent.includes('DISPLAY NAME'),
+    'EditItemModal.tsx must contain inputs for WEB URL and DISPLAY NAME'
+  );
+  assert.ok(
+    editModalContent.includes('previewFaviconUrl'),
+    'EditItemModal.tsx must provide live preview favicon'
+  );
+});
+
+
 

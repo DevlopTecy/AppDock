@@ -3,10 +3,11 @@ import { createPortal } from 'react-dom';
 import { getAssetUrl } from '../utils/assets';
 import { AppGroup, AppItem, GroupDensity, DockTheme } from '../types/dock';
 import { AppCard } from './AppCard';
-import { Plus, UploadCloud, FolderPlus, Sparkles, LayoutGrid, FolderOpen, Trash2 } from 'lucide-react';
+import { Plus, UploadCloud, FolderPlus, Sparkles, LayoutGrid, FolderOpen, Trash2, Edit3, ExternalLink } from 'lucide-react';
 import { resolveGroupDensity } from '../utils/density';
 import { KawaiiSpaceStickers } from './common/KawaiiSpaceStickers';
 import { AetherSpaceStickers } from './common/AetherSpaceStickers';
+import { EditItemModal } from './EditItemModal';
 
 interface AppGridProps {
   group?: AppGroup;
@@ -16,6 +17,7 @@ interface AppGridProps {
   cleanDockIconSize?: 'small' | 'medium' | 'large' | 'xlarge';
   onLaunchItem: (item: AppItem) => void;
   onDeleteItem: (itemId: string) => void;
+  onUpdateItem?: (updatedItem: AppItem) => void;
   onReorderItems?: (groupId: string, items: AppItem[]) => void;
   onOpenAddModal: () => void;
   onAddNewGroup: () => void;
@@ -31,6 +33,7 @@ export const AppGrid: React.FC<AppGridProps> = ({
   cleanDockIconSize = 'medium',
   onLaunchItem,
   onDeleteItem,
+  onUpdateItem,
   onReorderItems,
   onOpenAddModal,
   onAddNewGroup,
@@ -39,6 +42,7 @@ export const AppGrid: React.FC<AppGridProps> = ({
 }) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ item: AppItem; x: number; y: number } | null>(null);
+  const [editingItem, setEditingItem] = useState<AppItem | null>(null);
   const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
   const [dragOverItemId, setDragOverItemId] = useState<string | null>(null);
 
@@ -701,40 +705,148 @@ export const AppGrid: React.FC<AppGridProps> = ({
               {contextMenu.item.name}
             </div>
 
-            <button
-              onClick={async () => {
-                const item = contextMenu.item;
-                setContextMenu(null);
-                if (typeof window !== 'undefined' && (window as any).appDock?.showItemInFolder) {
-                  await (window as any).appDock.showItemInFolder(item.target);
-                }
-              }}
-              className="context-menu-item"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '6px 8px',
-                borderRadius: '5px',
-                background: 'transparent',
-                border: 'none',
-                color: 'var(--text-primary)',
-                fontSize: '11.5px',
-                cursor: 'pointer',
-                textAlign: 'left',
-                width: '100%',
-                transition: 'all 0.12s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'var(--bg-surface-hover)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'transparent';
-              }}
-            >
-              <FolderOpen size={13} color="var(--text-secondary)" />
-              <span>Open file location</span>
-            </button>
+            {/* Web item specific options: Edit URL & Name, Open in Browser */}
+            {contextMenu.item.type === 'url' ? (
+              <>
+                <button
+                  onClick={() => {
+                    const it = contextMenu.item;
+                    setContextMenu(null);
+                    setEditingItem(it);
+                  }}
+                  className="context-menu-item"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '6px 8px',
+                    borderRadius: '5px',
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--text-primary)',
+                    fontSize: '11.5px',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    width: '100%',
+                    transition: 'all 0.12s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'var(--bg-surface-hover)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent';
+                  }}
+                >
+                  <Edit3 size={13} color="var(--text-secondary)" />
+                  <span>Edit URL & Name</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    const it = contextMenu.item;
+                    setContextMenu(null);
+                    onLaunchItem(it);
+                  }}
+                  className="context-menu-item"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '6px 8px',
+                    borderRadius: '5px',
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--text-primary)',
+                    fontSize: '11.5px',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    width: '100%',
+                    transition: 'all 0.12s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'var(--bg-surface-hover)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent';
+                  }}
+                >
+                  <ExternalLink size={13} color="var(--text-secondary)" />
+                  <span>Open in browser</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={async () => {
+                    const item = contextMenu.item;
+                    setContextMenu(null);
+                    if (typeof window !== 'undefined' && (window as any).appDock?.showItemInFolder) {
+                      await (window as any).appDock.showItemInFolder(item.target);
+                    }
+                  }}
+                  className="context-menu-item"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '6px 8px',
+                    borderRadius: '5px',
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--text-primary)',
+                    fontSize: '11.5px',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    width: '100%',
+                    transition: 'all 0.12s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'var(--bg-surface-hover)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent';
+                  }}
+                >
+                  <FolderOpen size={13} color="var(--text-secondary)" />
+                  <span>Open file location</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    const it = contextMenu.item;
+                    setContextMenu(null);
+                    setEditingItem(it);
+                  }}
+                  className="context-menu-item"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '6px 8px',
+                    borderRadius: '5px',
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--text-primary)',
+                    fontSize: '11.5px',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    width: '100%',
+                    transition: 'all 0.12s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'var(--bg-surface-hover)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent';
+                  }}
+                >
+                  <Edit3 size={13} color="var(--text-secondary)" />
+                  <span>Edit Name</span>
+                </button>
+              </>
+            )}
+
+            <div style={{ height: '1px', background: 'var(--border-subtle)', margin: '2px 0' }} />
 
             <button
               onClick={() => {
@@ -771,6 +883,20 @@ export const AppGrid: React.FC<AppGridProps> = ({
           </div>,
           document.body
         )}
+
+      {/* Edit Item Modal (Edit Web URL & Name) */}
+      {editingItem && (
+        <EditItemModal
+          isOpen={!!editingItem}
+          item={editingItem}
+          onClose={() => setEditingItem(null)}
+          onSaveItem={(updated) => {
+            if (onUpdateItem) onUpdateItem(updated);
+            setEditingItem(null);
+          }}
+          theme={theme}
+        />
+      )}
     </div>
   );
 };
