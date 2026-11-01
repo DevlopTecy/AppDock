@@ -357,6 +357,10 @@ export const DockFrame: React.FC<DockFrameProps> = ({
       {isRight && !isSidebarHidden && (
         <div
           style={{
+            position: 'absolute',
+            right: `${drawerWidth}px`,
+            top: 0,
+            bottom: 0,
             display: 'flex',
             flexDirection: 'row',
             alignItems: 'flex-start',
@@ -365,7 +369,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
             width: `${companionW}px`,
             flexShrink: 0,
             overflow: 'hidden',
-            position: 'relative'
+            zIndex: 15
           }}
         >
           {/* Active Companion Module (Music / Weather / Calendar) — animates in/out within the fixed 340px space */}
@@ -476,7 +480,7 @@ export const DockFrame: React.FC<DockFrameProps> = ({
           style={{
             position: 'absolute',
             top: '50%',
-            left: '0px',
+            right: `${drawerWidth}px`,
             transform: 'translateY(-50%)',
             display: 'flex',
             alignItems: 'center',
@@ -518,7 +522,11 @@ export const DockFrame: React.FC<DockFrameProps> = ({
             ? (isRight ? '-8px 0 28px rgba(0, 0, 0, 0.45)' : isLeft ? '8px 0 28px rgba(0, 0, 0, 0.45)' : '0 8px 28px rgba(0, 0, 0, 0.45)')
             : 'none',
           overflow: 'hidden',
-          position: 'relative',
+          position: isRight ? 'absolute' : 'relative',
+          right: isRight ? 0 : undefined,
+          top: isRight ? 0 : undefined,
+          bottom: isRight ? 0 : undefined,
+          zIndex: 10,
           background: customTheme?.bgBlur && !['deathnote', 'kawaii', 'aether', 'eldenring', 'onepiece', 'candy', 'custom'].includes(theme || '')
             ? (theme === 'light' ? 'rgba(255, 255, 255, 0.65)' : 'rgba(12, 12, 16, 0.68)')
             : 'var(--bg-dock)',

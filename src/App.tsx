@@ -159,8 +159,12 @@ export const App: React.FC = () => {
     soundEngine.initSound(data.settings);
   }, [data.settings.soundEnabled, data.settings.soundVolume, data.settings.soundPack]);
 
+  const prevActiveModuleRef = React.useRef(activeModule);
   // Sync module bounds with Electron when dock is expanded
   useEffect(() => {
+    const wasActive = prevActiveModuleRef.current;
+    prevActiveModuleRef.current = activeModule;
+
     if (typeof window !== 'undefined' && (window as any).appDock?.setModuleWidth) {
       if (isExpanded) {
         const isQuickIconsActive = !isCleanDock && !data.settings.customThemeHideQuickIcons && !data.settings.hideQuickIcons;
@@ -170,10 +174,15 @@ export const App: React.FC = () => {
         if (shouldHideCompanionArea) {
           // Clean dock or both sidebar modules & quick icons hidden: no companion area at all
           (window as any).appDock.setModuleWidth(-1);
-        } else {
-          // Dynamic companion width: 340px when module active (and not hidden), 54px when idle (Quick Icons / ConnectorHub)
-          (window as any).appDock.setModuleWidth(!isModulesHidden ? (activeModule ? 340 : 54) : 54);
+        } else if (activeModule) {
+          // Module opening: expand immediately
+          (window as any).appDock.setModuleWidth(!isModulesHidden ? 340 : 54);
+        } else if (!wasActive) {
+          // Idle state (initial expand / mount / theme changes): set to 54px idle width
+          (window as any).appDock.setModuleWidth(54);
         }
+        // When transitioning from active to closed, DockFrame handles the 190ms exit animation
+        // and calls setModuleWidth(54) upon completion to prevent premature window shrink & micro-close.
       } else {
         (window as any).appDock.setModuleWidth(0);
       }

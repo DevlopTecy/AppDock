@@ -545,6 +545,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   const isAether = currentTheme === 'aether';
   const isEldenRing = currentTheme === 'eldenring';
   const isDeathNote = currentTheme === 'deathnote';
+  const isDarkOrMinimal = currentTheme === 'dark' || currentTheme === 'minimal';
   const activeDev = audioDevices.find((d) => d.id === activeAudioDeviceId) || audioDevices[0];
   const isHeadphones = activeDev?.type === 'headphones';
   const weatherCities = settings.weatherCities && settings.weatherCities.length > 0
@@ -2182,8 +2183,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                       width: '22px',
                       height: '22px',
                       borderRadius: '5px',
-                      background: isEldenRing ? '#EAC477' : (isDeathNote ? '#18181b' : 'var(--accent, #3b82f6)'),
-                      color: isEldenRing ? '#171813' : (isDeathNote ? '#eae6df' : '#ffffff'),
+                      background: isEldenRing ? '#EAC477' : (isDeathNote ? '#18181b' : 'var(--text-primary)'),
+                      color: isEldenRing ? '#171813' : (isDeathNote ? '#eae6df' : 'var(--bg-dock)'),
                       border: isDeathNote ? '1px solid rgba(255, 255, 255, 0.12)' : 'none',
                       display: 'flex',
                       alignItems: 'center',
@@ -2269,7 +2270,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                           padding: '5px 8px',
                           borderRadius: '4px',
                           background: isSelected
-                            ? (isEldenRing ? 'rgba(234, 196, 119, 0.2)' : (isDeathNote ? '#1a1a1e' : 'rgba(59, 130, 246, 0.18)'))
+                            ? (isEldenRing ? 'rgba(234, 196, 119, 0.2)' : (isDeathNote ? '#1a1a1e' : 'rgba(255, 255, 255, 0.12)'))
                             : 'transparent',
                           border: isSelected && isDeathNote ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid transparent',
                           cursor: 'pointer',
@@ -2283,7 +2284,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                         }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '7px', minWidth: 0, flex: 1, paddingRight: '6px' }}>
-                          <div style={{ color: isSelected ? (isEldenRing ? '#EAC477' : (isDeathNote ? '#ffffff' : 'var(--accent, #3b82f6)')) : 'var(--text-muted)', flexShrink: 0 }}>
+                          <div style={{ color: isSelected ? (isEldenRing ? '#EAC477' : (isDeathNote ? '#ffffff' : 'var(--text-primary)')) : 'var(--text-muted)', flexShrink: 0 }}>
                             {isHead ? <Headphones size={12} /> : <Speaker size={12} />}
                           </div>
                           <span
@@ -2300,7 +2301,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                           </span>
                         </div>
                         {isSelected && (
-                          <Check size={11} strokeWidth={2.5} style={{ color: isEldenRing ? '#EAC477' : (isDeathNote ? '#ffffff' : 'var(--accent, #3b82f6)'), flexShrink: 0 }} />
+                          <Check size={11} strokeWidth={2.5} style={{ color: isEldenRing ? '#EAC477' : (isDeathNote ? '#ffffff' : 'var(--text-primary)'), flexShrink: 0 }} />
                         )}
                       </div>
                     );
@@ -2421,7 +2422,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                   height: '19px',
                   borderRadius: '10px',
                   background: (settings.soundEnabled ?? false)
-                    ? (isEldenRing ? '#EAC477' : isDeathNote ? '#ffffff' : isAether ? '#59bcf4' : 'var(--accent, #3b82f6)')
+                    ? (isEldenRing ? '#EAC477' : isDeathNote ? '#ffffff' : isAether ? '#59bcf4' : (isDarkOrMinimal ? '#ffffff' : 'var(--accent-color, #3b82f6)'))
                     : (isDeathNote ? '#26262a' : 'var(--btn-border)'),
                   position: 'relative',
                   cursor: 'pointer',
@@ -2439,7 +2440,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                     height: '13px',
                     borderRadius: '50%',
                     background: (settings.soundEnabled ?? false)
-                      ? (isEldenRing ? '#171813' : (isDeathNote ? '#101012' : '#ffffff'))
+                      ? (isEldenRing ? '#171813' : isDeathNote ? '#101012' : (isDarkOrMinimal ? '#101012' : '#ffffff'))
                       : '#ffffff',
                     position: 'absolute',
                     top: '2px',
@@ -2458,7 +2459,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 <span
                   style={{
                     fontSize: '9.5px',
-                    color: isEldenRing ? '#EAC477' : (isDeathNote ? '#eae6df' : 'var(--accent, #3b82f6)'),
+                    color: isEldenRing ? '#EAC477' : (isDeathNote ? '#eae6df' : 'var(--text-primary)'),
                     fontWeight: 700,
                     textTransform: 'capitalize'
                   }}
@@ -2494,19 +2495,19 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                         fontWeight: isSel ? 700 : 500,
                         borderRadius: '4px',
                         border: isSel
-                          ? (isEldenRing ? '1px solid #EAC477' : (isDeathNote ? '1px solid rgba(255, 255, 255, 0.35)' : '1px solid var(--accent, #3b82f6)'))
+                          ? (isEldenRing ? '1px solid #EAC477' : (isDeathNote ? '1px solid rgba(255, 255, 255, 0.35)' : '1px solid var(--text-primary)'))
                           : (isDeathNote ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid var(--btn-border)'),
                         background: isSel
-                          ? (isEldenRing ? '#EAC477' : (isDeathNote ? '#222226' : 'var(--accent, #3b82f6)'))
+                          ? (isEldenRing ? '#EAC477' : (isDeathNote ? '#222226' : 'var(--text-primary)'))
                           : (isDeathNote ? '#101012' : 'var(--bg-surface-active)'),
                         color: isSel
-                          ? (isEldenRing ? '#171813' : '#ffffff')
+                          ? (isEldenRing ? '#171813' : (isDeathNote ? '#ffffff' : 'var(--bg-dock)'))
                           : (isDeathNote ? '#96908a' : 'var(--text-primary)'),
                         cursor: 'pointer',
                         textAlign: 'center',
                         transition: 'all 0.15s ease',
                         boxShadow: isSel
-                          ? (isEldenRing ? '0 0 6px rgba(234, 196, 119, 0.4)' : (isDeathNote ? '0 2px 6px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.15)' : '0 1px 3px rgba(59, 130, 246, 0.35)'))
+                          ? (isEldenRing ? '0 0 6px rgba(234, 196, 119, 0.4)' : (isDeathNote ? '0 2px 6px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.15)' : '0 1px 3px rgba(0, 0, 0, 0.35)'))
                           : 'none',
                         boxSizing: 'border-box'
                       }}

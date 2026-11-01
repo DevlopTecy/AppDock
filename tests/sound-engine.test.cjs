@@ -69,3 +69,18 @@ test('Phase 1 - Sound FX: micro-sounds eliminated and AudioContext suspended whe
   assert.ok(settingsContent.includes('if (settings.soundEnabled) soundEngine.previewPackSample'), 'SettingsView must guard previewPackSample with soundEnabled check');
 });
 
+test('Phase 1 - Sound FX: selected buttons and device icons have visible, high-contrast font and icons in dark and minimal themes', () => {
+  const settingsContent = fs.readFileSync(path.join(projectRoot, 'src', 'components', 'SettingsView.tsx'), 'utf8');
+  // Selected sound pack button must use contrasting text color (var(--bg-dock)) when background is light/white
+  assert.ok(
+    settingsContent.includes("isDeathNote ? '#ffffff' : 'var(--bg-dock)'"),
+    'SettingsView must use contrasting text color for selected sound profile pack button in dark/minimal themes'
+  );
+  // Audio device icon box must use contrasting icon color (var(--bg-dock)) when background is light/white
+  assert.ok(
+    settingsContent.includes("isDeathNote ? '#eae6df' : 'var(--bg-dock)'"),
+    'SettingsView must use contrasting icon color for active audio playback device icon in dark/minimal themes'
+  );
+});
+
+
