@@ -1,5 +1,14 @@
 let collapseFallbackTimer = null;
-const { app, BrowserWindow, ipcMain, screen, shell, dialog, Tray, Menu, nativeImage } = require('electron');
+const electron = require('electron');
+if (typeof electron === 'string') {
+  const { spawn } = require('child_process');
+  const env = { ...process.env };
+  delete env.ELECTRON_RUN_AS_NODE;
+  const child = spawn(electron, process.argv.slice(1), { env, stdio: 'inherit' });
+  child.on('exit', (code) => process.exit(code || 0));
+  return;
+}
+const { app, BrowserWindow, ipcMain, screen, shell, dialog, Tray, Menu, nativeImage } = electron;
 const path = require('path');
 const fs = require('fs');
 const https = require('https');
@@ -55,8 +64,10 @@ function calculateBounds(position, expanded, workArea, vertRatio = verticalRatio
   const tabCenterY = Math.round(centerY + (h - tabH) / 2);
 
   // Dynamic companion width: 340px when companion module is active, 54px when idle (ConnectorHub handles), 0 in Clean Dock mode (moduleWidth < 0)
-  // Prevents oversized ghost hitbox from blocking background apps/clicks when no module is open.
-  const companionW = expanded ? (moduleWidth < 0 ? 0 : (moduleWidth > 54 ? 340 : 54)) : 0;
+  // For the right dock: maintaining fixed total width (drawerWidth + 340) prevents DWM texture displacement and eliminates the micro close/reopen animation glitch.
+  const companionW = expanded
+    ? (moduleWidth < 0 ? 0 : (position === 'right' ? 340 : (moduleWidth > 54 ? 340 : 54)))
+    : 0;
   const totalExpandedWidth = drawerWidth + companionW;
 
   if (position === 'left') {
@@ -92,6 +103,16 @@ function updateWindowBounds() {
   const primaryDisplay = screen.getPrimaryDisplay();
   const workArea = primaryDisplay.workArea;
   const bounds = calculateBounds(currentPosition, isExpanded, workArea);
+  const currentBounds = mainWindow.getBounds();
+  if (
+    currentBounds.x === bounds.x &&
+    currentBounds.y === bounds.y &&
+    currentBounds.width === bounds.width &&
+    currentBounds.height === bounds.height
+  ) {
+    isProgrammaticBounds = false;
+    return;
+  }
   mainWindow.setBounds(bounds);
   setTimeout(() => {
     isProgrammaticBounds = false;
@@ -173,10 +194,25 @@ function createWindow() {
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html')).catch(() => {});
   }
 
+  const showWindowSafely = () => {
+    if (mainWindow && !mainWindow.isDestroyed() && !mainWindow.isVisible()) {
+      mainWindow.show();
+      updateWindowBounds();
+    }
+  };
+
   mainWindow.once('ready-to-show', () => {
-    mainWindow.show();
-    updateWindowBounds();
+    showWindowSafely();
   });
+
+  mainWindow.webContents.on('did-finish-load', () => {
+    showWindowSafely();
+  });
+
+  // Safety fallback: ensure dock handle is shown even if compositor event is delayed
+  setTimeout(() => {
+    showWindowSafely();
+  }, 1000);
 
   mainWindow.on('blur', () => {
     if (mainWindow && !mainWindow.isDestroyed()) {
@@ -198,6 +234,7 @@ function showDockWindow() {
   }
   isExpanded = true;
   updateWindowBounds();
+  mainWindow.setAlwaysOnTop(true);
   mainWindow.focus();
   mainWindow.webContents.send('dock:expand');
 }
@@ -350,6 +387,15 @@ ipcMain.handle('dock:set-module-width', (event, width) => {
     updateWindowBounds();
   }
   return { success: true, moduleWidth };
+});
+
+ipcMain.handle('dock:set-ignore-mouse-events', (event, ignore, options) => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    try {
+      mainWindow.setIgnoreMouseEvents(Boolean(ignore), options || { forward: true });
+    } catch (e) {}
+  }
+  return { success: true };
 });
 
 ipcMain.handle('dock:set-position', (event, position) => {
@@ -1712,9 +1758,7 @@ app.on('before-quit', () => {
 });
 
 app.on('window-all-closed', () => {
-  if (isQuitting || process.platform !== 'darwin') {
-    if (isQuitting) {
-      app.quit();
-    }
+  if (process.platform !== 'darwin') {
+    app.quit();
   }
 });

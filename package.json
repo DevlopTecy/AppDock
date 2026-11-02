@@ -7,7 +7,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:electron": "concurrently -k \"vite\" \"electron .\"",
+    "dev:electron": "concurrently -k \"vite\" \"node scripts/dev-electron.cjs\"",
     "build": "tsc -b && vite build",
     "start": "cross-env SERVE_DIST=1 electron .",
     "electron:start": "cross-env SERVE_DIST=1 electron .",

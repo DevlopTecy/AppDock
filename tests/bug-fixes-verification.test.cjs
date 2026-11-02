@@ -561,3 +561,48 @@ test('BUG-32: Smooth Dock Open & Close Transitions, Universal Button Micro-Inter
   assert.ok(css.includes('cubic-bezier(0.16, 1, 0.3, 1)'), 'index.css must utilize high-end fluid cubic-bezier curve');
 });
 
+test('BUG-33: Process Lifecycle, ELECTRON_RUN_AS_NODE Guard, and Guaranteed Window Visibility', () => {
+  const mainPath = path.join(projectRoot, 'electron', 'main.cjs');
+  const mainCjs = fs.readFileSync(mainPath, 'utf-8');
+
+  // 1. ELECTRON_RUN_AS_NODE respawn guard
+  assert.ok(
+    mainCjs.includes("if (typeof electron === 'string')") && mainCjs.includes('delete env.ELECTRON_RUN_AS_NODE'),
+    'main.cjs must implement self-healing respawn guard when ELECTRON_RUN_AS_NODE is inherited'
+  );
+
+  // 2. Window-all-closed unconditionally quits on non-macOS
+  assert.ok(
+    mainCjs.includes("app.on('window-all-closed', () => {") && mainCjs.includes("if (process.platform !== 'darwin') {\n    app.quit();\n  }"),
+    'main.cjs window-all-closed must unconditionally quit on non-macOS to prevent zombie processes'
+  );
+
+  // 3. showWindowSafely fallback triggers
+  assert.ok(
+    mainCjs.includes('showWindowSafely()') &&
+    mainCjs.includes("mainWindow.webContents.on('did-finish-load'") &&
+    mainCjs.includes("mainWindow.once('ready-to-show'"),
+    'main.cjs must call showWindowSafely on ready-to-show, did-finish-load, and fallback timer'
+  );
+
+  // 4. Preload and main expose dock:set-ignore-mouse-events
+  const preloadPath = path.join(projectRoot, 'electron', 'preload.cjs');
+  const preloadCjs = fs.readFileSync(preloadPath, 'utf-8');
+  assert.ok(
+    preloadCjs.includes("setIgnoreMouseEvents: (ignore, options) => ipcRenderer.invoke('dock:set-ignore-mouse-events', ignore, options)"),
+    'preload.cjs must expose setIgnoreMouseEvents bridge'
+  );
+  assert.ok(
+    mainCjs.includes("ipcMain.handle('dock:set-ignore-mouse-events'"),
+    'main.cjs must register dock:set-ignore-mouse-events IPC handler'
+  );
+
+  // 5. scripts/dev-electron.cjs exists and polls Vite before spawning
+  const devElectronPath = path.join(projectRoot, 'scripts', 'dev-electron.cjs');
+  assert.ok(fs.existsSync(devElectronPath), 'scripts/dev-electron.cjs must exist');
+  const devElectron = fs.readFileSync(devElectronPath, 'utf-8');
+  assert.ok(devElectron.includes('waitForVite'), 'dev-electron.cjs must implement waitForVite polling');
+  assert.ok(devElectron.includes('delete env.ELECTRON_RUN_AS_NODE'), 'dev-electron.cjs must strip ELECTRON_RUN_AS_NODE');
+});
+
+

@@ -54,6 +54,7 @@ contextBridge.exposeInMainWorld('appDock', {
     ipcRenderer.on('dock:resized', handler);
     return () => ipcRenderer.removeListener('dock:resized', handler);
   },
+  setIgnoreMouseEvents: (ignore, options) => ipcRenderer.invoke('dock:set-ignore-mouse-events', ignore, options),
   // Process Intelligence & Indicators (Phase 2)
   getRunningProcesses: () => ipcRenderer.invoke('dock:get-running-processes'),
   bringAppToFront: (targetOrName) => ipcRenderer.invoke('dock:bring-app-to-front', targetOrName),

@@ -239,6 +239,56 @@ export const DockFrame: React.FC<DockFrameProps> = ({
   const isCompactUi = drawerWidth < 260;
   const isTinyUi = drawerWidth < 225;
 
+  const isModulesHidden = Boolean(customTheme?.hideSidebar) || Boolean(customTheme?.hideSidebarModules);
+  const isQuickIconsVisible = Boolean(quickIconsContent) && !customTheme?.hideQuickIcons;
+  const isCompanionAreaVisible = !isCleanDock && (!isModulesHidden || isQuickIconsVisible);
+  const isSidebarHidden = !isCompanionAreaVisible;
+
+  // Seamless zero-stutter mouse pass-through hit testing for Right dock transparent area
+  React.useEffect(() => {
+    if (typeof window === 'undefined' || !(window as any).appDock?.setIgnoreMouseEvents) return;
+
+    const needsPassThrough = isRight && isExpanded && !isSidebarHidden && !renderedModule && !isExiting;
+
+    if (!needsPassThrough) {
+      (window as any).appDock.setIgnoreMouseEvents(false);
+      return;
+    }
+
+    let isCurrentlyIgnoring = false;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const interactiveStartX = window.innerWidth - (drawerWidth + 54);
+      if (e.clientX < interactiveStartX) {
+        if (!isCurrentlyIgnoring) {
+          isCurrentlyIgnoring = true;
+          (window as any).appDock.setIgnoreMouseEvents(true, { forward: true });
+        }
+      } else {
+        if (isCurrentlyIgnoring) {
+          isCurrentlyIgnoring = false;
+          (window as any).appDock.setIgnoreMouseEvents(false);
+        }
+      }
+    };
+
+    const handleMouseLeave = () => {
+      if (!isCurrentlyIgnoring) {
+        isCurrentlyIgnoring = true;
+        (window as any).appDock.setIgnoreMouseEvents(true, { forward: true });
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    window.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseleave', handleMouseLeave);
+      (window as any).appDock.setIgnoreMouseEvents(false);
+    };
+  }, [isRight, isExpanded, isSidebarHidden, renderedModule, isExiting, drawerWidth]);
+
   const handleMouseDownResize = (e: React.MouseEvent) => {
     e.preventDefault();
     setIsResizing(true);
@@ -325,10 +375,6 @@ export const DockFrame: React.FC<DockFrameProps> = ({
     );
   }
 
-  const isModulesHidden = Boolean(customTheme?.hideSidebar) || Boolean(customTheme?.hideSidebarModules);
-  const isQuickIconsVisible = Boolean(quickIconsContent) && !customTheme?.hideQuickIcons;
-  const isCompanionAreaVisible = !isCleanDock && (!isModulesHidden || isQuickIconsVisible);
-  const isSidebarHidden = !isCompanionAreaVisible;
   const isModuleActive = !isModulesHidden && Boolean(renderedModule || isExiting);
   const companionW = isSidebarHidden ? 0 : (isModuleActive ? 340 : 54);
   const _totalExpandedWidth = drawerWidth + companionW;
@@ -356,6 +402,11 @@ export const DockFrame: React.FC<DockFrameProps> = ({
       {/* Right dock layout: Companion Area */}
       {isRight && !isSidebarHidden && (
         <div
+          onMouseEnter={() => {
+            if (typeof window !== 'undefined' && (window as any).appDock?.setIgnoreMouseEvents) {
+              (window as any).appDock.setIgnoreMouseEvents(false);
+            }
+          }}
           style={{
             position: 'absolute',
             right: `${drawerWidth}px`,
@@ -502,6 +553,11 @@ export const DockFrame: React.FC<DockFrameProps> = ({
       {/* Main Drawer Surface - Sticks completely flush against screen edge */}
       <div
         className="glass-surface"
+        onMouseEnter={() => {
+          if (typeof window !== 'undefined' && (window as any).appDock?.setIgnoreMouseEvents) {
+            (window as any).appDock.setIgnoreMouseEvents(false);
+          }
+        }}
         style={{
           width: `${drawerWidth}px`,
           maxWidth: `${drawerWidth}px`,
