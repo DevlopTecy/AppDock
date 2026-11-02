@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/DevlopTecy/AppDock/releases"><img src="https://img.shields.io/badge/version-v1.0.6-blue.svg?style=flat-square" alt="Version" /></a>
-  <a href="RELEASE_NOTES.md"><img src="https://img.shields.io/badge/release%20notes-v1.0.6%20released-brightgreen.svg?style=flat-square" alt="Release Notes" /></a>
+  <a href="https://github.com/DevlopTecy/AppDock/releases"><img src="https://img.shields.io/badge/version-v1.0.7-blue.svg?style=flat-square" alt="Version" /></a>
+  <a href="RELEASE_NOTES.md"><img src="https://img.shields.io/badge/release%20notes-v1.0.7%20released-brightgreen.svg?style=flat-square" alt="Release Notes" /></a>
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6.svg?style=flat-square&logo=windows" alt="Platform" />
   <img src="https://img.shields.io/badge/react-19-61DAFB.svg?style=flat-square&logo=react" alt="React 19" />
   <img src="https://img.shields.io/badge/electron-32.3.3-47848F.svg?style=flat-square&logo=electron" alt="Electron" />

@@ -389,7 +389,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   const [updateErrorMessage, setUpdateErrorMessage] = useState<string>('');
   const [downloadProgress, setDownloadProgress] = useState<number>(0);
   const [downloadSpeed, setDownloadSpeed] = useState<string>('');
-  const [appVersion, setAppVersion] = useState<string>('1.0.6');
+  const [appVersion, setAppVersion] = useState<string>('1.0.7');
   const [latestReleaseInfo, setLatestReleaseInfo] = useState<{ version: string; downloadUrl?: string } | null>(null);
 
   React.useEffect(() => {

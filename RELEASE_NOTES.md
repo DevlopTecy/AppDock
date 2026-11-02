@@ -4,18 +4,18 @@
 
 ---
 
-## 📋 Quick Staging Summary for v1.0.6
+## 📋 Quick Staging Summary for v1.0.7
 
 | Category | Highlights |
 | :--- | :--- |
-| **New Features** | Quick Icons rail, Custom Group Icons (Pictures + 2-4 composite grid), Custom Theme Studio with Font Color picker, Multi-wallpaper background rotation across themes. |
-| **Critical Fixes** | Delete App Group modal clipping fixed with top-level portal; Drag-and-drop internal/external cross-talk resolved; Start Menu AUMID (`Google.AntigravityIDE`) launch error resolved; Background blur CSS fix; Auto-updater stall fix. |
-| **UX & Aesthetics** | "Reset Custom Theme" warning modal with Dark Theme fallback; Disguised theme stickers on Quick Icons; Removed modal glow dots & zap icons; README visual showcase. |
-| **Test Suites** | 14 automated test suites passing 100% green (130+ assertions across native bridges, layout geometry, update pipeline, and theming). |
+| **New Features** | Sound FX Engine (7 Web Audio packs), Live Running Process Indicators with "Bring to Front" / "Close", Smart Window Dodge on maximized windows, Audio Output Switcher & CoreAudio Volume sync in Settings. |
+| **Critical Fixes** | Zombie process & single instance lock resolution; ELECTRON_RUN_AS_NODE respawn wrapper; Guaranteed dock visibility; Right-dock DWM displacement elimination; OneDrive desktop shortcut auto-healing. |
+| **UX & Aesthetics** | Ultra-smooth fluid motion system (compositor transitions, button micro-press, modal entrances); High-contrast pill buttons in Dark/Minimal themes; Compact responsive header; Sub-options clipping fixes. |
+| **Test Suites** | 19 automated test suites passing 100% green (98 test suites / 150+ assertions across audio, native ops, process monitoring, and layout geometry). |
 
 ---
 
-## 📋 Upcoming Release Staging: v1.0.7
+## 🚀 Release: v1.0.7 (2026-11-02)
 
 ### 🐛 Critical Bug Fixes
 - **OneDrive Desktop Shortcut Misidentification & Auto-Healing (BUG-30)**:
